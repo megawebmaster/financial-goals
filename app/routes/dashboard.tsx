@@ -1,14 +1,15 @@
 import type {
+  ActionFunctionArgs,
   LoaderFunctionArgs,
   MetaFunction,
-  ActionFunctionArgs,
 } from '@remix-run/node';
 import { redirect } from '@remix-run/node';
 import { Form, useLoaderData } from '@remix-run/react';
-import StatusCodes from 'http-status-codes';
 
 import { authenticator } from '~/services/auth.server';
 import { getUser } from '~/services/user.server';
+import { ENCRYPTION_STATUS, useEncryption } from '~/hooks/useEncryption';
+import { clearEncryption } from '~/services/encryption.client';
 
 export const meta: MetaFunction = () => [
   {
@@ -21,7 +22,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const userId = await authenticator.isAuthenticated(request);
 
   if (!userId) {
-    return redirect('/', StatusCodes.BAD_REQUEST);
+    return redirect('/');
   }
 
   return {
@@ -37,11 +38,23 @@ export async function action({ request }: ActionFunctionArgs) {
 
 export default function () {
   const data = useLoaderData<typeof loader>();
+  const status = useEncryption(data.user);
+
+  if (status === ENCRYPTION_STATUS.LOADING) {
+    return 'Loading…';
+  }
+
+  const handleSubmit = () => {
+    clearEncryption();
+  };
 
   return (
     <>
       <p>Logged in as: {data.user.username}</p>
-      <Form method="post">
+      {status === ENCRYPTION_STATUS.ERROR && (
+        <p>An error occurred when preparing encryption.</p>
+      )}
+      <Form method="post" onSubmit={handleSubmit}>
         <button>Log out</button>
       </Form>
     </>

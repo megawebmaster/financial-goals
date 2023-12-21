@@ -1,3 +1,4 @@
+import type { FormEvent } from 'react';
 import type {
   ActionFunctionArgs,
   LoaderFunctionArgs,
@@ -6,6 +7,7 @@ import type {
 import { Form } from '@remix-run/react';
 
 import { authenticator } from '~/services/auth.server';
+import { storeKeyMaterial } from '~/services/encryption.client';
 
 export const meta: MetaFunction = () => [
   {
@@ -27,9 +29,17 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 
 export default function () {
-  // TODO: Generate wrapping key on submit
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    const data = new FormData(e.currentTarget);
+    const password = data.get('password');
+
+    if (password) {
+      storeKeyMaterial(password.toString());
+    }
+  };
+
   return (
-    <Form method="post">
+    <Form method="post" onSubmit={handleSubmit}>
       <input type="text" name="username" required autoComplete="username" />
       <input type="password" name="password" required autoComplete="password" />
       <button>Sign in!</button>
