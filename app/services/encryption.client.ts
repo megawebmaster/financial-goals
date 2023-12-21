@@ -204,3 +204,38 @@ export const lockKey = async (key: CryptoKey) => {
 
   return encodeArrayBufferToUrlSafeBase64(wrappedKey);
 };
+
+export const encrypt = async (
+  value: string,
+  key: CryptoKey,
+): Promise<string> => {
+  const iv = await window.crypto.getRandomValues(new Uint8Array(12));
+  const encrypted = await window.crypto.subtle.encrypt(
+    { name: 'AES-GCM', iv },
+    key,
+    encoder.encode(value),
+  );
+
+  return JSON.stringify({
+    value: encodeArrayBufferToUrlSafeBase64(encrypted),
+    iv: encodeArrayBufferToUrlSafeBase64(iv),
+  });
+};
+
+export const decrypt = async (
+  encrypted: string,
+  key: CryptoKey,
+): Promise<string> => {
+  const { value, iv } = JSON.parse(encrypted);
+
+  const decrypted = await window.crypto.subtle.decrypt(
+    {
+      name: 'AES-GCM',
+      iv: decodeUrlSafeBase64ToArrayBuffer(iv),
+    },
+    key,
+    decodeUrlSafeBase64ToArrayBuffer(value),
+  );
+
+  return decoder.decode(decrypted);
+};

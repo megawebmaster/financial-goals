@@ -11,8 +11,27 @@ datasource db {
 }
 
 model User {
-  id       Int    @id @default(autoincrement())
-  username String @unique
+  id       Int          @id @default(autoincrement())
+  username String       @unique
   password String
   salt     String
+  budgets  BudgetUser[] @relation(name: "AccessibleBudgets")
+}
+
+model BudgetUser {
+  budgetId Int
+  budget   Budget  @relation(name: "BudgetUsers", fields: [budgetId], references: [id], onDelete: Cascade)
+  userId   Int
+  user     User    @relation(name: "AccessibleBudgets", fields: [userId], references: [id], onDelete: Cascade)
+  name     String
+  key      String
+  isOwner  Boolean @default(false)
+
+  @@id([budgetId, userId])
+  @@unique([userId, name])
+}
+
+model Budget {
+  id    Int          @id @default(autoincrement())
+  users BudgetUser[] @relation(name: "BudgetUsers")
 }
