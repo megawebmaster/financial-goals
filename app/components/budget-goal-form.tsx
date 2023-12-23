@@ -1,9 +1,10 @@
 import type { FormEvent } from 'react';
-import type { BudgetGoal, BudgetUser } from '@prisma/client';
+import type { BudgetUser } from '@prisma/client';
+import type { BudgetGoalWithEntries } from '~/helpers/budget-goals';
 
 type BudgetGoalFormProps = {
   budget: BudgetUser;
-  goal?: BudgetGoal;
+  goal?: BudgetGoalWithEntries;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
   submit: string;
 };

@@ -52,7 +52,7 @@ export default function () {
           {(budget) => (
             <>
               <h2>
-                Your budget: {budget.name}
+                Your budget: {budget.name}{' '}
                 <a href={`/budgets/${budget.budgetId}/edit`}>Edit</a>
               </h2>
             </>
@@ -69,17 +69,21 @@ export default function () {
               <ul>
                 {goals.map((goal) => (
                   <li key={goal.id}>
-                    {goal.name} - {goal.requiredAmount}{' '}
+                    {goal.name} - {goal.requiredAmount} (
+                    {Math.round(
+                      (goal.currentAmount / goal.requiredAmount) * 100,
+                    )}
+                    %){' '}
                     <a
                       href={`/budgets/${data.budget.budgetId}/goals/${goal.id}/edit`}
                     >
                       Edit
-                    </a>
+                    </a>{' '}
                     <a
                       href={`/budgets/${data.budget.budgetId}/goals/${goal.id}/priority/up`}
                     >
                       Move up
-                    </a>
+                    </a>{' '}
                     <a
                       href={`/budgets/${data.budget.budgetId}/goals/${goal.id}/priority/down`}
                     >
@@ -93,6 +97,8 @@ export default function () {
         </GoalsList.Fulfilled>
       </GoalsList>
       <a href={`/budgets/${data.budget.budgetId}/goals/new`}>Create goal</a>
+      <br />
+      <a href={`/budgets/${data.budget.budgetId}/entries/new`}>Create entry</a>
     </>
   );
 }

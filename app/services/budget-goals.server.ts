@@ -2,11 +2,11 @@ import type { BudgetGoal } from '@prisma/client';
 
 import { prisma } from '~/services/db.server';
 
-export const getBudgetGoals = (
-  userId: number,
-  budgetId: number,
-): Promise<BudgetGoal[]> =>
+export const getBudgetGoals = (userId: number, budgetId: number) =>
   prisma.budgetGoal.findMany({
+    include: {
+      entries: true,
+    },
     where: {
       budget: {
         id: budgetId,
@@ -25,8 +25,11 @@ export const getBudgetGoal = (
   userId: number,
   budgetId: number,
   goalId: number,
-): Promise<BudgetGoal> =>
+) =>
   prisma.budgetGoal.findFirstOrThrow({
+    include: {
+      entries: true,
+    },
     where: {
       id: goalId,
       budget: {
@@ -44,14 +47,10 @@ export const createBudgetGoal = async (
   data: Omit<BudgetGoal, 'budgetId' | 'id' | 'priority'>,
 ): Promise<BudgetGoal> =>
   await prisma.$transaction(async (tx) => {
-    await tx.budget.findFirstOrThrow({
+    await tx.budgetUser.findFirstOrThrow({
       where: {
-        id: budgetId,
-        users: {
-          some: {
-            userId,
-          },
-        },
+        budgetId,
+        userId,
       },
     });
 
