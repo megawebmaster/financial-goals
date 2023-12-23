@@ -12,4 +12,10 @@ const promiseFn: PromiseFn<BudgetUser[]> = ({ budgets }) =>
     ),
   );
 
-export const BudgetsList = createInstance({ promiseFn }, 'BudgetsList');
+export const BudgetsList = createInstance(
+  {
+    promiseFn,
+    watchFn: (prev, cur) => prev.budgets !== cur.budgets,
+  },
+  'BudgetsList',
+);

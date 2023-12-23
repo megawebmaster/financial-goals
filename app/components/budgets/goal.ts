@@ -10,4 +10,10 @@ const promiseFn: PromiseFn<BudgetGoalWithEntries> = async ({
   goal,
 }) => await decryptBudgetGoal(goal, await unlockKey(encryptionKey));
 
-export const Goal = createInstance({ promiseFn }, 'Goal');
+export const Goal = createInstance(
+  {
+    promiseFn,
+    watchFn: (prev, cur) => prev.goal !== cur.goal,
+  },
+  'Goal',
+);

@@ -19,4 +19,10 @@ const promiseFn: PromiseFn<BudgetGoalWithEntries[]> = async ({
   );
 };
 
-export const GoalsList = createInstance({ promiseFn }, 'GoalsList');
+export const GoalsList = createInstance(
+  {
+    promiseFn,
+    watchFn: (prev, cur) => prev.goals !== cur.goals,
+  },
+  'GoalsList',
+);

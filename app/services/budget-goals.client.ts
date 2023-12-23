@@ -13,7 +13,7 @@ export type GoalWithEntries = BudgetGoal & {
 };
 
 const getCurrentAmount = pipe(
-  map<ClientBudgetGoalEntry, number>(prop('amount')),
+  map<ClientBudgetGoalEntry, number>(prop('value')),
   sum,
 );
 

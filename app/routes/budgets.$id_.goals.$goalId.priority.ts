@@ -1,11 +1,11 @@
-import type { LoaderFunctionArgs } from '@remix-run/node';
+import type { ActionFunctionArgs } from '@remix-run/node';
 import { redirect } from '@remix-run/node';
 import invariant from 'tiny-invariant';
 
 import { authenticator } from '~/services/auth.server';
 import { updateBudgetGoalPriority } from '~/services/budget-goals.server';
 
-export async function loader({ params, request }: LoaderFunctionArgs) {
+export async function action({ params, request }: ActionFunctionArgs) {
   const userId = await authenticator.isAuthenticated(request);
 
   if (!userId) {
@@ -26,13 +26,24 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
     const goalId = parseInt(params.goalId, 10);
     invariant(!isNaN(goalId), 'Goal ID must be a number');
 
-    invariant(params.direction, 'Direction is required');
-    invariant(
-      params.direction === 'up' || params.direction === 'down',
-      'Valid directions are: up or down',
-    );
+    const data = await request.formData();
+    const priorityValue = data.get('priority');
+    const goalEntries = data.get('goalsEntries');
+    invariant(priorityValue, 'Goal priority is required');
+    invariant(typeof priorityValue === 'string');
+    invariant(goalEntries, 'Entries for goals are required');
+    invariant(typeof goalEntries === 'string');
 
-    await updateBudgetGoalPriority(userId, budgetId, goalId, params.direction);
+    const priority = parseInt(priorityValue, 10);
+    invariant(!isNaN(priority), 'Priority must be a number');
+
+    await updateBudgetGoalPriority(
+      userId,
+      budgetId,
+      goalId,
+      priority,
+      JSON.parse(goalEntries),
+    );
     return redirect(`/budgets/${budgetId}`);
   } catch (e) {
     console.error('Changing goal priority failed', e);

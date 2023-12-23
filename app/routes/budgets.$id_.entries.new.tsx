@@ -6,17 +6,21 @@ import type {
 import { redirect } from '@remix-run/node';
 import { useLoaderData, useSubmit } from '@remix-run/react';
 import invariant from 'tiny-invariant';
+import { reduce, reduced } from 'ramda';
 
 import { authenticator } from '~/services/auth.server';
 import { getBudget } from '~/services/budgets.server';
 import { Budget } from '~/components/budget';
 import type { FormEvent } from 'react';
 import { unlockKey } from '~/services/encryption.client';
-import { createBudgetGoalEntry } from '~/services/budget-goal-entries.server';
-import { encryptBudgetGoalEntry } from '~/services/budget-goal-entries.client';
 import { getBudgetGoals } from '~/services/budget-goals.server';
 import { GoalsList } from '~/components/budgets/goals-list';
 import { BudgetGoalEntryForm } from '~/components/budget-goal-entry-form';
+import type { BudgetGoalWithEntries } from '~/helpers/budget-goals';
+import { createSavingsEntry } from '~/services/budget-savings-entries.server';
+import type { GoalEntry } from '~/services/budget-goal-entries.client';
+import { encryptBudgetGoalEntry } from '~/services/budget-goal-entries.client';
+import { encryptBudgetSavingsEntry } from '~/services/budget-savings-entries.client';
 
 export const meta: MetaFunction = () => [
   {
@@ -65,42 +69,43 @@ export async function action({ params, request }: ActionFunctionArgs) {
     invariant(!isNaN(budgetId), 'Budget ID must be a number');
 
     const data = await request.formData();
-    const goalId = data.get('goalId');
     const value = data.get('value');
+    const goalEntries = data.get('goalsEntries');
 
-    invariant(goalId, 'Goal ID is required');
-    invariant(typeof goalId === 'string');
     invariant(value, 'Value for entry is required');
     invariant(typeof value === 'string');
+    invariant(goalEntries, 'Entries for goals are required');
+    invariant(typeof goalEntries === 'string');
 
-    await createBudgetGoalEntry(userId, budgetId, parseInt(goalId, 10), {
-      value,
-    });
+    await createSavingsEntry(userId, budgetId, value, JSON.parse(goalEntries));
     return redirect(`/budgets/${budgetId}`);
   } catch (e) {
     // TODO: Handle errors notifications
-    console.error('Creating goal failed', e);
-    return redirect(`/budgets/${params.id}/goals/new`);
+    console.error('Creating entry failed', e);
+    return redirect(`/budgets/${params.id}/entries/new`);
   }
 }
+
+const buildGoalsEntriesBuilder = (amount: number) => {
+  let amountLeft = amount;
+
+  // Create entries for each goal we can fill up with the amount added now
+  return reduce((entries, goal: BudgetGoalWithEntries) => {
+    if (amountLeft <= 0) {
+      return reduced(entries);
+    }
+
+    const missingAmount = goal.requiredAmount - goal.currentAmount;
+    const value = missingAmount > amountLeft ? amountLeft : missingAmount;
+    amountLeft -= missingAmount;
+
+    return [...entries, { goalId: goal.id, value }];
+  }, [] as GoalEntry[]);
+};
 
 export default function () {
   const data = useLoaderData<typeof loader>();
   const submit = useSubmit();
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const encryptionKey = await unlockKey(data.budget.key);
-    const formData = new FormData(event.target as HTMLFormElement);
-
-    const date = new Date(formData.get('date') as string);
-    const amount = parseFloat(formData.get('amount') as string);
-    const value = await encryptBudgetGoalEntry(date, amount, encryptionKey);
-
-    submit(
-      { goalId: formData.get('goalId') as string, value },
-      { method: 'post' },
-    );
-  };
 
   return (
     <>
@@ -115,14 +120,55 @@ export default function () {
         <GoalsList.Pending>Decrypting data…</GoalsList.Pending>
         <GoalsList.Fulfilled>
           {(goals) => {
-            const currentGoal = goals.find(
+            const activeGoalsCount = goals.filter(
               (item) => item.requiredAmount !== item.currentAmount,
-            );
+            ).length;
+
+            if (activeGoalsCount === 0) {
+              return (
+                <>
+                  <p>
+                    You have no goals
+                    {goals.length > 0 ? ' that need money' : ' yet'}.
+                  </p>
+                  <p>
+                    <a href={`/budgets/${data.budget.budgetId}/goals/new`}>
+                      Create new one!
+                    </a>
+                  </p>
+                </>
+              );
+            }
+
+            const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+              event.preventDefault();
+              const encryptionKey = await unlockKey(data.budget.key);
+              const formData = new FormData(event.target as HTMLFormElement);
+
+              const date = new Date(formData.get('date') as string);
+              const amount = parseFloat(formData.get('amount') as string);
+              const processGoalsEntries = buildGoalsEntriesBuilder(amount);
+
+              const goalsEntries = await Promise.all(
+                processGoalsEntries(goals).map((entry) =>
+                  encryptBudgetGoalEntry(entry, encryptionKey),
+                ),
+              );
+              const value = await encryptBudgetSavingsEntry(
+                date,
+                amount,
+                encryptionKey,
+              );
+
+              submit(
+                { value, goalsEntries: JSON.stringify(goalsEntries) },
+                { method: 'post' },
+              );
+            };
 
             return (
               <BudgetGoalEntryForm
                 budget={data.budget}
-                goal={currentGoal}
                 onSubmit={handleSubmit}
                 submit="Create entry!"
               />

@@ -1,4 +1,4 @@
-import type { BudgetGoal } from '@prisma/client';
+import type { BudgetGoal, BudgetGoalEntry } from '@prisma/client';
 
 import { prisma } from '~/services/db.server';
 
@@ -64,7 +64,7 @@ export const createBudgetGoal = async (
       data: {
         ...data,
         budgetId,
-        priority: priority + 1,
+        priority,
       },
     });
   });
@@ -110,7 +110,8 @@ export const updateBudgetGoalPriority = async (
   userId: number,
   budgetId: number,
   goalId: number,
-  direction: 'up' | 'down',
+  priority: number,
+  goalEntries: Pick<BudgetGoalEntry, 'goalId' | 'value'>[],
 ): Promise<void> => {
   await prisma.$transaction(async (tx) => {
     const goal = await tx.budgetGoal.findFirstOrThrow({
@@ -128,7 +129,6 @@ export const updateBudgetGoalPriority = async (
       },
     });
 
-    const delta = direction === 'up' ? -1 : 1;
     const goalsCount = await tx.budgetGoal.count({
       where: {
         budget: {
@@ -141,20 +141,26 @@ export const updateBudgetGoalPriority = async (
       },
     });
 
-    if (goal.priority === 1 && direction === 'up') {
+    if (priority < 1) {
       return;
     }
-    if (goal.priority === goalsCount && direction === 'down') {
+    if (priority > goalsCount) {
       return;
     }
 
     await tx.budgetGoal.updateMany({
       where: {
         budgetId,
-        priority: goal.priority + delta,
+        priority: {
+          ...(priority > goal.priority
+            ? { lte: priority, gt: goal.priority }
+            : { lt: goal.priority, gte: priority }),
+        },
       },
       data: {
-        priority: goal.priority,
+        priority: {
+          ...(priority > goal.priority ? { decrement: 1 } : { increment: 1 }),
+        },
       },
     });
     await tx.budgetGoal.update({
@@ -162,8 +168,25 @@ export const updateBudgetGoalPriority = async (
         id: goalId,
       },
       data: {
-        priority: goal.priority + delta,
+        priority,
       },
     });
+    await tx.budgetGoalEntry.deleteMany({
+      where: {
+        goal: {
+          status: 'active',
+        },
+      },
+    });
+    await Promise.all(
+      goalEntries.map((entry) =>
+        tx.budgetGoalEntry.create({
+          data: {
+            ...entry,
+            userId, // TODO: How to keep money from correct users?
+          },
+        }),
+      ),
+    );
   });
 };

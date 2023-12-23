@@ -8,4 +8,10 @@ import { decryptBudget } from '~/services/budgets.client';
 const promiseFn: PromiseFn<BudgetUser> = async ({ budget }) =>
   await decryptBudget(budget, await unlockKey(budget.key));
 
-export const Budget = createInstance({ promiseFn }, 'Budget');
+export const Budget = createInstance(
+  {
+    promiseFn,
+    watchFn: (prev, cur) => prev.budget !== cur.budget,
+  },
+  'Budget',
+);

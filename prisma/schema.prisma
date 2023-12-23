@@ -11,12 +11,13 @@ datasource db {
 }
 
 model User {
-  id              Int               @id @default(autoincrement())
-  username        String            @unique
-  password        String
-  salt            String
-  budgets         BudgetUser[]      @relation("AccessibleBudgets")
-  BudgetGoalEntry BudgetGoalEntry[] @relation("UserGoalEntries")
+  id          Int                  @id @default(autoincrement())
+  username    String               @unique
+  password    String
+  salt        String
+  budgets     BudgetUser[]         @relation("AccessibleBudgets")
+  savings     BudgetSavingsEntry[] @relation("UserSavingEntries")
+  goalEntries BudgetGoalEntry[]    @relation("UserGoalEntries")
 }
 
 model BudgetUser {
@@ -36,6 +37,13 @@ model Budget {
   id    Int          @id @default(autoincrement())
   users BudgetUser[] @relation("BudgetUsers")
   goals BudgetGoal[] @relation("BudgetGoals")
+}
+
+model BudgetSavingsEntry {
+  id     Int    @id @default(autoincrement())
+  userId Int
+  user   User   @relation("UserSavingEntries", fields: [userId], references: [id], onDelete: Cascade)
+  value  String
 }
 
 model BudgetGoal {
