@@ -69,11 +69,21 @@ export default function () {
               <ul>
                 {goals.map((goal) => (
                   <li key={goal.id}>
-                    {goal.name} - {goal.requiredAmount}
+                    {goal.name} - {goal.requiredAmount}{' '}
                     <a
                       href={`/budgets/${data.budget.budgetId}/goals/${goal.id}/edit`}
                     >
                       Edit
+                    </a>
+                    <a
+                      href={`/budgets/${data.budget.budgetId}/goals/${goal.id}/priority/up`}
+                    >
+                      Move up
+                    </a>
+                    <a
+                      href={`/budgets/${data.budget.budgetId}/goals/${goal.id}/priority/down`}
+                    >
+                      Move down
                     </a>
                   </li>
                 ))}

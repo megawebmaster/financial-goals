@@ -15,6 +15,9 @@
   },
   "author": "Amadeusz Starzykiewicz <megawebmaster@gmail.com>",
   "license": "ISC",
+  "prisma": {
+    "seed": "npm run seed"
+  },
   "dependencies": {
     "@prisma/client": "^5.7.1",
     "@remix-run/node": "^2.4.0",

@@ -15,6 +15,9 @@ export const getBudgetGoals = (
         },
       },
     },
+    orderBy: {
+      priority: 'asc',
+    },
   });
 
 export const getBudgetGoal = (
@@ -34,12 +37,12 @@ export const getBudgetGoal = (
     },
   });
 
-export const createBudgetGoal = (
+export const createBudgetGoal = async (
   userId: number,
   budgetId: number,
-  data: Omit<BudgetGoal, 'budgetId' | 'id'>,
+  data: Omit<BudgetGoal, 'budgetId' | 'id' | 'priority'>,
 ): Promise<BudgetGoal> =>
-  prisma.$transaction(async (tx) => {
+  await prisma.$transaction(async (tx) => {
     await tx.budget.findFirstOrThrow({
       where: {
         id: budgetId,
@@ -51,10 +54,17 @@ export const createBudgetGoal = (
       },
     });
 
+    const priority = await tx.budgetGoal.count({
+      where: {
+        budgetId,
+      },
+    });
+
     return tx.budgetGoal.create({
       data: {
         ...data,
         budgetId,
+        priority: priority + 1,
       },
     });
   });
@@ -93,5 +103,67 @@ export const deleteBudgetGoal = async (
       },
       id: goalId,
     },
+  });
+};
+
+export const updateBudgetGoalPriority = async (
+  userId: number,
+  budgetId: number,
+  goalId: number,
+  direction: 'up' | 'down',
+): Promise<void> => {
+  await prisma.$transaction(async (tx) => {
+    const goal = await tx.budgetGoal.findFirstOrThrow({
+      select: {
+        priority: true,
+      },
+      where: {
+        budget: {
+          id: budgetId,
+          users: {
+            some: { userId },
+          },
+        },
+        id: goalId,
+      },
+    });
+
+    const delta = direction === 'up' ? -1 : 1;
+    const goalsCount = await tx.budgetGoal.count({
+      where: {
+        budget: {
+          id: budgetId,
+          users: {
+            some: { userId },
+          },
+        },
+        id: goalId,
+      },
+    });
+
+    if (goal.priority === 1 && direction === 'up') {
+      return;
+    }
+    if (goal.priority === goalsCount && direction === 'down') {
+      return;
+    }
+
+    await tx.budgetGoal.updateMany({
+      where: {
+        budgetId,
+        priority: goal.priority + delta,
+      },
+      data: {
+        priority: goal.priority,
+      },
+    });
+    await tx.budgetGoal.update({
+      where: {
+        id: goalId,
+      },
+      data: {
+        priority: goal.priority + delta,
+      },
+    });
   });
 };

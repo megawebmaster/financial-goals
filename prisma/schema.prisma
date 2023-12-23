@@ -43,4 +43,5 @@ model BudgetGoal {
   budget         Budget @relation("BudgetGoals", fields: [budgetId], references: [id])
   name           String
   requiredAmount String
+  priority       Int
 }
