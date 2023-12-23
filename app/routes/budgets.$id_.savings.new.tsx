@@ -6,7 +6,6 @@ import type {
 import { redirect } from '@remix-run/node';
 import { useLoaderData, useSubmit } from '@remix-run/react';
 import invariant from 'tiny-invariant';
-import { reduce, reduced } from 'ramda';
 
 import { authenticator } from '~/services/auth.server';
 import { getBudget } from '~/services/budgets.server';
@@ -15,11 +14,12 @@ import type { FormEvent } from 'react';
 import { unlockKey } from '~/services/encryption.client';
 import { getBudgetGoals } from '~/services/budget-goals.server';
 import { GoalsList } from '~/components/budgets/goals-list';
-import { BudgetGoalEntryForm } from '~/components/budget-goal-entry-form';
-import type { BudgetGoalWithEntries } from '~/helpers/budget-goals';
+import { BudgetSavingsEntryForm } from '~/components/budget-savings-entry-form';
 import { createSavingsEntry } from '~/services/budget-savings-entries.server';
-import type { GoalEntry } from '~/services/budget-goal-entries.client';
-import { encryptBudgetGoalEntry } from '~/services/budget-goal-entries.client';
+import {
+  buildGoalsEntriesBuilder,
+  encryptBudgetGoalEntry,
+} from '~/services/budget-goal-entries.client';
 import { encryptBudgetSavingsEntry } from '~/services/budget-savings-entries.client';
 
 export const meta: MetaFunction = () => [
@@ -82,26 +82,9 @@ export async function action({ params, request }: ActionFunctionArgs) {
   } catch (e) {
     // TODO: Handle errors notifications
     console.error('Creating entry failed', e);
-    return redirect(`/budgets/${params.id}/entries/new`);
+    return redirect(`/budgets/${params.id}/savings/new`);
   }
 }
-
-const buildGoalsEntriesBuilder = (amount: number) => {
-  let amountLeft = amount;
-
-  // Create entries for each goal we can fill up with the amount added now
-  return reduce((entries, goal: BudgetGoalWithEntries) => {
-    if (amountLeft <= 0) {
-      return reduced(entries);
-    }
-
-    const missingAmount = goal.requiredAmount - goal.currentAmount;
-    const value = missingAmount > amountLeft ? amountLeft : missingAmount;
-    amountLeft -= missingAmount;
-
-    return [...entries, { goalId: goal.id, value }];
-  }, [] as GoalEntry[]);
-};
 
 export default function () {
   const data = useLoaderData<typeof loader>();
@@ -113,7 +96,7 @@ export default function () {
       <Budget budget={data.budget}>
         <Budget.Pending>Decrypting data…</Budget.Pending>
         <Budget.Fulfilled>
-          {(budget) => <h2>Add an entry to {budget.name} budget</h2>}
+          {(budget) => <h2>Add savings to {budget.name} budget</h2>}
         </Budget.Fulfilled>
       </Budget>
       <GoalsList encryptionKey={data.budget.key} goals={data.goals}>
@@ -167,10 +150,10 @@ export default function () {
             };
 
             return (
-              <BudgetGoalEntryForm
+              <BudgetSavingsEntryForm
                 budget={data.budget}
                 onSubmit={handleSubmit}
-                submit="Create entry!"
+                submit="Add savings!"
               />
             );
           }}

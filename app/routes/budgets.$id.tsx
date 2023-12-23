@@ -2,7 +2,7 @@ import type { FormEvent } from 'react';
 import type { LoaderFunctionArgs, MetaFunction } from '@remix-run/node';
 import { redirect } from '@remix-run/node';
 import { useLoaderData, useSubmit } from '@remix-run/react';
-import { map, pipe, prop, propEq, reduce, reduced, sortBy } from 'ramda';
+import { pipe } from 'ramda';
 import invariant from 'tiny-invariant';
 
 import { authenticator } from '~/services/auth.server';
@@ -10,9 +10,11 @@ import { getBudget } from '~/services/budgets.server';
 import { getBudgetGoals } from '~/services/budget-goals.server';
 import { Budget } from '~/components/budget';
 import { GoalsList } from '~/components/budgets/goals-list';
-import type { BudgetGoalWithEntries } from '~/helpers/budget-goals';
-import type { GoalEntry } from '~/services/budget-goal-entries.client';
-import { encryptBudgetGoalEntry } from '~/services/budget-goal-entries.client';
+import {
+  buildGoalsEntriesBuilder,
+  buildGoalsSorting,
+  encryptBudgetGoalEntry,
+} from '~/services/budget-goal-entries.client';
 import { unlockKey } from '~/services/encryption.client';
 
 export const meta: MetaFunction = () => [
@@ -45,63 +47,6 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
     return redirect('/budgets');
   }
 }
-
-const buildGoalsEntriesBuilder = (
-  amount: number,
-  goalId: number,
-  newPriority: number,
-) => {
-  let amountLeft = amount;
-
-  // Create entries for each goal we can fill up with the amount added now
-  return (goals: BudgetGoalWithEntries[]) => {
-    const currentGoal = goals.find(propEq(goalId, 'id'));
-
-    if (!currentGoal) {
-      return [];
-    }
-
-    const getPriority = (goal: BudgetGoalWithEntries) => {
-      if (
-        newPriority > currentGoal.priority &&
-        goal.priority >= newPriority &&
-        goal.priority < currentGoal.priority
-      ) {
-        return goal.priority;
-      }
-      if (
-        newPriority < currentGoal.priority &&
-        goal.priority < newPriority &&
-        goal.priority >= currentGoal.priority
-      ) {
-        return goal.priority;
-      }
-
-      return newPriority > currentGoal.priority
-        ? goal.priority - 1
-        : goal.priority + 1;
-    };
-
-    return pipe(
-      map((goal: BudgetGoalWithEntries) => ({
-        ...goal,
-        priority: goal.id === goalId ? newPriority : getPriority(goal),
-      })),
-      sortBy(prop('priority')),
-      reduce((entries, goal: BudgetGoalWithEntries) => {
-        if (amountLeft <= 0) {
-          return reduced(entries);
-        }
-
-        const value =
-          goal.requiredAmount > amountLeft ? amountLeft : goal.requiredAmount;
-        amountLeft -= goal.requiredAmount;
-
-        return [...entries, { goalId: goal.id, value }];
-      }, [] as GoalEntry[]),
-    )(goals);
-  };
-};
 
 export default function () {
   const data = useLoaderData<typeof loader>();
@@ -139,10 +84,9 @@ export default function () {
 
               const goalId = parseInt(formData.get('goalId') as string);
               const priority = parseInt(formData.get('priority') as string);
-              const processGoalsEntries = buildGoalsEntriesBuilder(
-                amount,
-                goalId,
-                priority,
+              const processGoalsEntries = pipe(
+                buildGoalsSorting(goalId, priority),
+                buildGoalsEntriesBuilder(amount),
               );
 
               const goalsEntries = await Promise.all(
@@ -204,7 +148,7 @@ export default function () {
       </GoalsList>
       <a href={`/budgets/${data.budget.budgetId}/goals/new`}>Create goal</a>
       <br />
-      <a href={`/budgets/${data.budget.budgetId}/entries/new`}>Create entry</a>
+      <a href={`/budgets/${data.budget.budgetId}/savings/new`}>Add savings</a>
     </>
   );
 }
