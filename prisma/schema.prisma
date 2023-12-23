@@ -34,4 +34,13 @@ model BudgetUser {
 model Budget {
   id    Int          @id @default(autoincrement())
   users BudgetUser[] @relation(name: "BudgetUsers")
+  goals BudgetGoal[] @relation(name: "BudgetGoals")
+}
+
+model BudgetGoal {
+  id             Int    @id @default(autoincrement())
+  budgetId       Int
+  budget         Budget @relation(name: "BudgetGoals", fields: [budgetId], references: [id])
+  name           String
+  requiredAmount String
 }

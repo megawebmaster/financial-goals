@@ -12,7 +12,4 @@ const promiseFn: PromiseFn<BudgetUser[]> = ({ budgets }) =>
     ),
   );
 
-export const DecryptedBudgetsList = createInstance(
-  { promiseFn },
-  'DecryptedBudgetsList',
-);
+export const BudgetsList = createInstance({ promiseFn }, 'BudgetsList');

@@ -4,7 +4,7 @@ import { Link, useLoaderData } from '@remix-run/react';
 
 import { authenticator } from '~/services/auth.server';
 import { getBudgets } from '~/services/budgets.server';
-import { DecryptedBudgetsList } from '~/components/decrypted-budgets-list';
+import { BudgetsList } from '~/components/budgets-list';
 
 export const meta: MetaFunction = () => [
   {
@@ -32,24 +32,25 @@ export default function () {
   return (
     <>
       <p>Your budgets:</p>
-      <DecryptedBudgetsList budgets={data.budgets}>
-        <DecryptedBudgetsList.Pending>
-          Decrypting data…
-        </DecryptedBudgetsList.Pending>
-        <DecryptedBudgetsList.Fulfilled>
-          {(data) => (
-            <ul>
-              {data?.map((budget) => (
-                <li key={budget.budgetId}>
-                  {budget.name}
-                  <a href={`/budgets/${budget.budgetId}`}>View</a>
-                  <a href={`/budgets/${budget.budgetId}/edit`}>Edit</a>
-                </li>
-              ))}
-            </ul>
+      <BudgetsList budgets={data.budgets}>
+        <BudgetsList.Pending>Decrypting data…</BudgetsList.Pending>
+        <BudgetsList.Fulfilled>
+          {(budgets) => (
+            <>
+              {budgets.length === 0 && <p>No budgets yet!</p>}
+              <ul>
+                {budgets?.map((budget) => (
+                  <li key={budget.budgetId}>
+                    {budget.name}
+                    <a href={`/budgets/${budget.budgetId}`}>View</a>
+                    <a href={`/budgets/${budget.budgetId}/edit`}>Edit</a>
+                  </li>
+                ))}
+              </ul>
+            </>
           )}
-        </DecryptedBudgetsList.Fulfilled>
-      </DecryptedBudgetsList>
+        </BudgetsList.Fulfilled>
+      </BudgetsList>
       <Link to="/budgets/new">Create</Link>
     </>
   );
