@@ -58,3 +58,40 @@ export const createBudgetGoal = (
       },
     });
   });
+
+export const updateBudgetGoal = (
+  userId: number,
+  budgetId: number,
+  goalId: number,
+  data: Partial<Omit<BudgetGoal, 'budgetId' | 'id'>>,
+): Promise<BudgetGoal> =>
+  prisma.budgetGoal.update({
+    data,
+    where: {
+      budget: {
+        id: budgetId,
+        users: {
+          some: { userId },
+        },
+      },
+      id: goalId,
+    },
+  });
+
+export const deleteBudgetGoal = async (
+  userId: number,
+  budgetId: number,
+  goalId: number,
+): Promise<void> => {
+  await prisma.budgetGoal.delete({
+    where: {
+      budget: {
+        id: budgetId,
+        users: {
+          some: { userId },
+        },
+      },
+      id: goalId,
+    },
+  });
+};

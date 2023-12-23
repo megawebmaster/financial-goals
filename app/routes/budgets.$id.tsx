@@ -64,6 +64,11 @@ export default function () {
                 {goals.map((goal) => (
                   <li key={goal.id}>
                     {goal.name} - {goal.requiredAmount}
+                    <a
+                      href={`/budgets/${data.budget.budgetId}/goals/${goal.id}/edit`}
+                    >
+                      Edit
+                    </a>
                   </li>
                 ))}
               </ul>
