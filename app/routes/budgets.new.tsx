@@ -1,10 +1,8 @@
-import type {
-  ActionFunctionArgs,
-  LoaderFunctionArgs,
-  MetaFunction,
-} from '@remix-run/node';
+import type { FormEvent } from 'react';
+import type { ActionFunctionArgs, MetaFunction } from '@remix-run/node';
 import { redirect } from '@remix-run/node';
 import { useSubmit } from '@remix-run/react';
+import invariant from 'tiny-invariant';
 
 import { authenticator } from '~/services/auth.server';
 import {
@@ -12,19 +10,14 @@ import {
   generateEncryptionKey,
   lockKey,
 } from '~/services/encryption.client';
-import type { FormEvent } from 'react';
 import { createBudget } from '~/services/budgets.server';
-import invariant from 'tiny-invariant';
+import { BudgetForm } from '~/components/budget-form';
 
 export const meta: MetaFunction = () => [
   {
-    title: 'Financial Goals - Dashboard',
+    title: 'Financial Goals - Create budget',
   },
 ];
-
-export async function loader({ request }: LoaderFunctionArgs) {
-  return await authenticator.isAuthenticated(request);
-}
 
 export async function action({ request }: ActionFunctionArgs) {
   const userId = await authenticator.isAuthenticated(request);
@@ -51,7 +44,6 @@ export default function () {
   const submit = useSubmit();
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log('event', event);
     const encryptionKey = await generateEncryptionKey();
     const formData = new FormData(event.target as HTMLFormElement);
 
@@ -62,10 +54,9 @@ export default function () {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <>
       <h2>Create new budget</h2>
-      <input name="name" type="text" />
-      <button>Create!</button>
-    </form>
+      <BudgetForm onSubmit={handleSubmit} submit="Create!" />
+    </>
   );
 }

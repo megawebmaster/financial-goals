@@ -29,6 +29,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const userId = await authenticator.isAuthenticated(request);
 
   if (!userId) {
+    // TODO: Handle errors notifications
     return redirect('/');
   }
 
@@ -53,7 +54,7 @@ export default function () {
       <Form method="post">
         <button>Log out</button>
       </Form>
-      <Outlet />
+      <Outlet context={data} />
     </>
   );
 }
