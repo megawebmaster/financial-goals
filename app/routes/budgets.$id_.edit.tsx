@@ -78,23 +78,28 @@ export default function () {
   };
 
   return (
-    <Budget budget={data.budget}>
-      <Budget.Pending>Decrypting data…</Budget.Pending>
-      <Budget.Fulfilled>
-        {(budget) => (
-          <>
-            <h2>Update budget</h2>
+    <>
+      <a href={`/budgets/${data.budget.budgetId}`}>Go back</a>
+      <h2>Update budget</h2>
+      <Budget budget={data.budget}>
+        <Budget.Pending>Decrypting data…</Budget.Pending>
+        <Budget.Fulfilled>
+          {(budget) => (
             <BudgetForm
               budget={budget}
               onSubmit={handleSubmit}
               submit="Update!"
             />
-            <Form action={`/budgets/${budget.budgetId}/destroy`} method="post">
-              <button type="submit">Delete</button>
-            </Form>
-          </>
-        )}
-      </Budget.Fulfilled>
-    </Budget>
+          )}
+        </Budget.Fulfilled>
+      </Budget>
+      <Form
+        action={`/budgets/${data.budget.budgetId}/destroy`}
+        method="post"
+        replace
+      >
+        <button type="submit">Delete</button>
+      </Form>
+    </>
   );
 }

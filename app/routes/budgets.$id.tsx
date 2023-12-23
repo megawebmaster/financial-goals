@@ -40,6 +40,7 @@ export default function () {
 
   return (
     <>
+      <a href="/budgets">Go back</a>
       <Budget budget={data.budget}>
         <Budget.Pending>Decrypting data…</Budget.Pending>
         <Budget.Fulfilled>

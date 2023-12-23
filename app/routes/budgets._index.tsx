@@ -41,9 +41,7 @@ export default function () {
               <ul>
                 {budgets?.map((budget) => (
                   <li key={budget.budgetId}>
-                    {budget.name}
-                    <a href={`/budgets/${budget.budgetId}`}>View</a>
-                    <a href={`/budgets/${budget.budgetId}/edit`}>Edit</a>
+                    <a href={`/budgets/${budget.budgetId}`}>{budget.name}</a>
                   </li>
                 ))}
               </ul>

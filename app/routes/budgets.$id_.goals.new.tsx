@@ -86,6 +86,7 @@ export default function () {
 
   return (
     <>
+      <a href={`/budgets/${data.budget.budgetId}`}>Go back</a>
       <Budget budget={data.budget}>
         <Budget.Pending>Decrypting data…</Budget.Pending>
         <Budget.Fulfilled>

@@ -55,6 +55,7 @@ export default function () {
 
   return (
     <>
+      <a href="/budgets">Go back</a>
       <h2>Create new budget</h2>
       <BudgetForm onSubmit={handleSubmit} submit="Create!" />
     </>

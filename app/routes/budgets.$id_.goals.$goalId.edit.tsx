@@ -103,6 +103,7 @@ export default function () {
 
   return (
     <>
+      <a href={`/budgets/${data.budget.budgetId}`}>Go back</a>
       <Budget budget={data.budget}>
         <Budget.Pending>Decrypting data…</Budget.Pending>
         <Budget.Fulfilled>
@@ -125,6 +126,7 @@ export default function () {
       <Form
         action={`/budgets/${data.budget.budgetId}/goals/${data.goal.id}/destroy`}
         method="post"
+        replace
       >
         <button type="submit">Delete goal</button>
       </Form>
