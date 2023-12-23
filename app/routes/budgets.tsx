@@ -33,9 +33,16 @@ export async function loader({ request }: LoaderFunctionArgs) {
     return redirect('/');
   }
 
-  return {
-    user: await getUser(userId),
-  };
+  try {
+    return {
+      user: await getUser(userId),
+    };
+  } catch (e) {
+    // TODO: Handle logged out notification
+    return await authenticator.logout(request, {
+      redirectTo: '/',
+    });
+  }
 }
 
 export async function clientLoader({ serverLoader }: ClientLoaderFunctionArgs) {

@@ -13,18 +13,24 @@ export async function action({ params, request }: ActionFunctionArgs) {
     return redirect('/');
   }
 
-  invariant(params.id, 'Budget ID is required');
-  invariant(typeof params.id === 'string');
+  try {
+    invariant(params.id, 'Budget ID is required');
+    invariant(typeof params.id === 'string');
 
-  const budgetId = parseInt(params.id, 10);
-  invariant(!isNaN(budgetId), 'Budget ID must be a number');
+    const budgetId = parseInt(params.id, 10);
+    invariant(!isNaN(budgetId), 'Budget ID must be a number');
 
-  invariant(params.goalId, 'Goal ID is required');
-  invariant(typeof params.goalId === 'string');
+    invariant(params.goalId, 'Goal ID is required');
+    invariant(typeof params.goalId === 'string');
 
-  const goalId = parseInt(params.goalId, 10);
-  invariant(!isNaN(goalId), 'Goal ID must be a number');
+    const goalId = parseInt(params.goalId, 10);
+    invariant(!isNaN(goalId), 'Goal ID must be a number');
 
-  await deleteBudgetGoal(userId, budgetId, goalId);
-  return redirect(`/budgets/${budgetId}`);
+    await deleteBudgetGoal(userId, budgetId, goalId);
+    return redirect(`/budgets/${budgetId}`);
+  } catch (e) {
+    console.error('Deleting goal failed', e);
+    // TODO: Handle errors notifications
+    return redirect(`/budgets/${params.id}/goals/${params.goalId}/edit`);
+  }
 }

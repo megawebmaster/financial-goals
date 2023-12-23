@@ -23,16 +23,21 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
     return redirect('/');
   }
 
-  invariant(params.id, 'Budget ID is required');
-  invariant(typeof params.id === 'string');
+  try {
+    invariant(params.id, 'Budget ID is required');
+    invariant(typeof params.id === 'string');
 
-  const budgetId = parseInt(params.id, 10);
-  invariant(!isNaN(budgetId), 'Budget ID must be a number');
+    const budgetId = parseInt(params.id, 10);
+    invariant(!isNaN(budgetId), 'Budget ID must be a number');
 
-  return {
-    budget: await getBudget(userId, budgetId),
-    goals: await getBudgetGoals(userId, budgetId),
-  };
+    return {
+      budget: await getBudget(userId, budgetId),
+      goals: await getBudgetGoals(userId, budgetId),
+    };
+  } catch (e) {
+    // TODO: Handle errors notifications
+    return redirect('/budgets');
+  }
 }
 
 export default function () {

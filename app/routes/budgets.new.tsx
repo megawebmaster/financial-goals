@@ -27,17 +27,23 @@ export async function action({ request }: ActionFunctionArgs) {
     return redirect('/');
   }
 
-  const data = await request.formData();
-  const name = data.get('name');
-  const key = data.get('key');
+  try {
+    const data = await request.formData();
+    const name = data.get('name');
+    const key = data.get('key');
 
-  invariant(name, 'Name of the budget is required');
-  invariant(typeof name === 'string', 'Name must be a text');
-  invariant(key, 'Budget encryption key is required');
-  invariant(typeof key === 'string', 'Encryption key must be a text');
+    invariant(name, 'Name of the budget is required');
+    invariant(typeof name === 'string', 'Name must be a text');
+    invariant(key, 'Budget encryption key is required');
+    invariant(typeof key === 'string', 'Encryption key must be a text');
 
-  await createBudget(userId, { name, key });
-  return redirect('/budgets');
+    const budget = await createBudget(userId, { name, key });
+    return redirect(`/budgets/${budget.budgetId}`);
+  } catch (e) {
+    console.error('Creating budget failed', e);
+    // TODO: Handle errors notifications
+    return redirect('/budgets/new');
+  }
 }
 
 export default function () {

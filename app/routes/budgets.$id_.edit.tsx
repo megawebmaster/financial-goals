@@ -28,15 +28,20 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
     return redirect('/');
   }
 
-  invariant(params.id, 'Budget ID is required');
-  invariant(typeof params.id === 'string');
+  try {
+    invariant(params.id, 'Budget ID is required');
+    invariant(typeof params.id === 'string');
 
-  const budgetId = parseInt(params.id, 10);
-  invariant(!isNaN(budgetId), 'Budget ID must be a number');
+    const budgetId = parseInt(params.id, 10);
+    invariant(!isNaN(budgetId), 'Budget ID must be a number');
 
-  return {
-    budget: await getBudget(userId, budgetId),
-  };
+    return {
+      budget: await getBudget(userId, budgetId),
+    };
+  } catch (e) {
+    // TODO: Handle errors notifications
+    return redirect(`/budgets/${params.id}`);
+  }
 }
 
 export async function action({ params, request }: ActionFunctionArgs) {
@@ -47,20 +52,26 @@ export async function action({ params, request }: ActionFunctionArgs) {
     return redirect('/');
   }
 
-  invariant(params.id, 'Budget ID is required');
-  invariant(typeof params.id === 'string');
+  try {
+    invariant(params.id, 'Budget ID is required');
+    invariant(typeof params.id === 'string');
 
-  const budgetId = parseInt(params.id, 10);
-  invariant(!isNaN(budgetId), 'Budget ID must be a number');
+    const budgetId = parseInt(params.id, 10);
+    invariant(!isNaN(budgetId), 'Budget ID must be a number');
 
-  const data = await request.formData();
-  const name = data.get('name');
+    const data = await request.formData();
+    const name = data.get('name');
 
-  invariant(name, 'Name of the budget is required');
-  invariant(typeof name === 'string', 'Name must be a text');
+    invariant(name, 'Name of the budget is required');
+    invariant(typeof name === 'string', 'Name must be a text');
 
-  await updateBudget(userId, budgetId, { name });
-  return redirect('/budgets');
+    await updateBudget(userId, budgetId, { name });
+    return redirect('/budgets');
+  } catch (e) {
+    console.error('Updating budget failed', e);
+    // TODO: Handle errors notifications
+    return redirect(`/budgets/${params.id}/edit`);
+  }
 }
 
 export default function () {

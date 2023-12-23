@@ -13,12 +13,18 @@ export async function action({ params, request }: ActionFunctionArgs) {
     return redirect('/');
   }
 
-  invariant(params.id, 'Budget ID is required');
-  invariant(typeof params.id === 'string');
+  try {
+    invariant(params.id, 'Budget ID is required');
+    invariant(typeof params.id === 'string');
 
-  const budgetId = parseInt(params.id, 10);
-  invariant(!isNaN(budgetId), 'Budget ID must be a number');
+    const budgetId = parseInt(params.id, 10);
+    invariant(!isNaN(budgetId), 'Budget ID must be a number');
 
-  await deleteBudget(userId, budgetId);
-  return redirect('/budgets');
+    await deleteBudget(userId, budgetId);
+    return redirect('/budgets');
+  } catch (e) {
+    console.error('Deleting budget failed', e);
+    // TODO: Handle errors notifications
+    return redirect(`/budgets/${params.id}/edit`);
+  }
 }

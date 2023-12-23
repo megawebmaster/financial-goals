@@ -51,7 +51,7 @@ export const createBudgetGoal = (
       },
     });
 
-    return prisma.budgetGoal.create({
+    return tx.budgetGoal.create({
       data: {
         ...data,
         budgetId,
