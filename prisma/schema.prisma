@@ -44,4 +44,5 @@ model BudgetGoal {
   name           String
   requiredAmount String
   priority       Int
+  status         String @default("active")
 }

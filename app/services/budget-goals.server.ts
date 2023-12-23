@@ -14,6 +14,7 @@ export const getBudgetGoals = (
           some: { userId },
         },
       },
+      status: 'active',
     },
     orderBy: {
       priority: 'asc',
@@ -137,7 +138,7 @@ export const updateBudgetGoalPriority = async (
             some: { userId },
           },
         },
-        id: goalId,
+        status: 'active',
       },
     });
 

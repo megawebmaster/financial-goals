@@ -69,7 +69,11 @@ export async function action({ params, request }: ActionFunctionArgs) {
     invariant(requiredAmount, 'Goal required amount is required');
     invariant(typeof requiredAmount === 'string');
 
-    await createBudgetGoal(userId, budgetId, { name, requiredAmount });
+    await createBudgetGoal(userId, budgetId, {
+      name,
+      requiredAmount,
+      status: 'active',
+    });
     return redirect(`/budgets/${budgetId}`);
   } catch (e) {
     // TODO: Handle errors notifications
