@@ -4,14 +4,16 @@ import type {
   LoaderFunctionArgs,
   MetaFunction,
 } from '@remix-run/node';
+import { redirect } from '@remix-run/node';
 import { Form } from '@remix-run/react';
 
 import { authenticator } from '~/services/auth.server';
 import { storeKeyMaterial } from '~/services/encryption.client';
+import { createUser } from '~/services/user.server';
 
 export const meta: MetaFunction = () => [
   {
-    title: 'Financial Goals',
+    title: 'Financial Goals - Sign up',
   },
 ];
 
@@ -22,6 +24,18 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 export async function action({ request }: ActionFunctionArgs) {
+  try {
+    const data = await request.clone().formData();
+    await createUser(
+      data.get('username') as string,
+      data.get('password') as string,
+    );
+  } catch (e) {
+    console.error('Unable to create new user', e);
+    // TODO: Show user exists?
+    return redirect('/signup');
+  }
+
   return await authenticator.authenticate('user-pass', request, {
     successRedirect: '/budgets',
     failureRedirect: '/',
@@ -40,6 +54,7 @@ export default function () {
 
   return (
     <>
+      <h2>Sign up for an account</h2>
       <Form method="post" onSubmit={handleSubmit}>
         <label htmlFor="username">Username</label>
         <input
@@ -57,9 +72,8 @@ export default function () {
           required
           autoComplete="password"
         />
-        <button type="submit">Sign in!</button>
+        <button type="submit">Create account!</button>
       </Form>
-      <a href="/signup">Sign up</a>
     </>
   );
 }

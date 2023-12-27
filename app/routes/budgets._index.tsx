@@ -49,7 +49,7 @@ export default function () {
           )}
         </BudgetsList.Fulfilled>
       </BudgetsList>
-      <Link to="/budgets/new">Create</Link>
+      <Link to="/budgets/new">Create budget</Link>
     </>
   );
 }

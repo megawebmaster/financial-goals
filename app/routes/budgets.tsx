@@ -59,7 +59,10 @@ export default function () {
     <>
       <p>Logged in as: {data.user.username}</p>
       <Form method="post">
-        <button>Log out</button>
+        <button type="submit">Log out</button>
+      </Form>
+      <Form action="/user/destroy" method="post">
+        <button type="submit">Delete account</button>
       </Form>
       <Outlet context={data} />
     </>

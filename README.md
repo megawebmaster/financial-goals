@@ -8,6 +8,7 @@ with the money you have and how you want to make it work for you.
 * Remix
 * TypeScript
 * ShadCN + Radix UI
+* Playwright
 
 ## Running
 

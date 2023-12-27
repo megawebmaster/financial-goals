@@ -18,8 +18,11 @@ export const BudgetGoalForm = ({
   return (
     <form onSubmit={onSubmit}>
       <input type="hidden" name="budgetId" value={budget.budgetId} />
-      <input defaultValue={goal?.name} name="name" type="text" />
+      <label htmlFor="name">Goal name</label>
+      <input id="name" defaultValue={goal?.name} name="name" type="text" />
+      <label htmlFor="amount">Required amount</label>
       <input
+        id="amount"
         defaultValue={goal?.requiredAmount}
         name="requiredAmount"
         type="number"
