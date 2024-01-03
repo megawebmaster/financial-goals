@@ -12,6 +12,9 @@ import {
 } from '~/services/encryption.client';
 import { createBudget } from '~/services/budgets.server';
 import { BudgetForm } from '~/components/budget-form';
+import { useCastle } from '~/contexts/CastleContextProvider';
+import { castleRisk } from '~/services/castle.server';
+import { getUser } from '~/services/user.server';
 
 export const meta: MetaFunction = () => [
   {
@@ -20,7 +23,7 @@ export const meta: MetaFunction = () => [
 ];
 
 export async function action({ request }: ActionFunctionArgs) {
-  const userId = await authenticator.isAuthenticated(request);
+  const userId = await authenticator.isAuthenticated(request.clone());
 
   if (!userId) {
     // TODO: Handle errors notifications
@@ -28,7 +31,7 @@ export async function action({ request }: ActionFunctionArgs) {
   }
 
   try {
-    const data = await request.formData();
+    const data = await request.clone().formData();
     const name = data.get('name');
     const key = data.get('key');
 
@@ -36,6 +39,16 @@ export async function action({ request }: ActionFunctionArgs) {
     invariant(typeof name === 'string', 'Name must be a text');
     invariant(key, 'Budget encryption key is required');
     invariant(typeof key === 'string', 'Encryption key must be a text');
+
+    const riskResponse = await castleRisk(request, await getUser(userId), {
+      type: '$custom',
+      name: 'Create budget',
+    });
+
+    if (riskResponse.risk > 0.9) {
+      // TODO: Show error about risk too high
+      return redirect('/budgets');
+    }
 
     const budget = await createBudget(userId, { name, key });
     return redirect(`/budgets/${budget.budgetId}`);
@@ -48,6 +61,8 @@ export async function action({ request }: ActionFunctionArgs) {
 
 export default function () {
   const submit = useSubmit();
+  const castle = useCastle();
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const encryptionKey = await generateEncryptionKey();
@@ -55,8 +70,9 @@ export default function () {
 
     const name = await encrypt(formData.get('name') as string, encryptionKey);
     const key = await lockKey(encryptionKey);
+    const requestToken = (await castle?.createRequestToken()) || '';
 
-    submit({ name, key }, { method: 'post' });
+    submit({ name, key, requestToken }, { method: 'post' });
   };
 
   return (
