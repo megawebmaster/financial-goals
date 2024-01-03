@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
 import { redirect } from '@remix-run/node';
 import type {
@@ -12,6 +13,7 @@ import {
   buildWrappingKey,
   clearEncryption,
 } from '~/services/encryption.client';
+import { useCastle } from '~/contexts/CastleContextProvider';
 
 export async function action({ request }: ActionFunctionArgs) {
   return await authenticator.logout(request, {
@@ -53,7 +55,17 @@ export async function clientLoader({ serverLoader }: ClientLoaderFunctionArgs) {
 }
 
 export default function () {
+  const castle = useCastle();
   const data = useLoaderData<typeof loader>();
+
+  useEffect(() => {
+    castle?.page({
+      user: {
+        id: data.user.id.toString(),
+        name: data.user.username,
+      },
+    });
+  }, [castle, data.user.id, data.user.username]);
 
   return (
     <>

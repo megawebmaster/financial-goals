@@ -7,6 +7,8 @@ import {
   ScrollRestoration,
 } from '@remix-run/react';
 
+import { CastleContextProvider } from '~/contexts/CastleContextProvider';
+
 export default function App() {
   return (
     <html lang="en">
@@ -18,8 +20,10 @@ export default function App() {
         <Links />
       </head>
       <body>
-        <h1>Hello world!</h1>
-        <Outlet />
+        <CastleContextProvider>
+          <h1>Hello world!</h1>
+          <Outlet />
+        </CastleContextProvider>
         <ScrollRestoration />
         <Scripts />
         <LiveReload />

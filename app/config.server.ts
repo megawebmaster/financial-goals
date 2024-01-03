@@ -19,12 +19,18 @@ const getEnv = <T>(
 };
 
 type Config = {
+  castle: {
+    apiSecret: string;
+  };
   session: {
     secret: string;
   };
 };
 
 export const config: Config = {
+  castle: {
+    apiSecret: getEnv('CASTLE_API_SECRET'),
+  },
   session: {
     secret: getEnv('SESSION_SECRET'),
   },
