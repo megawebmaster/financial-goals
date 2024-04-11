@@ -141,7 +141,7 @@ export const updateBudgetGoalPriority = async (
       },
     });
 
-    if (priority < 1) {
+    if (priority < 0) {
       return;
     }
     if (priority > goalsCount) {
