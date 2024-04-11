@@ -5,6 +5,7 @@ import { BudgetsPage } from './pages/budgets-page';
 import { BudgetForm } from './pages/budget-form';
 import { BudgetGoalForm } from './pages/budget-goal-form';
 import { BudgetPage } from './pages/budget-page';
+import { BudgetSavingsForm } from './pages/budget-savings-form';
 
 type Fixtures = {
   account: {
@@ -14,6 +15,7 @@ type Fixtures = {
   loggedIn: Page;
   budget: Page;
   goals: Page;
+  savings: Page;
 };
 type WorkerFixtures = {};
 
@@ -78,25 +80,37 @@ export const test = base.extend<Fixtures, WorkerFixtures>({
     const goalForm = new BudgetGoalForm(page);
 
     // Add first goal
-    await budgetPage.addGoal.click();
+    await budgetPage.addGoal();
     await goalForm.name.fill('First goal');
     await goalForm.amount.fill('1000');
     await goalForm.submit.click();
     await expect(page.getByText('First goal')).toBeVisible();
 
     // Add second goal
-    await budgetPage.addGoal.click();
+    await budgetPage.addGoal();
     await goalForm.name.fill('Second goal');
     await goalForm.amount.fill('500');
     await goalForm.submit.click();
     await expect(page.getByText('Second goal')).toBeVisible();
 
     // Add third goal
-    await budgetPage.addGoal.click();
+    await budgetPage.addGoal();
     await goalForm.name.fill('Third goal');
     await goalForm.amount.fill('750');
     await goalForm.submit.click();
     await expect(page.getByText('Third goal')).toBeVisible();
+
+    await use(page);
+  },
+
+  savings: async ({ goals: page }, use) => {
+    const budgetPage = new BudgetPage(page);
+    const savingsForm = new BudgetSavingsForm(page);
+
+    // Add first savings value
+    await budgetPage.addSavings();
+    await savingsForm.amount.fill('2000');
+    await savingsForm.submit.click();
 
     await use(page);
   },

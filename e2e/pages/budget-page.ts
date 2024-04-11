@@ -1,12 +1,27 @@
 import type { Locator, Page } from 'playwright/test';
+import { expect } from 'playwright/test';
 
 export class BudgetPage {
-  public readonly addGoal: Locator;
-  public readonly addSavings: Locator;
+  private readonly addGoalLink: Locator;
+  private readonly addSavingsLink: Locator;
 
   constructor(private readonly page: Page) {
-    this.addGoal = page.getByRole('link', { name: 'Create goal' });
-    this.addSavings = page.getByRole('link', { name: 'Add savings' });
+    this.addGoalLink = page.getByRole('link', { name: 'Create goal' });
+    this.addSavingsLink = page.getByRole('link', { name: 'Add savings' });
+  }
+
+  async addGoal() {
+    await this.addGoalLink.click();
+    await expect(
+      this.page.getByRole('heading', { name: 'Add a goal' }),
+    ).toBeVisible();
+  }
+
+  async addSavings() {
+    await this.addSavingsLink.click();
+    await expect(
+      this.page.getByRole('heading', { name: 'Add savings' }),
+    ).toBeVisible();
   }
 
   moveGoalUp(name: string) {
