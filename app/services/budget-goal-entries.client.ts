@@ -28,6 +28,13 @@ export const encryptBudgetGoalEntry = async (
   value: await encrypt(entry.value.toString(), key),
 });
 
+export const clearGoalEntriesAmounts = map(
+  (goal: BudgetGoalWithEntries): BudgetGoalWithEntries => ({
+    ...goal,
+    currentAmount: 0,
+  }),
+);
+
 export const buildGoalsEntriesBuilder =
   (amount: number) => (goals: BudgetGoalWithEntries[]) => {
     // Create entries for each goal we can fill up with the amount added now

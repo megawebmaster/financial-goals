@@ -13,6 +13,7 @@ import { GoalsList } from '~/components/budgets/goals-list';
 import {
   buildGoalsEntriesBuilder,
   buildGoalsSorting,
+  clearGoalEntriesAmounts,
   encryptBudgetGoalEntry,
 } from '~/services/budget-goal-entries.client';
 import { unlockKey } from '~/services/encryption.client';
@@ -86,6 +87,7 @@ export default function () {
               const priority = parseInt(formData.get('priority') as string);
               const processGoalsEntries = pipe(
                 buildGoalsSorting(goalId, priority),
+                clearGoalEntriesAmounts,
                 buildGoalsEntriesBuilder(amount),
               );
 
