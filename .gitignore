@@ -2,6 +2,7 @@
 build/
 node_modules/
 prisma/dev.db*
+prisma/test.db*
 .env
 /test-results/
 /playwright-report/

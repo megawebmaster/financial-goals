@@ -21,7 +21,7 @@ type WorkerFixtures = {};
 
 export { expect };
 export const test = base.extend<Fixtures, WorkerFixtures>({
-  account: async ({ browser }, use, workerInfo) => {
+  account: async ({ browser, baseURL }, use, workerInfo) => {
     const username = 'test-user-' + workerInfo.workerIndex;
     const password = 'very-secure';
 
@@ -38,7 +38,7 @@ export const test = base.extend<Fixtures, WorkerFixtures>({
     await use({ username, password });
 
     const deleteAccountPage = await browser.newPage();
-    await deleteAccountPage.goto('http://localhost:5173/');
+    await deleteAccountPage.goto(baseURL || 'http://127.0.0.1:5173');
     const form = new LoginForm(deleteAccountPage);
     await form.login.fill(username);
     await form.password.fill(password);
