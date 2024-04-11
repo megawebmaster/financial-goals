@@ -69,9 +69,10 @@ export default defineConfig({
   ],
 
   /* Run your local dev server before starting the tests */
-  // webServer: {
-  //   command: 'npm run start',
-  //   url: 'http://127.0.0.1:3000',
-  //   reuseExistingServer: !process.env.CI,
-  // },
+  webServer: {
+    command:
+      'SESSION_SECRET=test PORT=5555 DATABASE_URL=file:./test.db npm run dev',
+    url: 'http://127.0.0.1:5555',
+    reuseExistingServer: !process.env.CI,
+  },
 });
