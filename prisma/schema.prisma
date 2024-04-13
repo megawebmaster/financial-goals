@@ -21,7 +21,7 @@ model User {
 
 model BudgetUser {
   budgetId Int
-  budget   Budget  @relation("BudgetUsers", fields: [budgetId], references: [id], onDelete: Cascade)
+  budget   Budget  @relation("BudgetUsers", fields: [budgetId], references: [id], onDelete: Restrict)
   userId   Int
   user     User    @relation("AccessibleBudgets", fields: [userId], references: [id], onDelete: Cascade)
   name     String
@@ -33,24 +33,27 @@ model BudgetUser {
 }
 
 model Budget {
-  id             Int          @id @default(autoincrement())
-  users          BudgetUser[] @relation("BudgetUsers")
-  goals          BudgetGoal[] @relation("BudgetGoals")
+  id             Int                  @id @default(autoincrement())
+  users          BudgetUser[]         @relation("BudgetUsers")
+  goals          BudgetGoal[]         @relation("BudgetGoals")
+  savings        BudgetSavingsEntry[] @relation("BudgetSavingsEntries")
   currentSavings String
   freeSavings    String
 }
 
 model BudgetSavingsEntry {
-  id     Int    @id @default(autoincrement())
-  userId Int
-  user   User   @relation("UserSavingEntries", fields: [userId], references: [id], onDelete: Cascade)
-  value  String
+  id       Int    @id @default(autoincrement())
+  budgetId Int
+  budget   Budget @relation("BudgetSavingsEntries", fields: [budgetId], references: [id], onDelete: Cascade)
+  userId   Int
+  user     User   @relation("UserSavingEntries", fields: [userId], references: [id], onDelete: Restrict)
+  value    String
 }
 
 model BudgetGoal {
   id             Int    @id @default(autoincrement())
   budgetId       Int
-  budget         Budget @relation("BudgetGoals", fields: [budgetId], references: [id])
+  budget         Budget @relation("BudgetGoals", fields: [budgetId], references: [id], onDelete: Cascade)
   name           String
   requiredAmount String
   currentAmount  String
