@@ -57,6 +57,14 @@ export default function () {
         Your budget: {budget.name}{' '}
         <a href={`/budgets/${budget.budgetId}/edit`}>Edit</a>
       </h2>
+      <p>
+        <strong>Current savings:</strong> {budget.currentSavings}
+      </p>
+      {budget.freeSavings > 0 && (
+        <p>
+          <strong>Free, unused savings:</strong> {budget.freeSavings}
+        </p>
+      )}
       <h3>Goals:</h3>
       {goals.length === 0 && <p>No goals yet!</p>}
       <ul>

@@ -12,6 +12,9 @@ test('add savings, then create goal', async ({ budget: page }) => {
   await savingsForm.amount.fill('1000');
   await savingsForm.submit.click();
 
+  await expect(budgetPage.currentSavings).toContainText('1000');
+  await expect(budgetPage.freeSavings).toContainText('1000');
+
   await budgetPage.addGoal();
   const goalForm = new BudgetGoalForm(page);
   await goalForm.name.fill('First goal');
@@ -20,6 +23,8 @@ test('add savings, then create goal', async ({ budget: page }) => {
   await expect(page.getByText('First goal')).toBeVisible();
 
   await expect(page.getByRole('listitem').nth(0)).toContainText('50%');
+  await expect(budgetPage.currentSavings).toContainText('1000');
+  await expect(budgetPage.freeSavings).not.toBeAttached();
 });
 
 test('add savings, then create multiple goals', async ({ budget: page }) => {
@@ -30,6 +35,9 @@ test('add savings, then create multiple goals', async ({ budget: page }) => {
   const savingsForm = new BudgetSavingsForm(page);
   await savingsForm.amount.fill('2000');
   await savingsForm.submit.click();
+
+  await expect(budgetPage.currentSavings).toContainText('2000');
+  await expect(budgetPage.freeSavings).toContainText('2000');
 
   const goalForm = new BudgetGoalForm(page);
   await budgetPage.addGoal();
@@ -46,6 +54,8 @@ test('add savings, then create multiple goals', async ({ budget: page }) => {
 
   await expect(page.getByRole('listitem').nth(0)).toContainText('100%');
   await expect(page.getByRole('listitem').nth(1)).toContainText('50%');
+  await expect(budgetPage.currentSavings).toContainText('2000');
+  await expect(budgetPage.freeSavings).not.toBeAttached();
 });
 
 test('create goal, then add savings', async ({ budget: page }) => {
@@ -65,6 +75,8 @@ test('create goal, then add savings', async ({ budget: page }) => {
   await savingsForm.submit.click();
 
   await expect(page.getByRole('listitem').nth(0)).toContainText('50%');
+  await expect(budgetPage.currentSavings).toContainText('1000');
+  await expect(budgetPage.freeSavings).not.toBeAttached();
 });
 
 test('create multiple goals, then add savings', async ({ budget: page }) => {
@@ -91,4 +103,6 @@ test('create multiple goals, then add savings', async ({ budget: page }) => {
 
   await expect(page.getByRole('listitem').nth(0)).toContainText('100%');
   await expect(page.getByRole('listitem').nth(1)).toContainText('50%');
+  await expect(budgetPage.currentSavings).toContainText('2000');
+  await expect(budgetPage.freeSavings).not.toBeAttached();
 });

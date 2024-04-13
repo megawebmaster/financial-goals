@@ -24,7 +24,8 @@ test('remove goal and return savings', async ({ savings: page }) => {
   await expect(page.getByText('Your budget: First budget')).toBeVisible();
   await expect(page.getByText('First goal')).not.toBeAttached();
 
-  // TODO: Add a check for free savings
+  await expect(budgetPage.currentSavings).toContainText('2000');
+  await expect(budgetPage.freeSavings).toContainText('750');
   await expect(page.getByRole('listitem').nth(0)).toContainText('100%');
   await expect(page.getByRole('listitem').nth(1)).toContainText('100%');
 });
