@@ -65,6 +65,7 @@ export async function action({ params, request }: ActionFunctionArgs) {
     const name = data.get('name');
     const requiredAmount = data.get('requiredAmount');
     const currentAmount = data.get('currentAmount');
+    const freeSavings = data.get('freeSavings');
 
     invariant(name, 'Name of the goal is required');
     invariant(typeof name === 'string');
@@ -72,8 +73,10 @@ export async function action({ params, request }: ActionFunctionArgs) {
     invariant(typeof requiredAmount === 'string');
     invariant(currentAmount, 'Goal required amount is required');
     invariant(typeof currentAmount === 'string');
+    invariant(freeSavings, 'Free savings amount is required');
+    invariant(typeof freeSavings === 'string');
 
-    await createBudgetGoal(userId, budgetId, {
+    await createBudgetGoal(userId, budgetId, freeSavings, {
       name,
       requiredAmount,
       currentAmount,
@@ -105,16 +108,23 @@ export default function () {
               const name = formData.get('name') as string;
               const requiredAmount = formData.get('requiredAmount') as string;
               const currentAmount = getCurrentAmount(
-                // TODO: Subtract already used up savings
-                budget.currentSavings,
+                budget.freeSavings,
                 parseFloat(requiredAmount),
-              ).toString(10);
+              );
+              const freeSavings = budget.freeSavings - currentAmount;
 
               submit(
                 {
                   name: await encrypt(name, encryptionKey),
                   requiredAmount: await encrypt(requiredAmount, encryptionKey),
-                  currentAmount: await encrypt(currentAmount, encryptionKey),
+                  currentAmount: await encrypt(
+                    currentAmount.toString(10),
+                    encryptionKey,
+                  ),
+                  freeSavings: await encrypt(
+                    freeSavings.toString(10),
+                    encryptionKey,
+                  ),
                 },
                 { method: 'post' },
               );

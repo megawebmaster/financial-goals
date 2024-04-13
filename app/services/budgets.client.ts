@@ -17,10 +17,12 @@ export const decryptBudgetWithSavings = async (
   key: CryptoKey,
 ): Promise<ClientBudget> => {
   const currentSavings = await decrypt(budget.budget.currentSavings, key);
+  const freeSavings = await decrypt(budget.budget.freeSavings, key);
 
   return {
     ...budget,
     name: await decrypt(budget.name, key),
     currentSavings: parseFloat(currentSavings),
+    freeSavings: parseFloat(freeSavings),
   };
 };

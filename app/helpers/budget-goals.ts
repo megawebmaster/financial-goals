@@ -3,9 +3,13 @@ import type {
   BudgetSavingsEntry,
   BudgetUser,
 } from '@prisma/client';
+import { reduce } from 'ramda';
+
+import type { PickFieldsOfType } from '~/helpers/types';
 
 export type ClientBudget = BudgetUser & {
   currentSavings: number;
+  freeSavings: number;
 };
 
 export type ClientBudgetGoal = Omit<
@@ -28,3 +32,8 @@ export const getCurrentAmount = (
   currentSavings == 0 || requiredAmount > currentSavings
     ? currentSavings
     : requiredAmount;
+
+export const getGoalsSum = (
+  field: PickFieldsOfType<ClientBudgetGoal, number>,
+) =>
+  reduce((result: number, goal: ClientBudgetGoal) => result + goal[field], 0);

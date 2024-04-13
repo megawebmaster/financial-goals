@@ -37,6 +37,7 @@ model Budget {
   users          BudgetUser[] @relation("BudgetUsers")
   goals          BudgetGoal[] @relation("BudgetGoals")
   currentSavings String
+  freeSavings    String
 }
 
 model BudgetSavingsEntry {

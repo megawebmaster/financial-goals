@@ -1,4 +1,4 @@
-import type { BudgetUser } from '@prisma/client';
+import type { Budget as BaseBudget, BudgetUser } from '@prisma/client';
 
 import { prisma } from '~/services/db.server';
 import type { ThenArg } from '~/helpers/types';
@@ -24,14 +24,14 @@ export const getBudget = (userId: number, budgetId: number): Promise<Budget> =>
 
 export const createBudget = (
   userId: number,
-  currentSavings: string,
-  data: Omit<BudgetUser, 'budgetId' | 'userId' | 'isOwner'>,
+  budgetData: Omit<BaseBudget, 'id'>,
+  budgetUserdata: Omit<BudgetUser, 'budgetId' | 'userId' | 'isOwner'>,
 ): Promise<BudgetUser> =>
   prisma.$transaction(async (tx) => {
-    const budget = await tx.budget.create({ data: { currentSavings } });
+    const budget = await tx.budget.create({ data: budgetData });
     return tx.budgetUser.create({
       data: {
-        ...data,
+        ...budgetUserdata,
         budgetId: budget.id,
         userId,
         isOwner: true,

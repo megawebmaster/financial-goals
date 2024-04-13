@@ -21,6 +21,7 @@ import {
   buildGoalsFiller,
   encryptBudgetGoal,
 } from '~/services/budget-goals.client';
+import { getGoalsSum } from '~/helpers/budget-goals';
 
 export const meta: MetaFunction = () => [
   {
@@ -70,20 +71,20 @@ export async function action({ params, request }: ActionFunctionArgs) {
 
     const data = await request.formData();
     const entryValue = data.get('entryValue');
-    const currentSavingsValue = data.get('currentSavingsValue');
+    const budgetData = data.get('budgetData');
     const goals = data.get('goals');
 
     invariant(entryValue, 'Value for entry is required');
     invariant(typeof entryValue === 'string');
-    invariant(currentSavingsValue, 'Current budget savings value is required');
-    invariant(typeof currentSavingsValue === 'string');
+    invariant(budgetData, 'Budget data is required');
+    invariant(typeof budgetData === 'string');
     invariant(goals, 'Goals are required');
     invariant(typeof goals === 'string');
 
     await createSavingsEntry(
       userId,
       budgetId,
-      currentSavingsValue,
+      JSON.parse(budgetData),
       entryValue,
       JSON.parse(goals),
     );
@@ -94,6 +95,8 @@ export async function action({ params, request }: ActionFunctionArgs) {
     return redirect(`/budgets/${params.id}/savings/new`);
   }
 }
+
+const getGoalsCurrentAmount = getGoalsSum('currentAmount');
 
 export default function () {
   const data = useLoaderData<typeof loader>();
@@ -127,12 +130,9 @@ export default function () {
                       );
                       const currentSavings = budget.currentSavings + amount;
                       const processGoals = buildGoalsFiller(currentSavings);
-
-                      const updatedGoals = await Promise.all(
-                        processGoals(goals).map((item) =>
-                          encryptBudgetGoal(item, encryptionKey),
-                        ),
-                      );
+                      const updatedGoals = processGoals(goals);
+                      const freeSavings =
+                        currentSavings - getGoalsCurrentAmount(updatedGoals);
                       const entryValue = await encryptBudgetSavingsEntry(
                         // TODO: Why did I decide to encrypt date here?
                         date,
@@ -143,11 +143,23 @@ export default function () {
                       submit(
                         {
                           entryValue,
-                          currentSavingsValue: await encrypt(
-                            currentSavings.toString(10),
-                            encryptionKey,
+                          budgetData: JSON.stringify({
+                            currentSavings: await encrypt(
+                              currentSavings.toString(10),
+                              encryptionKey,
+                            ),
+                            freeSavings: await encrypt(
+                              freeSavings.toString(10),
+                              encryptionKey,
+                            ),
+                          }),
+                          goals: JSON.stringify(
+                            await Promise.all(
+                              updatedGoals.map((item) =>
+                                encryptBudgetGoal(item, encryptionKey),
+                              ),
+                            ),
                           ),
-                          goals: JSON.stringify(updatedGoals),
                         },
                         { method: 'post' },
                       );

@@ -39,14 +39,19 @@ export const getBudgetGoal = (
 export const createBudgetGoal = async (
   userId: number,
   budgetId: number,
+  freeSavings: string,
   data: Omit<BudgetGoal, 'budgetId' | 'id' | 'priority'>,
 ): Promise<BudgetGoal> =>
   await prisma.$transaction(async (tx) => {
-    await tx.budgetUser.findFirstOrThrow({
+    // TODO: Does this ensure budget exists and user has access to it?
+    await tx.budget.update({
       where: {
-        budgetId,
-        userId,
+        id: budgetId,
+        users: {
+          some: { userId },
+        },
       },
+      data: { freeSavings },
     });
 
     const priority = await tx.budgetGoal.count({

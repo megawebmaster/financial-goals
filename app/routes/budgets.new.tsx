@@ -32,6 +32,7 @@ export async function action({ request }: ActionFunctionArgs) {
     const name = data.get('name');
     const key = data.get('key');
     const currentSavings = data.get('currentSavings');
+    const freeSavings = data.get('freeSavings');
 
     invariant(name, 'Name of the budget is required');
     invariant(typeof name === 'string', 'Name must be a text');
@@ -39,8 +40,14 @@ export async function action({ request }: ActionFunctionArgs) {
     invariant(typeof key === 'string', 'Encryption key must be a text');
     invariant(currentSavings, 'Current savings value required');
     invariant(typeof currentSavings === 'string', 'Current savings a text');
+    invariant(freeSavings, 'Free savings value required');
+    invariant(typeof freeSavings === 'string', 'Free savings a text');
 
-    const budget = await createBudget(userId, currentSavings, { name, key });
+    const budget = await createBudget(
+      userId,
+      { currentSavings, freeSavings },
+      { name, key },
+    );
     return redirect(`/budgets/${budget.budgetId}`);
   } catch (e) {
     console.error('Creating budget failed', e);
@@ -57,10 +64,13 @@ export default function () {
     const formData = new FormData(event.target as HTMLFormElement);
 
     const name = await encrypt(formData.get('name') as string, encryptionKey);
-    const currentSavings = await encrypt('0', encryptionKey);
+    const zeroValue = await encrypt('0', encryptionKey);
     const key = await lockKey(encryptionKey);
 
-    submit({ name, key, currentSavings }, { method: 'post' });
+    submit(
+      { name, key, currentSavings: zeroValue, freeSavings: zeroValue },
+      { method: 'post' },
+    );
   };
 
   return (
