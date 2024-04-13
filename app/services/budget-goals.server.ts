@@ -54,11 +54,12 @@ export const createBudgetGoal = async (
       data: { freeSavings },
     });
 
-    const priority = await tx.budgetGoal.count({
-      where: {
-        budgetId,
-      },
-    });
+    const priority =
+      (await tx.budgetGoal.count({
+        where: {
+          budgetId,
+        },
+      })) + 1;
 
     return tx.budgetGoal.create({
       data: {
