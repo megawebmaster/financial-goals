@@ -24,6 +24,13 @@ export class BudgetPage {
     ).toBeVisible();
   }
 
+  async editGoal(name: string) {
+    await this.getGoal(name).getByRole('link', { name: 'Edit' }).click();
+    await expect(
+      this.page.getByRole('heading', { name: 'Update goal' }),
+    ).toBeVisible();
+  }
+
   moveGoalUp(name: string) {
     return this.getGoal(name).getByRole('button', { name: 'Move up' }).click();
   }

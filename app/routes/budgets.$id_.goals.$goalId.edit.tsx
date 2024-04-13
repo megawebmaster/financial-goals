@@ -4,7 +4,7 @@ import type {
   MetaFunction,
 } from '@remix-run/node';
 import { redirect } from '@remix-run/node';
-import { Form, useLoaderData, useSubmit } from '@remix-run/react';
+import { useLoaderData, useSubmit } from '@remix-run/react';
 import invariant from 'tiny-invariant';
 
 import { authenticator } from '~/services/auth.server';
@@ -15,9 +15,19 @@ import type { FormEvent } from 'react';
 import { encrypt, unlockKey } from '~/services/encryption.client';
 import {
   getBudgetGoal,
+  getBudgetGoals,
   updateBudgetGoal,
 } from '~/services/budget-goals.server';
 import { Goal } from '~/components/budgets/goal';
+import { pipe } from 'ramda';
+import {
+  buildGoalsFiller,
+  encryptBudgetGoal,
+  removeGoal,
+  updateGoal,
+} from '~/services/budget-goals.client';
+import { GoalsList } from '~/components/budgets/goals-list';
+import { getGoalsSum } from '~/helpers/budget-goals';
 
 export const meta: MetaFunction = () => [
   {
@@ -48,6 +58,7 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 
     return {
       budget: await getBudget(userId, budgetId),
+      goals: await getBudgetGoals(userId, budgetId),
       goal: await getBudgetGoal(userId, budgetId, goalId),
     };
   } catch (e) {
@@ -78,15 +89,21 @@ export async function action({ params, request }: ActionFunctionArgs) {
     invariant(!isNaN(goalId), 'Goal ID must be a number');
 
     const data = await request.formData();
-    const name = data.get('name');
-    const requiredAmount = data.get('requiredAmount');
+    const freeSavings = data.get('freeSavings');
+    const goals = data.get('goals');
 
-    invariant(name, 'Name of the goal is required');
-    invariant(typeof name === 'string');
-    invariant(requiredAmount, 'Goal required amount is required');
-    invariant(typeof requiredAmount === 'string');
+    invariant(freeSavings, 'Free budget savings is required');
+    invariant(typeof freeSavings === 'string');
+    invariant(goals, 'Updated goals are required');
+    invariant(typeof goals === 'string');
 
-    await updateBudgetGoal(userId, budgetId, goalId, { name, requiredAmount });
+    await updateBudgetGoal(
+      userId,
+      budgetId,
+      goalId,
+      freeSavings,
+      JSON.parse(goals),
+    );
     return redirect(`/budgets/${budgetId}`);
   } catch (e) {
     // TODO: Handle errors notifications
@@ -95,22 +112,11 @@ export async function action({ params, request }: ActionFunctionArgs) {
   }
 }
 
+const getGoalsCurrentAmount = getGoalsSum('currentAmount');
+
 export default function () {
   const data = useLoaderData<typeof loader>();
   const submit = useSubmit();
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const encryptionKey = await unlockKey(data.budget.key);
-    const formData = new FormData(event.target as HTMLFormElement);
-
-    const name = await encrypt(formData.get('name') as string, encryptionKey);
-    const requiredAmount = await encrypt(
-      formData.get('requiredAmount') as string,
-      encryptionKey,
-    );
-
-    submit({ name, requiredAmount }, { method: 'patch' });
-  };
 
   return (
     <>
@@ -118,29 +124,123 @@ export default function () {
       <Budget budget={data.budget}>
         <Budget.Pending>Decrypting data…</Budget.Pending>
         <Budget.Fulfilled>
-          {(budget) => <h2>Update goal in {budget.name} budget</h2>}
+          {(budget) => {
+            return (
+              <>
+                <h2>Update goal in {budget.name} budget</h2>
+                <GoalsList encryptionKey={data.budget.key} goals={data.goals}>
+                  <GoalsList.Pending>Decrypting goals…</GoalsList.Pending>
+                  <GoalsList.Fulfilled>
+                    {(goals) => {
+                      const handleSubmit = async (
+                        event: FormEvent<HTMLFormElement>,
+                      ) => {
+                        event.preventDefault();
+                        const encryptionKey = await unlockKey(data.budget.key);
+                        const formData = new FormData(
+                          event.target as HTMLFormElement,
+                        );
+                        const name = formData.get('name') as string;
+                        const requiredAmount = parseFloat(
+                          formData.get('requiredAmount') as string,
+                        );
+                        const processGoals = pipe(
+                          updateGoal(data.goal.id, { name, requiredAmount }),
+                          buildGoalsFiller(budget.currentSavings),
+                        );
+
+                        const updatedGoals = processGoals(goals);
+                        const freeSavings =
+                          budget.currentSavings -
+                          getGoalsCurrentAmount(updatedGoals);
+
+                        submit(
+                          {
+                            freeSavings: await encrypt(
+                              freeSavings.toString(10),
+                              encryptionKey,
+                            ),
+                            goals: JSON.stringify(
+                              await Promise.all(
+                                updatedGoals.map((item) =>
+                                  encryptBudgetGoal(item, encryptionKey),
+                                ),
+                              ),
+                            ),
+                          },
+                          { method: 'patch' },
+                        );
+                      };
+
+                      const handleDelete = async (
+                        event: FormEvent<HTMLFormElement>,
+                      ) => {
+                        event.preventDefault();
+                        const encryptionKey = await unlockKey(data.budget.key);
+
+                        const processGoals = pipe(
+                          removeGoal(data.goal.id),
+                          buildGoalsFiller(budget.currentSavings),
+                        );
+
+                        const updatedGoals = processGoals(goals);
+                        const freeSavings =
+                          budget.currentSavings -
+                          getGoalsCurrentAmount(updatedGoals);
+
+                        submit(
+                          {
+                            freeSavings: await encrypt(
+                              freeSavings.toString(10),
+                              encryptionKey,
+                            ),
+                            goals: JSON.stringify(
+                              await Promise.all(
+                                updatedGoals.map((item) =>
+                                  encryptBudgetGoal(item, encryptionKey),
+                                ),
+                              ),
+                            ),
+                          },
+                          {
+                            action: `/budgets/${budget.budgetId}/goals/${data.goal.id}/destroy`,
+                            method: 'post',
+                            replace: true,
+                          },
+                        );
+                      };
+
+                      return (
+                        <>
+                          <Goal
+                            encryptionKey={data.budget.key}
+                            goal={data.goal}
+                          >
+                            <Goal.Pending>Decrypting data…</Goal.Pending>
+                            <Goal.Fulfilled>
+                              {(goal) => (
+                                <BudgetGoalForm
+                                  budget={data.budget}
+                                  goal={goal}
+                                  onSubmit={handleSubmit}
+                                  submit="Update goal!"
+                                />
+                              )}
+                            </Goal.Fulfilled>
+                          </Goal>
+                          <form onSubmit={handleDelete}>
+                            <button type="submit">Delete goal</button>
+                          </form>
+                        </>
+                      );
+                    }}
+                  </GoalsList.Fulfilled>
+                </GoalsList>
+              </>
+            );
+          }}
         </Budget.Fulfilled>
       </Budget>
-      <Goal encryptionKey={data.budget.key} goal={data.goal}>
-        <Goal.Pending>Decrypting data…</Goal.Pending>
-        <Goal.Fulfilled>
-          {(goal) => (
-            <BudgetGoalForm
-              budget={data.budget}
-              goal={goal}
-              onSubmit={handleSubmit}
-              submit="Update goal!"
-            />
-          )}
-        </Goal.Fulfilled>
-      </Goal>
-      <Form
-        action={`/budgets/${data.budget.budgetId}/goals/${data.goal.id}/destroy`}
-        method="post"
-        replace
-      >
-        <button type="submit">Delete goal</button>
-      </Form>
     </>
   );
 }

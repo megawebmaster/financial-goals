@@ -83,21 +83,21 @@ export const test = base.extend<Fixtures, WorkerFixtures>({
     await budgetPage.addGoal();
     await goalForm.name.fill('First goal');
     await goalForm.amount.fill('1000');
-    await goalForm.submit.click();
+    await goalForm.submit();
     await expect(page.getByText('First goal')).toBeVisible();
 
     // Add second goal
     await budgetPage.addGoal();
     await goalForm.name.fill('Second goal');
     await goalForm.amount.fill('500');
-    await goalForm.submit.click();
+    await goalForm.submit();
     await expect(page.getByText('Second goal')).toBeVisible();
 
     // Add third goal
     await budgetPage.addGoal();
     await goalForm.name.fill('Third goal');
     await goalForm.amount.fill('750');
-    await goalForm.submit.click();
+    await goalForm.submit();
     await expect(page.getByText('Third goal')).toBeVisible();
 
     await use(page);

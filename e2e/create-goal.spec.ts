@@ -10,7 +10,7 @@ test('create goal', async ({ budget: page }) => {
   const goalForm = new BudgetGoalForm(page);
   await goalForm.name.fill('First goal');
   await goalForm.amount.fill('1000');
-  await goalForm.submit.click();
+  await goalForm.submit();
 
   await expect(page.getByText('First goal')).toBeVisible();
 });

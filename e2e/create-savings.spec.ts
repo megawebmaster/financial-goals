@@ -16,7 +16,7 @@ test('add savings, then create goal', async ({ budget: page }) => {
   const goalForm = new BudgetGoalForm(page);
   await goalForm.name.fill('First goal');
   await goalForm.amount.fill('2000');
-  await goalForm.submit.click();
+  await goalForm.submit();
   await expect(page.getByText('First goal')).toBeVisible();
 
   await expect(page.getByRole('listitem').nth(0)).toContainText('50%');
@@ -35,13 +35,13 @@ test('add savings, then create multiple goals', async ({ budget: page }) => {
   await budgetPage.addGoal();
   await goalForm.name.fill('First goal');
   await goalForm.amount.fill('1000');
-  await goalForm.submit.click();
+  await goalForm.submit();
   await expect(page.getByText('First goal')).toBeVisible();
 
   await budgetPage.addGoal();
   await goalForm.name.fill('Second goal');
   await goalForm.amount.fill('2000');
-  await goalForm.submit.click();
+  await goalForm.submit();
   await expect(page.getByText('Second goal')).toBeVisible();
 
   await expect(page.getByRole('listitem').nth(0)).toContainText('100%');
@@ -56,7 +56,7 @@ test('create goal, then add savings', async ({ budget: page }) => {
   const goalForm = new BudgetGoalForm(page);
   await goalForm.name.fill('First goal');
   await goalForm.amount.fill('2000');
-  await goalForm.submit.click();
+  await goalForm.submit();
   await expect(page.getByText('First goal')).toBeVisible();
 
   await budgetPage.addSavings();
@@ -75,13 +75,13 @@ test('create multiple goals, then add savings', async ({ budget: page }) => {
   await budgetPage.addGoal();
   await goalForm.name.fill('First goal');
   await goalForm.amount.fill('1000');
-  await goalForm.submit.click();
+  await goalForm.submit();
   await expect(page.getByText('First goal')).toBeVisible();
 
   await budgetPage.addGoal();
   await goalForm.name.fill('Second goal');
   await goalForm.amount.fill('2000');
-  await goalForm.submit.click();
+  await goalForm.submit();
   await expect(page.getByText('Second goal')).toBeVisible();
 
   await budgetPage.addSavings();

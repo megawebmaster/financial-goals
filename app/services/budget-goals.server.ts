@@ -73,36 +73,76 @@ export const updateBudgetGoal = (
   userId: number,
   budgetId: number,
   goalId: number,
-  data: Partial<Omit<BudgetGoal, 'budgetId' | 'id'>>,
+  freeSavings: string,
+  goals: BudgetGoal[],
 ): Promise<BudgetGoal> =>
-  prisma.budgetGoal.update({
-    data,
-    where: {
-      budget: {
+  prisma.$transaction(async (tx) => {
+    // TODO: Does this ensure budget exists and user has access to it?
+    await tx.budget.update({
+      where: {
         id: budgetId,
         users: {
           some: { userId },
         },
       },
-      id: goalId,
-    },
+      data: { freeSavings },
+    });
+
+    await Promise.all(
+      goals.map((goal) =>
+        tx.budgetGoal.update({
+          where: {
+            id: goal.id,
+          },
+          data: getUpdateableGoalFields(goal),
+        }),
+      ),
+    );
+
+    return await tx.budgetGoal.findUniqueOrThrow({ where: { id: goalId } });
   });
 
 export const deleteBudgetGoal = async (
   userId: number,
   budgetId: number,
   goalId: number,
+  freeSavings: string,
+  goals: BudgetGoal[],
 ): Promise<void> => {
-  await prisma.budgetGoal.delete({
-    where: {
-      budget: {
+  await prisma.$transaction(async (tx) => {
+    // TODO: Does this ensure budget exists and user has access to it?
+    await tx.budget.update({
+      where: {
         id: budgetId,
         users: {
           some: { userId },
         },
       },
-      id: goalId,
-    },
+      data: { freeSavings },
+    });
+
+    await tx.budgetGoal.delete({
+      where: {
+        budget: {
+          id: budgetId,
+          users: {
+            some: { userId },
+          },
+        },
+        id: goalId,
+      },
+    });
+
+    await Promise.all(
+      goals.map((goal) =>
+        tx.budgetGoal.update({
+          where: {
+            id: goal.id,
+          },
+          data: getUpdateableGoalFields(goal),
+        }),
+      ),
+    );
   });
 };
 

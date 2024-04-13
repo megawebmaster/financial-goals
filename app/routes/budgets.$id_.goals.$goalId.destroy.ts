@@ -26,7 +26,22 @@ export async function action({ params, request }: ActionFunctionArgs) {
     const goalId = parseInt(params.goalId, 10);
     invariant(!isNaN(goalId), 'Goal ID must be a number');
 
-    await deleteBudgetGoal(userId, budgetId, goalId);
+    const data = await request.formData();
+    const freeSavings = data.get('freeSavings');
+    const goals = data.get('goals');
+
+    invariant(freeSavings, 'Free budget savings is required');
+    invariant(typeof freeSavings === 'string');
+    invariant(goals, 'Updated goals are required');
+    invariant(typeof goals === 'string');
+
+    await deleteBudgetGoal(
+      userId,
+      budgetId,
+      goalId,
+      freeSavings,
+      JSON.parse(goals),
+    );
     return redirect(`/budgets/${budgetId}`);
   } catch (e) {
     console.error('Deleting goal failed', e);

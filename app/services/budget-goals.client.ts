@@ -1,4 +1,4 @@
-import { map, pipe, prop, propEq, reduce, sortBy } from 'ramda';
+import { map, pipe, prop, propEq, reduce, reject, sortBy } from 'ramda';
 import type { BudgetGoal } from '@prisma/client';
 
 import { decrypt, encrypt } from '~/services/encryption.client';
@@ -84,3 +84,17 @@ export const buildGoalsSorting =
       sortBy(prop('priority')),
     )(goals);
   };
+
+export const removeGoal = (goalId: number) => reject(propEq(goalId, 'id'));
+export const updateGoal = (
+  goalId: number,
+  updatedFields: Partial<ClientBudgetGoal>,
+) =>
+  map((goal: ClientBudgetGoal) =>
+    goal.id === goalId
+      ? {
+          ...goal,
+          ...updatedFields,
+        }
+      : goal,
+  );
