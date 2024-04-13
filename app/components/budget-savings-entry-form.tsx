@@ -2,7 +2,7 @@ import type { FormEvent } from 'react';
 import type { BudgetUser } from '@prisma/client';
 import type { ClientBudgetSavingsEntry } from '~/helpers/budget-goals';
 
-type BudgetGoalEntryFormProps = {
+type BudgetSavingsEntryFormProps = {
   budget: BudgetUser;
   entry?: ClientBudgetSavingsEntry;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
@@ -14,7 +14,7 @@ export const BudgetSavingsEntryForm = ({
   entry,
   onSubmit,
   submit,
-}: BudgetGoalEntryFormProps) => {
+}: BudgetSavingsEntryFormProps) => {
   return (
     <form onSubmit={onSubmit}>
       <input type="hidden" name="budgetId" value={budget.budgetId} />

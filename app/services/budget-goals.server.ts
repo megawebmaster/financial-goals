@@ -1,12 +1,10 @@
-import type { BudgetGoal, BudgetGoalEntry } from '@prisma/client';
+import type { BudgetGoal } from '@prisma/client';
 
 import { prisma } from '~/services/db.server';
+import { pick } from 'ramda';
 
 export const getBudgetGoals = (userId: number, budgetId: number) =>
   prisma.budgetGoal.findMany({
-    include: {
-      entries: true,
-    },
     where: {
       budget: {
         id: budgetId,
@@ -27,9 +25,6 @@ export const getBudgetGoal = (
   goalId: number,
 ) =>
   prisma.budgetGoal.findFirstOrThrow({
-    include: {
-      entries: true,
-    },
     where: {
       id: goalId,
       budget: {
@@ -106,85 +101,37 @@ export const deleteBudgetGoal = async (
   });
 };
 
-export const updateBudgetGoalPriority = async (
+const getUpdateableGoalFields = pick<(keyof BudgetGoal)[]>([
+  'name',
+  'requiredAmount',
+  'currentAmount',
+  'priority',
+  'status',
+]);
+
+export const updateBudgetGoalsPriority = async (
   userId: number,
   budgetId: number,
-  goalId: number,
-  priority: number,
-  goalEntries: Pick<BudgetGoalEntry, 'goalId' | 'value'>[],
+  goals: BudgetGoal[],
 ): Promise<void> => {
   await prisma.$transaction(async (tx) => {
-    const goal = await tx.budgetGoal.findFirstOrThrow({
-      select: {
-        priority: true,
-      },
+    // Ensure user has access to the budget
+    await tx.budget.findFirstOrThrow({
       where: {
-        budget: {
-          id: budgetId,
-          users: {
-            some: { userId },
-          },
+        id: budgetId,
+        users: {
+          some: { userId },
         },
-        id: goalId,
       },
     });
 
-    const goalsCount = await tx.budgetGoal.count({
-      where: {
-        budget: {
-          id: budgetId,
-          users: {
-            some: { userId },
-          },
-        },
-        status: 'active',
-      },
-    });
-
-    if (priority < 0) {
-      return;
-    }
-    if (priority > goalsCount) {
-      return;
-    }
-
-    await tx.budgetGoal.updateMany({
-      where: {
-        budgetId,
-        priority: {
-          ...(priority > goal.priority
-            ? { lte: priority, gt: goal.priority }
-            : { lt: goal.priority, gte: priority }),
-        },
-      },
-      data: {
-        priority: {
-          ...(priority > goal.priority ? { decrement: 1 } : { increment: 1 }),
-        },
-      },
-    });
-    await tx.budgetGoal.update({
-      where: {
-        id: goalId,
-      },
-      data: {
-        priority,
-      },
-    });
-    await tx.budgetGoalEntry.deleteMany({
-      where: {
-        goal: {
-          status: 'active',
-        },
-      },
-    });
     await Promise.all(
-      goalEntries.map((entry) =>
-        tx.budgetGoalEntry.create({
-          data: {
-            ...entry,
-            userId, // TODO: How to keep money from correct users?
+      goals.map((goal) =>
+        tx.budgetGoal.update({
+          where: {
+            id: goal.id,
           },
+          data: getUpdateableGoalFields(goal),
         }),
       ),
     );

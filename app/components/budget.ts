@@ -1,12 +1,12 @@
 import type { PromiseFn } from 'react-async';
 import { createInstance } from 'react-async';
-import type { BudgetUser } from '@prisma/client';
 
 import { unlockKey } from '~/services/encryption.client';
-import { decryptBudget } from '~/services/budgets.client';
+import { decryptBudgetWithSavings } from '~/services/budgets.client';
+import type { ClientBudget } from '~/helpers/budget-goals';
 
-const promiseFn: PromiseFn<BudgetUser> = async ({ budget }) =>
-  await decryptBudget(budget, await unlockKey(budget.key));
+const promiseFn: PromiseFn<ClientBudget> = async ({ budget }) =>
+  await decryptBudgetWithSavings(budget, await unlockKey(budget.key));
 
 export const Budget = createInstance(
   {

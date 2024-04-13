@@ -31,13 +31,16 @@ export async function action({ request }: ActionFunctionArgs) {
     const data = await request.formData();
     const name = data.get('name');
     const key = data.get('key');
+    const currentSavings = data.get('currentSavings');
 
     invariant(name, 'Name of the budget is required');
     invariant(typeof name === 'string', 'Name must be a text');
     invariant(key, 'Budget encryption key is required');
     invariant(typeof key === 'string', 'Encryption key must be a text');
+    invariant(currentSavings, 'Current savings value required');
+    invariant(typeof currentSavings === 'string', 'Current savings a text');
 
-    const budget = await createBudget(userId, { name, key });
+    const budget = await createBudget(userId, currentSavings, { name, key });
     return redirect(`/budgets/${budget.budgetId}`);
   } catch (e) {
     console.error('Creating budget failed', e);
@@ -54,9 +57,10 @@ export default function () {
     const formData = new FormData(event.target as HTMLFormElement);
 
     const name = await encrypt(formData.get('name') as string, encryptionKey);
+    const currentSavings = await encrypt('0', encryptionKey);
     const key = await lockKey(encryptionKey);
 
-    submit({ name, key }, { method: 'post' });
+    submit({ name, key, currentSavings }, { method: 'post' });
   };
 
   return (

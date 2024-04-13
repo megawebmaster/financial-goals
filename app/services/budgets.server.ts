@@ -1,27 +1,34 @@
 import type { BudgetUser } from '@prisma/client';
 
 import { prisma } from '~/services/db.server';
+import type { ThenArg } from '~/helpers/types';
 
 export const getBudgets = (userId: number): Promise<BudgetUser[]> =>
   prisma.budgetUser.findMany({ where: { userId } });
 
-export const getBudget = (
-  userId: number,
-  budgetId: number,
-): Promise<BudgetUser> =>
+const fetchBudget = (userId: number, budgetId: number) =>
   prisma.budgetUser.findFirstOrThrow({
+    include: {
+      budget: true,
+    },
     where: {
       budgetId,
       userId,
     },
   });
 
+export type Budget = ThenArg<ReturnType<typeof fetchBudget>>;
+
+export const getBudget = (userId: number, budgetId: number): Promise<Budget> =>
+  fetchBudget(userId, budgetId);
+
 export const createBudget = (
   userId: number,
+  currentSavings: string,
   data: Omit<BudgetUser, 'budgetId' | 'userId' | 'isOwner'>,
 ): Promise<BudgetUser> =>
   prisma.$transaction(async (tx) => {
-    const budget = await tx.budget.create({ data: {} });
+    const budget = await tx.budget.create({ data: { currentSavings } });
     return tx.budgetUser.create({
       data: {
         ...data,

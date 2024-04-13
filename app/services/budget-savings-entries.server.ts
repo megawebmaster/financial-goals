@@ -1,35 +1,52 @@
-import type { BudgetGoalEntry, BudgetSavingsEntry } from '@prisma/client';
+import type { BudgetGoal, BudgetSavingsEntry } from '@prisma/client';
+import { pick } from 'ramda';
 
 import { prisma } from '~/services/db.server';
+
+const getCurrentAmount = pick<(keyof BudgetGoal)[]>(['currentAmount']);
 
 export const createSavingsEntry = async (
   userId: number,
   budgetId: number,
-  value: string,
-  goalEntries: Pick<BudgetGoalEntry, 'goalId' | 'value'>[],
+  currentSavingsValue: string,
+  entryValue: string,
+  goals: BudgetGoal[],
 ): Promise<BudgetSavingsEntry> =>
   await prisma.$transaction(async (tx) => {
-    await tx.budgetUser.findFirstOrThrow({
+    // await tx.budgetUser.findFirstOrThrow({
+    //   where: {
+    //     budgetId,
+    //     userId,
+    //   },
+    // });
+
+    // TODO: Does this update ensure the budget exists?
+    await tx.budget.update({
+      data: {
+        currentSavings: currentSavingsValue,
+      },
       where: {
-        budgetId,
-        userId,
+        id: budgetId,
+        users: {
+          some: { userId },
+        },
       },
     });
 
-    const entry = tx.budgetSavingsEntry.create({
+    const entry = await tx.budgetSavingsEntry.create({
       data: {
-        value,
+        value: entryValue,
         userId,
       },
     });
 
     await Promise.all(
-      goalEntries.map(async (goalEntry) =>
-        tx.budgetGoalEntry.create({
-          data: {
-            ...goalEntry,
-            userId,
+      goals.map(async (goal) =>
+        tx.budgetGoal.update({
+          where: {
+            id: goal.id,
           },
+          data: getCurrentAmount(goal),
         }),
       ),
     );

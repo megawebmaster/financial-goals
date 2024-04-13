@@ -4,9 +4,9 @@ import { createInstance } from 'react-async';
 import { unlockKey } from '~/services/encryption.client';
 import type { GoalWithEntries } from '~/services/budget-goals.client';
 import { decryptBudgetGoal } from '~/services/budget-goals.client';
-import type { BudgetGoalWithEntries } from '~/helpers/budget-goals';
+import type { ClientBudgetGoal } from '~/helpers/budget-goals';
 
-const promiseFn: PromiseFn<BudgetGoalWithEntries[]> = async ({
+const promiseFn: PromiseFn<ClientBudgetGoal[]> = async ({
   encryptionKey,
   goals,
 }) => {

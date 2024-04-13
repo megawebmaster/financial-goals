@@ -10,13 +10,12 @@ import { getBudget } from '~/services/budgets.server';
 import { getBudgetGoals } from '~/services/budget-goals.server';
 import { Budget } from '~/components/budget';
 import { GoalsList } from '~/components/budgets/goals-list';
-import {
-  buildGoalsEntriesBuilder,
-  buildGoalsSorting,
-  clearGoalEntriesAmounts,
-  encryptBudgetGoalEntry,
-} from '~/services/budget-goal-entries.client';
 import { unlockKey } from '~/services/encryption.client';
+import {
+  buildGoalsFiller,
+  buildGoalsSorting,
+  encryptBudgetGoal,
+} from '~/services/budget-goals.client';
 
 export const meta: MetaFunction = () => [
   {
@@ -85,22 +84,22 @@ export default function () {
 
               const goalId = parseInt(formData.get('goalId') as string);
               const priority = parseInt(formData.get('priority') as string);
-              const processGoalsEntries = pipe(
+
+              const processGoals = pipe(
                 buildGoalsSorting(goalId, priority),
-                clearGoalEntriesAmounts,
-                buildGoalsEntriesBuilder(amount),
+                buildGoalsFiller(amount),
               );
 
-              const goalsEntries = await Promise.all(
-                processGoalsEntries(goals).map((entry) =>
-                  encryptBudgetGoalEntry(entry, encryptionKey),
+              const updatedGoals = await Promise.all(
+                processGoals(goals).map((item) =>
+                  encryptBudgetGoal(item, encryptionKey),
                 ),
               );
 
               submit(
-                { priority, goalsEntries: JSON.stringify(goalsEntries) },
+                { goals: JSON.stringify(updatedGoals) },
                 {
-                  action: `/budgets/${data.budget.budgetId}/goals/${goalId}/priority`,
+                  action: `/budgets/${data.budget.budgetId}/goals/priority`,
                   method: 'post',
                 },
               );

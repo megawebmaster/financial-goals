@@ -11,13 +11,12 @@ datasource db {
 }
 
 model User {
-  id          Int                  @id @default(autoincrement())
-  username    String               @unique
-  password    String
-  salt        String
-  budgets     BudgetUser[]         @relation("AccessibleBudgets")
-  savings     BudgetSavingsEntry[] @relation("UserSavingEntries")
-  goalEntries BudgetGoalEntry[]    @relation("UserGoalEntries")
+  id       Int                  @id @default(autoincrement())
+  username String               @unique
+  password String
+  salt     String
+  budgets  BudgetUser[]         @relation("AccessibleBudgets")
+  savings  BudgetSavingsEntry[] @relation("UserSavingEntries")
 }
 
 model BudgetUser {
@@ -34,9 +33,10 @@ model BudgetUser {
 }
 
 model Budget {
-  id    Int          @id @default(autoincrement())
-  users BudgetUser[] @relation("BudgetUsers")
-  goals BudgetGoal[] @relation("BudgetGoals")
+  id             Int          @id @default(autoincrement())
+  users          BudgetUser[] @relation("BudgetUsers")
+  goals          BudgetGoal[] @relation("BudgetGoals")
+  currentSavings String
 }
 
 model BudgetSavingsEntry {
@@ -47,21 +47,12 @@ model BudgetSavingsEntry {
 }
 
 model BudgetGoal {
-  id             Int               @id @default(autoincrement())
+  id             Int    @id @default(autoincrement())
   budgetId       Int
-  budget         Budget            @relation("BudgetGoals", fields: [budgetId], references: [id])
+  budget         Budget @relation("BudgetGoals", fields: [budgetId], references: [id])
   name           String
   requiredAmount String
+  currentAmount  String
   priority       Int
-  status         String            @default("active")
-  entries        BudgetGoalEntry[] @relation("GoalEntries")
-}
-
-model BudgetGoalEntry {
-  id     Int        @id @default(autoincrement())
-  goalId Int
-  goal   BudgetGoal @relation("GoalEntries", fields: [goalId], references: [id])
-  userId Int
-  user   User       @relation("UserGoalEntries", fields: [userId], references: [id], onDelete: Cascade)
-  value  String
+  status         String @default("active")
 }
