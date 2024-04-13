@@ -71,8 +71,10 @@ export default function () {
         {goals.map((goal) => (
           <li key={goal.id}>
             {goal.name} - {goal.requiredAmount} (
-            {Math.round((goal.currentAmount / goal.requiredAmount) * 100)}
-            %){' '}
+            {goal.currentAmount !== 0 &&
+              goal.currentAmount !== goal.requiredAmount &&
+              `${goal.currentAmount}, `}
+            {Math.round((goal.currentAmount / goal.requiredAmount) * 100)}%){' '}
             <a href={`/budgets/${budget.budgetId}/goals/${goal.id}/edit`}>
               Edit
             </a>{' '}
