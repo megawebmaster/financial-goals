@@ -6,10 +6,13 @@ import type {
 } from '@remix-run/node';
 import { redirect } from '@remix-run/node';
 import { Form } from '@remix-run/react';
+import { render } from '@react-email/render';
 
 import { authenticator } from '~/services/auth.server';
 import { storeKeyMaterial } from '~/services/encryption.client';
 import { createUser } from '~/services/user.server';
+import { mailer } from '~/services/mail.server';
+import NewAccount from '~/emails/new-account';
 
 export const meta: MetaFunction = () => [
   {
@@ -26,10 +29,14 @@ export async function loader({ request }: LoaderFunctionArgs) {
 export async function action({ request }: ActionFunctionArgs) {
   try {
     const data = await request.clone().formData();
-    await createUser(
+    const user = await createUser(
       data.get('username') as string,
       data.get('password') as string,
     );
+    await mailer.sendMail({
+      to: user.username,
+      html: render(<NewAccount name={user.username} />),
+    });
   } catch (e) {
     console.error('Unable to create new user', e);
     // TODO: Show user exists?
