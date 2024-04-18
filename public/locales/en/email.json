@@ -1,0 +1,5 @@
+{
+  "new-account.header": "Hello {{name}}!",
+  "new-account.description": "Your new account has been created!",
+  "signature": "Financial Goals app"
+}

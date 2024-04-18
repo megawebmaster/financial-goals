@@ -4,20 +4,32 @@ import type {
   LoaderFunctionArgs,
   MetaFunction,
 } from '@remix-run/node';
-import { Form } from '@remix-run/react';
+import { redirect } from '@remix-run/node';
+import { Form, json } from '@remix-run/react';
+import { useTranslation } from 'react-i18next';
 
 import { authenticator } from '~/services/auth.server';
 import { storeKeyMaterial } from '~/services/encryption.client';
+import i18next from '~/i18n.server';
 
-export const meta: MetaFunction = () => [
+export const meta: MetaFunction<typeof loader> = ({ data }) => [
   {
-    title: 'Financial Goals',
+    title: data?.title || 'Financial Goals',
   },
 ];
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  return await authenticator.isAuthenticated(request, {
-    successRedirect: '/budgets',
+  // If the user is already authenticated redirect to /budgets directly
+  const userId = await authenticator.isAuthenticated(request);
+
+  if (userId) {
+    return redirect('/budgets');
+  }
+
+  const t = await i18next.getFixedT(await i18next.getLocale(request));
+
+  return json({
+    title: t('app.title', { page: t('login.title') }),
   });
 }
 
@@ -29,6 +41,7 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 
 export default function () {
+  const { t } = useTranslation();
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     const data = new FormData(e.currentTarget);
     const password = data.get('password');
@@ -40,8 +53,9 @@ export default function () {
 
   return (
     <>
+      <h1>{t('app.name')}</h1>
       <Form method="post" onSubmit={handleSubmit}>
-        <label htmlFor="username">Username</label>
+        <label htmlFor="username">{t('login.form.username')}</label>
         <input
           id="username"
           type="text"
@@ -49,7 +63,7 @@ export default function () {
           required
           autoComplete="username"
         />
-        <label htmlFor="password">Password</label>
+        <label htmlFor="password">{t('login.form.password')}</label>
         <input
           id="password"
           type="password"
@@ -57,9 +71,9 @@ export default function () {
           required
           autoComplete="password"
         />
-        <button type="submit">Sign in!</button>
+        <button type="submit">{t('login.form.submit')}</button>
       </Form>
-      <a href="/signup">Sign up</a>
+      <a href="/signup">{t('login.form.register')}</a>
     </>
   );
 }

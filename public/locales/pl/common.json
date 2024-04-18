@@ -1,0 +1,14 @@
+{
+  "app.name": "Financial Goals",
+  "app.title": "{{ page }} | Financial Goals",
+  "login.title": "Logowanie",
+  "login.form.username": "E-mail",
+  "login.form.password": "Hasło",
+  "login.form.submit": "Zaloguj się!",
+  "login.form.register": "Rejestracja",
+  "register.title": "Rejestracja",
+  "register.page.title": "Utwórz nowe konto",
+  "register.form.username": "E-mail",
+  "register.form.password": "Hasło",
+  "register.form.submit": "Utwórz konto!"
+}

@@ -5,6 +5,7 @@ import type {
   ClientLoaderFunctionArgs,
 } from '@remix-run/react';
 import { Form, Outlet, useLoaderData } from '@remix-run/react';
+import { useTranslation } from 'react-i18next';
 
 import { authenticator } from '~/services/auth.server';
 import { getUser } from '~/services/user.server';
@@ -54,9 +55,11 @@ export async function clientLoader({ serverLoader }: ClientLoaderFunctionArgs) {
 
 export default function () {
   const data = useLoaderData<typeof loader>();
+  const { t } = useTranslation();
 
   return (
     <>
+      <h1>{t('app.name')}</h1>
       <p>Logged in as: {data.user.username}</p>
       <Form method="post">
         <button type="submit">Log out</button>

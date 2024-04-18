@@ -1,0 +1,14 @@
+{
+  "app.name": "Financial Goals",
+  "app.title": "{{ page }} | Financial Goals",
+  "login.title": "Log in",
+  "login.form.username": "Email",
+  "login.form.password": "Password",
+  "login.form.submit": "Sign in!",
+  "login.form.register": "Sign up",
+  "register.title": "Sign up",
+  "register.page.title": "Sign up for an account",
+  "register.form.username": "Email",
+  "register.form.password": "Password",
+  "register.form.submit": "Create account!"
+}
