@@ -5,7 +5,7 @@ import type {
   MetaFunction,
 } from '@remix-run/node';
 import { redirect } from '@remix-run/node';
-import { Form, json } from '@remix-run/react';
+import { Form } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
 
 import { authenticator } from '~/services/auth.server';
@@ -28,9 +28,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
   const t = await i18next.getFixedT(await i18next.getLocale(request));
 
-  return json({
-    title: t('app.title', { page: t('login.title') }),
-  });
+  return {
+    title: t('login.title'),
+  };
 }
 
 export async function action({ request }: ActionFunctionArgs) {

@@ -1,7 +1,9 @@
 import type { FormEvent } from 'react';
-import type { MetaFunction } from '@remix-run/node';
+import type { LoaderFunctionArgs, MetaFunction } from '@remix-run/node';
 import { useOutletContext, useSubmit } from '@remix-run/react';
 import { pipe } from 'ramda';
+import { useTranslation } from 'react-i18next';
+
 import { unlockKey } from '~/services/encryption.client';
 import {
   buildGoalsFiller,
@@ -9,14 +11,24 @@ import {
   encryptBudgetGoal,
 } from '~/services/budget-goals.client';
 import type { BudgetsLayoutContext } from '~/helpers/budgets';
+import i18next from '~/i18n.server';
 
-export const meta: MetaFunction = () => [
+export const meta: MetaFunction<typeof loader> = ({ data }) => [
   {
-    title: 'Financial Goals - Your budget',
+    title: data?.title || 'Financial Goals',
   },
 ];
 
+export async function loader({ request }: LoaderFunctionArgs) {
+  const t = await i18next.getFixedT(await i18next.getLocale(request));
+
+  return {
+    title: t('budget.view.title'),
+  };
+}
+
 export default function () {
+  const { t } = useTranslation();
   const { budget, goals } = useOutletContext<BudgetsLayoutContext>();
   const submit = useSubmit();
 
@@ -52,21 +64,22 @@ export default function () {
 
   return (
     <>
-      <a href="/budgets">Go back</a>
+      <a href="/budgets">{t('budget.view.back')}</a>
       <h2>
-        Your budget: {budget.name}{' '}
-        <a href={`/budgets/${budget.budgetId}/edit`}>Edit</a>
+        <span>{t('budget.view.name', { name: budget.name })} </span>
+        <a href={`/budgets/${budget.budgetId}/edit`}>{t('budget.view.edit')}</a>
       </h2>
       <p>
-        <strong>Current savings:</strong> {budget.currentSavings}
+        <strong>{t('budget.view.current-savings')}:</strong>{' '}
+        {budget.currentSavings}
       </p>
       {budget.freeSavings > 0 && (
         <p>
-          <strong>Free, unused savings:</strong> {budget.freeSavings}
+          <strong>{t('budget.view.free-savings')}:</strong> {budget.freeSavings}
         </p>
       )}
-      <h3>Goals:</h3>
-      {goals.length === 0 && <p>No goals yet!</p>}
+      <h3>{t('budget.view.goals')}:</h3>
+      {goals.length === 0 && <p>{t('budget.view.list.goals.empty')}</p>}
       <ul>
         {goals.map((goal) => (
           <li key={goal.id}>
@@ -76,24 +89,28 @@ export default function () {
               `${goal.currentAmount}, `}
             {Math.round((goal.currentAmount / goal.requiredAmount) * 100)}%){' '}
             <a href={`/budgets/${budget.budgetId}/goals/${goal.id}/edit`}>
-              Edit
+              {t('budget.view.goals.edit')}
             </a>{' '}
             <form onSubmit={handleSubmit}>
               <input type="hidden" name="goalId" value={goal.id} />
               <input type="hidden" name="priority" value={goal.priority - 1} />
-              <button type="submit">Move up</button>
+              <button type="submit">{t('budget.view.goals.move-up')}</button>
             </form>{' '}
             <form onSubmit={handleSubmit}>
               <input type="hidden" name="goalId" value={goal.id} />
               <input type="hidden" name="priority" value={goal.priority + 1} />
-              <button type="submit">Move down</button>
+              <button type="submit">{t('budget.view.goals.move-down')}</button>
             </form>
           </li>
         ))}
       </ul>
-      <a href={`/budgets/${budget.budgetId}/goals/new`}>Create goal</a>
+      <a href={`/budgets/${budget.budgetId}/goals/new`}>
+        {t('budget.view.goals.create')}
+      </a>
       <br />
-      <a href={`/budgets/${budget.budgetId}/savings/new`}>Add savings</a>
+      <a href={`/budgets/${budget.budgetId}/savings/new`}>
+        {t('budget.view.savings.add')}
+      </a>
     </>
   );
 }

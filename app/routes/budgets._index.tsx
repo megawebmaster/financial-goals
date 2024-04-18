@@ -1,14 +1,16 @@
 import type { LoaderFunctionArgs, MetaFunction } from '@remix-run/node';
 import { redirect } from '@remix-run/node';
 import { Link, useLoaderData } from '@remix-run/react';
+import { useTranslation } from 'react-i18next';
 
 import { authenticator } from '~/services/auth.server';
 import { getBudgets } from '~/services/budgets.server';
 import { BudgetsList } from '~/components/budgets-list';
+import i18next from '~/i18n.server';
 
-export const meta: MetaFunction = () => [
+export const meta: MetaFunction<typeof loader> = ({ data }) => [
   {
-    title: 'Financial Goals - Your budgets',
+    title: data?.title || 'Financial Goals',
   },
 ];
 
@@ -21,23 +23,29 @@ export async function loader({ request }: LoaderFunctionArgs) {
     return redirect('/');
   }
 
+  const t = await i18next.getFixedT(await i18next.getLocale(request));
+
   return {
     budgets: await getBudgets(userId),
+    title: t('budgets.title'),
   };
 }
 
 export default function () {
+  const { t } = useTranslation();
   const data = useLoaderData<typeof loader>();
 
   return (
     <>
-      <p>Your budgets:</p>
+      <p>{t('budgets.page.title')}:</p>
       <BudgetsList budgets={data.budgets}>
-        <BudgetsList.Pending>Decrypting data…</BudgetsList.Pending>
+        <BudgetsList.Pending>
+          {t('budgets.encryption.decrypting')}
+        </BudgetsList.Pending>
         <BudgetsList.Fulfilled>
           {(budgets) => (
             <>
-              {budgets.length === 0 && <p>No budgets yet!</p>}
+              {budgets.length === 0 && <p>{t('budgets.list.empty')}</p>}
               <ul>
                 {budgets?.map((budget) => (
                   <li key={budget.budgetId}>
@@ -49,7 +57,7 @@ export default function () {
           )}
         </BudgetsList.Fulfilled>
       </BudgetsList>
-      <Link to="/budgets/new">Create budget</Link>
+      <Link to="/budgets/new">{t('budgets.list.create')}</Link>
     </>
   );
 }

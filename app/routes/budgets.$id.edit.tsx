@@ -1,7 +1,12 @@
 import type { FormEvent } from 'react';
-import type { ActionFunctionArgs, MetaFunction } from '@remix-run/node';
+import type {
+  ActionFunctionArgs,
+  LoaderFunctionArgs,
+  MetaFunction,
+} from '@remix-run/node';
 import { redirect } from '@remix-run/node';
 import { Form, useOutletContext, useSubmit } from '@remix-run/react';
+import { useTranslation } from 'react-i18next';
 import invariant from 'tiny-invariant';
 
 import { authenticator } from '~/services/auth.server';
@@ -9,12 +14,21 @@ import { encrypt, unlockKey } from '~/services/encryption.client';
 import { updateBudget } from '~/services/budgets.server';
 import { BudgetForm } from '~/components/budget-form';
 import type { BudgetsLayoutContext } from '~/helpers/budgets';
+import i18next from '~/i18n.server';
 
-export const meta: MetaFunction = () => [
+export const meta: MetaFunction<typeof loader> = ({ data }) => [
   {
-    title: 'Financial Goals - Update budget',
+    title: data?.title || 'Financial Goals',
   },
 ];
+
+export async function loader({ request }: LoaderFunctionArgs) {
+  const t = await i18next.getFixedT(await i18next.getLocale(request));
+
+  return {
+    title: t('budget.edit.title'),
+  };
+}
 
 export async function action({ params, request }: ActionFunctionArgs) {
   const userId = await authenticator.isAuthenticated(request);
@@ -47,6 +61,7 @@ export async function action({ params, request }: ActionFunctionArgs) {
 }
 
 export default function () {
+  const { t } = useTranslation();
   const { budget } = useOutletContext<BudgetsLayoutContext>();
   const submit = useSubmit();
 
@@ -62,15 +77,19 @@ export default function () {
 
   return (
     <>
-      <a href={`/budgets/${budget.budgetId}`}>Go back</a>
-      <h2>Update budget</h2>
-      <BudgetForm budget={budget} onSubmit={handleSubmit} submit="Update!" />
+      <a href={`/budgets/${budget.budgetId}`}>{t('budget.edit.back')}</a>
+      <h2>{t('budget.edit.page.title', { name: budget.name })}</h2>
+      <BudgetForm
+        budget={budget}
+        onSubmit={handleSubmit}
+        submit={t('budget.edit.form.submit')}
+      />
       <Form
         action={`/budgets/${budget.budgetId}/destroy`}
         method="post"
         replace
       >
-        <button type="submit">Delete</button>
+        <button type="submit">{t('budget.edit.delete.submit')}</button>
       </Form>
     </>
   );

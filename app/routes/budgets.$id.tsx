@@ -1,6 +1,7 @@
 import type { LoaderFunctionArgs } from '@remix-run/node';
 import { redirect } from '@remix-run/node';
 import { Outlet, useLoaderData } from '@remix-run/react';
+import { useTranslation } from 'react-i18next';
 import invariant from 'tiny-invariant';
 
 import { authenticator } from '~/services/auth.server';
@@ -36,16 +37,19 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 }
 
 export default function () {
+  const { t } = useTranslation();
   const data = useLoaderData<typeof loader>();
 
   return (
     <Budget budget={data.budget}>
       <GoalsList encryptionKey={data.budget.key} goals={data.goals}>
-        <Budget.Pending>Decrypting data…</Budget.Pending>
+        <Budget.Pending>{t('budget.encryption.decrypting')}</Budget.Pending>
         <Budget.Fulfilled>
           {(budget) => (
             <>
-              <GoalsList.Pending>Decrypting goals…</GoalsList.Pending>
+              <GoalsList.Pending>
+                {t('budget.encryption.decrypting')}
+              </GoalsList.Pending>
               <GoalsList.Fulfilled>
                 {(goals) => (
                   <Outlet context={{ budget, goals } as BudgetsLayoutContext} />

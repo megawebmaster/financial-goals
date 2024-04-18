@@ -1,7 +1,12 @@
 import type { FormEvent } from 'react';
-import type { ActionFunctionArgs, MetaFunction } from '@remix-run/node';
+import type {
+  ActionFunctionArgs,
+  LoaderFunctionArgs,
+  MetaFunction,
+} from '@remix-run/node';
 import { redirect } from '@remix-run/node';
 import { useSubmit } from '@remix-run/react';
+import { useTranslation } from 'react-i18next';
 import invariant from 'tiny-invariant';
 
 import { authenticator } from '~/services/auth.server';
@@ -12,12 +17,21 @@ import {
 } from '~/services/encryption.client';
 import { createBudget } from '~/services/budgets.server';
 import { BudgetForm } from '~/components/budget-form';
+import i18next from '~/i18n.server';
 
-export const meta: MetaFunction = () => [
+export const meta: MetaFunction<typeof loader> = ({ data }) => [
   {
-    title: 'Financial Goals - Create budget',
+    title: data?.title || 'Financial Goals',
   },
 ];
+
+export async function loader({ request }: LoaderFunctionArgs) {
+  const t = await i18next.getFixedT(await i18next.getLocale(request));
+
+  return {
+    title: t('budget.new.title'),
+  };
+}
 
 export async function action({ request }: ActionFunctionArgs) {
   const userId = await authenticator.isAuthenticated(request);
@@ -57,6 +71,7 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 
 export default function () {
+  const { t } = useTranslation();
   const submit = useSubmit();
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -75,9 +90,12 @@ export default function () {
 
   return (
     <>
-      <a href="/budgets">Go back</a>
-      <h2>Create new budget</h2>
-      <BudgetForm onSubmit={handleSubmit} submit="Create budget!" />
+      <a href="/budgets">{t('budget.new.back')}</a>
+      <h2>{t('budget.new.page.title')}</h2>
+      <BudgetForm
+        onSubmit={handleSubmit}
+        submit={t('budget.new.form.submit')}
+      />
     </>
   );
 }

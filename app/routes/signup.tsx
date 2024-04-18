@@ -33,7 +33,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const t = await i18next.getFixedT(await i18next.getLocale(request));
 
   return json({
-    title: t('app.title', { page: t('register.title') }),
+    title: t('register.title'),
   });
 }
 

@@ -1,4 +1,8 @@
-import type { ActionFunctionArgs, MetaFunction } from '@remix-run/node';
+import type {
+  ActionFunctionArgs,
+  LoaderFunctionArgs,
+  MetaFunction,
+} from '@remix-run/node';
 import { redirect } from '@remix-run/node';
 import {
   useNavigate,
@@ -8,6 +12,7 @@ import {
 } from '@remix-run/react';
 import type { FormEvent } from 'react';
 import { pipe, propEq } from 'ramda';
+import { useTranslation } from 'react-i18next';
 import invariant from 'tiny-invariant';
 
 import { authenticator } from '~/services/auth.server';
@@ -22,12 +27,21 @@ import {
   removeGoal,
   updateGoal,
 } from '~/services/budget-goals.client';
+import i18next from '~/i18n.server';
 
-export const meta: MetaFunction = () => [
+export const meta: MetaFunction<typeof loader> = ({ data }) => [
   {
-    title: 'Financial Goals - Edit goal',
+    title: data?.title || 'Financial Goals',
   },
 ];
+
+export async function loader({ request }: LoaderFunctionArgs) {
+  const t = await i18next.getFixedT(await i18next.getLocale(request));
+
+  return {
+    title: t('goal.edit.title'),
+  };
+}
 
 export async function action({ params, request }: ActionFunctionArgs) {
   const userId = await authenticator.isAuthenticated(request);
@@ -77,6 +91,7 @@ export async function action({ params, request }: ActionFunctionArgs) {
 const getGoalsCurrentAmount = getGoalsSum('currentAmount');
 
 export default function () {
+  const { t } = useTranslation();
   const { budget, goals } = useOutletContext<BudgetsLayoutContext>();
   const { goalId } = useParams();
   const submit = useSubmit();
@@ -149,16 +164,16 @@ export default function () {
 
   return (
     <>
-      <a href={`/budgets/${budget.budgetId}`}>Go back</a>
-      <h2>Update goal in {budget.name} budget</h2>
+      <a href={`/budgets/${budget.budgetId}`}>{t('goal.edit.back')}</a>
+      <h2>{t('goal.edit.page.title', { budget: budget.name })}</h2>
       <BudgetGoalForm
         budget={budget}
         goal={goal}
         onSubmit={handleSubmit}
-        submit="Update goal!"
+        submit={t('goal.edit.form.submit')}
       />
       <form onSubmit={handleDelete}>
-        <button type="submit">Delete goal</button>
+        <button type="submit">{t('goal.edit.delete.submit')}</button>
       </form>
     </>
   );

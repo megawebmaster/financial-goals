@@ -5,6 +5,7 @@ import type {
 } from '@remix-run/node';
 import { redirect } from '@remix-run/node';
 import { useOutletContext, useSubmit } from '@remix-run/react';
+import { useTranslation } from 'react-i18next';
 import invariant from 'tiny-invariant';
 
 import { authenticator } from '~/services/auth.server';
@@ -21,10 +22,11 @@ import {
 } from '~/services/budget-goals.client';
 import { getGoalsSum } from '~/helpers/budget-goals';
 import type { BudgetsLayoutContext } from '~/helpers/budgets';
+import i18next from '~/i18n.server';
 
-export const meta: MetaFunction = () => [
+export const meta: MetaFunction<typeof loader> = ({ data }) => [
   {
-    title: 'Financial Goals - New entry',
+    title: data?.title || 'Financial Goals',
   },
 ];
 
@@ -36,6 +38,8 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
     return redirect('/');
   }
 
+  const t = await i18next.getFixedT(await i18next.getLocale(request));
+
   try {
     invariant(params.id, 'Budget ID is required');
     invariant(typeof params.id === 'string');
@@ -46,6 +50,7 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
     return {
       budget: await getBudget(userId, budgetId),
       goals: await getBudgetGoals(userId, budgetId),
+      title: t('savings.new.title'),
     };
   } catch (e) {
     // TODO: Handle errors notifications
@@ -98,6 +103,7 @@ export async function action({ params, request }: ActionFunctionArgs) {
 const getGoalsCurrentAmount = getGoalsSum('currentAmount');
 
 export default function () {
+  const { t } = useTranslation();
   const { budget, goals } = useOutletContext<BudgetsLayoutContext>();
   const submit = useSubmit();
 
@@ -141,12 +147,12 @@ export default function () {
 
   return (
     <>
-      <a href={`/budgets/${budget.budgetId}`}>Go back</a>
-      <h2>Add savings to {budget.name} budget</h2>
+      <a href={`/budgets/${budget.budgetId}`}>{t('savings.new.back')}</a>
+      <h2>{t('savings.new.page.title', { budget: budget.name })}</h2>
       <BudgetSavingsEntryForm
         budget={budget}
         onSubmit={handleSubmit}
-        submit="Add savings!"
+        submit={t('savings.new.form.submit')}
       />
     </>
   );

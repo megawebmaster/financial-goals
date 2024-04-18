@@ -1,7 +1,12 @@
-import type { ActionFunctionArgs, MetaFunction } from '@remix-run/node';
+import type {
+  ActionFunctionArgs,
+  LoaderFunctionArgs,
+  MetaFunction,
+} from '@remix-run/node';
 import { redirect } from '@remix-run/node';
 import type { FormEvent } from 'react';
 import { useOutletContext, useSubmit } from '@remix-run/react';
+import { useTranslation } from 'react-i18next';
 import invariant from 'tiny-invariant';
 
 import { authenticator } from '~/services/auth.server';
@@ -10,12 +15,21 @@ import { createBudgetGoal } from '~/services/budget-goals.server';
 import { encrypt, unlockKey } from '~/services/encryption.client';
 import { getCurrentAmount } from '~/helpers/budget-goals';
 import type { BudgetsLayoutContext } from '~/helpers/budgets';
+import i18next from '~/i18n.server';
 
-export const meta: MetaFunction = () => [
+export const meta: MetaFunction<typeof loader> = ({ data }) => [
   {
-    title: 'Financial Goals - New goal',
+    title: data?.title || 'Financial Goals',
   },
 ];
+
+export async function loader({ request }: LoaderFunctionArgs) {
+  const t = await i18next.getFixedT(await i18next.getLocale(request));
+
+  return {
+    title: t('goal.new.title'),
+  };
+}
 
 export async function action({ params, request }: ActionFunctionArgs) {
   const userId = await authenticator.isAuthenticated(request);
@@ -62,6 +76,7 @@ export async function action({ params, request }: ActionFunctionArgs) {
 }
 
 export default function () {
+  const { t } = useTranslation();
   const { budget } = useOutletContext<BudgetsLayoutContext>();
   const submit = useSubmit();
 
@@ -90,12 +105,14 @@ export default function () {
 
   return (
     <>
-      <a href={`/budgets/${budget.budgetId}`}>Go back</a>
-      <h2>Add a goal to {budget.name} budget</h2>
+      <a href={`/budgets/${budget.budgetId}`}>
+        {t('goal.new.back', { budget: budget.name })}
+      </a>
+      <h2>{t('goal.new.page.title', { budget: budget.name })}</h2>
       <BudgetGoalForm
         budget={budget}
         onSubmit={handleSubmit}
-        submit="Create goal!"
+        submit={t('goal.new.form.submit')}
       />
     </>
   );

@@ -1,5 +1,7 @@
 import type { FormEvent } from 'react';
 import type { BudgetUser } from '@prisma/client';
+import { useTranslation } from 'react-i18next';
+
 import type { ClientBudgetGoal } from '~/helpers/budget-goals';
 
 type BudgetGoalFormProps = {
@@ -15,12 +17,14 @@ export const BudgetGoalForm = ({
   onSubmit,
   submit,
 }: BudgetGoalFormProps) => {
+  const { t } = useTranslation();
+
   return (
     <form onSubmit={onSubmit}>
       <input type="hidden" name="budgetId" value={budget.budgetId} />
-      <label htmlFor="name">Goal name</label>
+      <label htmlFor="name">{t('component.goal-form.name')}</label>
       <input id="name" defaultValue={goal?.name} name="name" type="text" />
-      <label htmlFor="amount">Required amount</label>
+      <label htmlFor="amount">{t('component.goal-form.amount')}</label>
       <input
         id="amount"
         defaultValue={goal?.requiredAmount}
