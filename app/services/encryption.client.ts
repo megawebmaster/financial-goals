@@ -109,6 +109,7 @@ class KeyStore {
 
 const store = new KeyStore();
 const KEY_MATERIAL = 'source-material';
+const WRAPPING_KEY = 'wrapping';
 
 export const storeKeyMaterial = async (password: string): Promise<void> => {
   globalThis.sessionStorage.setItem(
@@ -118,7 +119,7 @@ export const storeKeyMaterial = async (password: string): Promise<void> => {
 };
 
 export const buildWrappingKey = async (salt: string) => {
-  if (await store.getKey('wrapping')) {
+  if (await store.getKey(WRAPPING_KEY)) {
     // Key already exists
     return;
   }
@@ -129,32 +130,35 @@ export const buildWrappingKey = async (salt: string) => {
   }
 
   const key = await generateWrappingKey(digest, salt);
-  await store.setKey('wrapping', key);
+  await store.setKey(WRAPPING_KEY, key);
   globalThis.sessionStorage.removeItem(KEY_MATERIAL);
 };
 
 export const clearEncryption = async () => await store.clear();
 
-export const unlockKey = async (encryptedKey: string) => {
+export const unlockKey = async (
+  encryptedKey: string,
+  usages: KeyUsage[] = ['encrypt', 'decrypt'],
+) => {
   const unlocked = await store.getKey(encryptedKey);
   if (unlocked) {
     return unlocked;
   }
 
-  const wrappingKey = await store.getKey('wrapping');
+  const wrappingKey = await store.getKey(WRAPPING_KEY);
 
   if (!wrappingKey) {
     throw new Error('Wrapping key is missing! Invalid encryption usage!');
   }
 
-  const key = await encryptUnlockKey(wrappingKey, encryptedKey);
+  const key = await encryptUnlockKey(wrappingKey, encryptedKey, usages);
   await store.setKey(encryptedKey, key);
 
   return key;
 };
 
 export const lockKey = async (key: CryptoKey) => {
-  const wrappingKey = await store.getKey('wrapping');
+  const wrappingKey = await store.getKey(WRAPPING_KEY);
 
   if (!wrappingKey) {
     throw new Error('Wrapping key is missing! Invalid encryption usage!');

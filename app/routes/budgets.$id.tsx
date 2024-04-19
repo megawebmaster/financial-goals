@@ -1,7 +1,8 @@
 import type { LoaderFunctionArgs } from '@remix-run/node';
 import { redirect } from '@remix-run/node';
-import { Outlet, useLoaderData } from '@remix-run/react';
+import { Outlet, useLoaderData, useOutletContext } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
+import type { User } from '@prisma/client';
 import invariant from 'tiny-invariant';
 
 import type { BudgetsLayoutContext } from '~/helpers/budgets';
@@ -40,6 +41,7 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 export default function () {
   const { t } = useTranslation();
   const data = useLoaderData<typeof loader>();
+  const user = useOutletContext<User>();
 
   return (
     <Budget budget={data.budget}>
@@ -53,7 +55,9 @@ export default function () {
               </GoalsList.Pending>
               <GoalsList.Fulfilled>
                 {(goals) => (
-                  <Outlet context={{ budget, goals } as BudgetsLayoutContext} />
+                  <Outlet
+                    context={{ budget, goals, user } as BudgetsLayoutContext}
+                  />
                 )}
               </GoalsList.Fulfilled>
             </>

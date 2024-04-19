@@ -8,7 +8,7 @@ type NewAccountProps = {
   t: TFunction;
 };
 
-export default function NewAccount({ name, t }: NewAccountProps) {
+export default function NewAccountEmail({ name, t }: NewAccountProps) {
   return (
     <Html>
       <Heading>{t('new-account.header', { name })}</Heading>
@@ -23,4 +23,4 @@ const previewProps: NewAccountProps = {
   name: 'Test',
   t: emailPreviewTranslate,
 };
-NewAccount.PreviewProps = previewProps;
+NewAccountEmail.PreviewProps = previewProps;

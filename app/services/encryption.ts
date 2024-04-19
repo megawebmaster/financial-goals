@@ -58,7 +58,10 @@ export const generateWrappingKey = async (
       hash: 'SHA-512',
     },
     keyMaterial,
-    { name: 'AES-GCM', length: 256 },
+    {
+      name: 'AES-GCM',
+      length: 256,
+    },
     false,
     ['wrapKey', 'unwrapKey'],
   );
@@ -71,7 +74,7 @@ export const encrypt = async (
   const iv = globalThis.crypto.getRandomValues(new Uint8Array(12));
   const encrypted = await globalThis.crypto.subtle.encrypt(
     {
-      name: 'AES-GCM',
+      name: key.algorithm.name,
       iv,
     },
     key,
@@ -92,7 +95,7 @@ export const decrypt = async (
 
   const decrypted = await globalThis.crypto.subtle.decrypt(
     {
-      name: 'AES-GCM',
+      name: key.algorithm.name,
       iv: decodeUrlSafeBase64ToArrayBuffer(iv),
     },
     key,
@@ -105,8 +108,9 @@ export const decrypt = async (
 export const unlockKey = async (
   wrappingKey: CryptoKey,
   encryptedKey: string,
+  usages: KeyUsage[],
 ): Promise<CryptoKey> => {
-  const { key, iv } = JSON.parse(encryptedKey);
+  const { key, iv, algo } = JSON.parse(encryptedKey);
   return await globalThis.crypto.subtle.unwrapKey(
     'jwk',
     decodeUrlSafeBase64ToArrayBuffer(key),
@@ -115,10 +119,26 @@ export const unlockKey = async (
       name: 'AES-GCM',
       iv: decodeUrlSafeBase64ToArrayBuffer(iv),
     },
-    'AES-GCM',
-    false,
-    ['encrypt', 'decrypt'],
+    algo,
+    true,
+    usages,
   );
+};
+
+const getKeyAlgorith = (algo: string): Record<string, string> => {
+  switch (algo) {
+    case 'RSA-OAEP':
+      return {
+        name: algo,
+        hash: 'SHA-512',
+      };
+    case 'AES-GCM':
+      return {
+        name: algo,
+      };
+    default:
+      throw new Error(`Unsupported key type: ${algo}`);
+  }
 };
 
 export const lockKey = async (
@@ -139,26 +159,31 @@ export const lockKey = async (
   return JSON.stringify({
     key: encodeArrayBufferToUrlSafeBase64(wrappedKey),
     iv: encodeArrayBufferToUrlSafeBase64(iv),
+    algo: getKeyAlgorith(key.algorithm.name),
   });
 };
 
-export const importPublicKey = async (
+export const importKey = async (
   exportedKey: string,
-): Promise<CryptoKey> =>
-  await globalThis.crypto.subtle.importKey(
+  usages: KeyUsage[],
+): Promise<CryptoKey> => {
+  const { key, algo } = JSON.parse(exportedKey);
+
+  return await globalThis.crypto.subtle.importKey(
     // @ts-ignore
     'jwk',
-    JSON.parse(exportedKey),
-    {
-      name: 'RSA-OAEP',
-      hash: 'SHA-512',
-    },
-    false,
-    ['encrypt', 'decrypt'],
+    key,
+    algo,
+    true,
+    usages,
   );
+};
 
-export const exportPublicKey = async (key: CryptoKey): Promise<string> => {
+export const exportKey = async (key: CryptoKey): Promise<string> => {
   const exportedKey = await globalThis.crypto.subtle.exportKey('jwk', key);
 
-  return JSON.stringify(exportedKey);
+  return JSON.stringify({
+    key: exportedKey,
+    algo: getKeyAlgorith(key.algorithm.name),
+  });
 };

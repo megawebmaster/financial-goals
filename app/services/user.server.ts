@@ -3,7 +3,7 @@ import type { User } from '@prisma/client';
 import { prisma } from '~/services/db.server';
 import { generateSalt, hash, safeCompare } from '~/services/helpers.server';
 import {
-  exportPublicKey,
+  exportKey,
   generateKeyMaterial,
   generatePKI,
   generateWrappingKey,
@@ -18,7 +18,7 @@ export const login = async (
   const hashedPassword = await hash(password, user.salt);
 
   if (!safeCompare(user.password, hashedPassword)) {
-    throw new Error('Username and/or password is not valid.');
+    throw new Error('Email and/or password is not valid.');
   }
 
   return user;
@@ -51,7 +51,7 @@ export const createUser = async (
       username,
       password: hashed,
       salt,
-      publicKey: await exportPublicKey(pki.publicKey),
+      publicKey: await exportKey(pki.publicKey),
       privateKey: await lockKey(wrappingKey, pki.privateKey),
     },
   });
@@ -59,3 +59,13 @@ export const createUser = async (
 
 export const deleteUser = (userId: number) =>
   prisma.user.delete({ where: { id: userId } });
+
+export const getUserPK = async (email: string): Promise<string> => {
+  const user = await prisma.user.findFirstOrThrow({
+    where: {
+      username: email,
+    },
+  });
+
+  return user.publicKey;
+};

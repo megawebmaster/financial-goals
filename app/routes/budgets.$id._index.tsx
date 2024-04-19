@@ -68,6 +68,9 @@ export default function () {
       <h2>
         <span>{t('budget.view.name', { name: budget.name })} </span>
         <a href={`/budgets/${budget.budgetId}/edit`}>{t('budget.view.edit')}</a>
+        <a href={`/budgets/${budget.budgetId}/share`}>
+          {t('budget.view.share')}
+        </a>
       </h2>
       <p>
         <strong>{t('budget.view.current-savings')}:</strong>{' '}

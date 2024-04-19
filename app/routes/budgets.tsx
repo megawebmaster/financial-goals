@@ -55,20 +55,20 @@ export async function clientLoader({ serverLoader }: ClientLoaderFunctionArgs) {
 }
 
 export default function () {
-  const data = useLoaderData<typeof loader>();
+  const { user } = useLoaderData<typeof loader>();
   const { t } = useTranslation();
 
   return (
     <>
       <h1>{t('app.name')}</h1>
-      <p>Logged in as: {data.user.username}</p>
+      <p>Logged in as: {user.username}</p>
       <Form method="post">
         <button type="submit">Log out</button>
       </Form>
       <Form action="/user/destroy" method="post">
         <button type="submit">Delete account</button>
       </Form>
-      <Outlet context={data} />
+      <Outlet context={user} />
     </>
   );
 }

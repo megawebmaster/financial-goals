@@ -5,7 +5,7 @@ export class LoginForm {
   public readonly password: Locator;
 
   constructor(private readonly page: Page) {
-    this.login = page.getByLabel('Username');
+    this.login = page.getByLabel('Email');
     this.password = page.getByLabel('Password');
   }
 

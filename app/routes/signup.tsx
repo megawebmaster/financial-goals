@@ -13,7 +13,8 @@ import { authenticator } from '~/services/auth.server';
 import { storeKeyMaterial } from '~/services/encryption.client';
 import { createUser } from '~/services/user.server';
 import { mailer } from '~/services/mail.server';
-import NewAccount from '~/emails/new-account';
+import { LOGIN_ROUTE } from '~/routes';
+import NewAccountEmail from '~/emails/new-account-email';
 import i18next from '~/i18n.server';
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => [
@@ -50,7 +51,8 @@ export async function action({ request }: ActionFunctionArgs) {
     );
     await mailer.sendMail({
       to: user.username,
-      html: render(<NewAccount name={user.username} t={t} />),
+      subject: t('new-account.subject'),
+      html: render(<NewAccountEmail name={user.username} t={t} />),
     });
   } catch (e) {
     console.error('Unable to create new user', e);
@@ -82,10 +84,10 @@ export default function () {
         <label htmlFor="username">{t('register.form.username')}</label>
         <input
           id="username"
-          type="text"
+          type="email"
           name="username"
           required
-          autoComplete="username"
+          autoComplete="email"
         />
         <label htmlFor="password">{t('register.form.password')}</label>
         <input

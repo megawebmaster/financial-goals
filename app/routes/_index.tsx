@@ -59,10 +59,10 @@ export default function () {
         <label htmlFor="username">{t('login.form.username')}</label>
         <input
           id="username"
-          type="text"
+          type="email"
           name="username"
           required
-          autoComplete="username"
+          autoComplete="email"
         />
         <label htmlFor="password">{t('login.form.password')}</label>
         <input

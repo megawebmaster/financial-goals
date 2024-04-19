@@ -32,6 +32,7 @@
     "@remix-run/node": "^2.4.0",
     "@remix-run/react": "^2.4.0",
     "@remix-run/serve": "^2.4.0",
+    "date-fns": "^3.6.0",
     "http-status-codes": "^2.3.0",
     "i18next": "^23.11.2",
     "i18next-browser-languagedetector": "^7.2.1",

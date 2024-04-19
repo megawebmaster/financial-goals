@@ -1,7 +1,12 @@
-import type { Budget as BaseBudget, BudgetUser } from '@prisma/client';
+import type {
+  Budget as BaseBudget,
+  BudgetInvitation,
+  BudgetUser,
+} from '@prisma/client';
+import { addDays } from 'date-fns';
 
-import { prisma } from '~/services/db.server';
 import type { ThenArg } from '~/helpers/types';
+import { prisma } from '~/services/db.server';
 
 export const getBudgets = (userId: number): Promise<BudgetUser[]> =>
   prisma.budgetUser.findMany({ where: { userId } });
@@ -72,4 +77,23 @@ export const deleteBudget = (userId: number, budgetId: number): Promise<void> =>
     if (usersCount === 0) {
       await tx.budget.delete({ where: { id: budgetId } });
     }
+  });
+
+export const shareBudget = (
+  userId: number,
+  budgetId: number,
+  username: string,
+  key: string,
+): Promise<BudgetInvitation> =>
+  prisma.$transaction(async (tx) => {
+    await fetchBudget(userId, budgetId);
+    const user = await tx.user.findFirstOrThrow({ where: { username } });
+    return tx.budgetInvitation.create({
+      data: {
+        budgetId,
+        key,
+        userId: user.id,
+        expiresAt: addDays(new Date(), 3),
+      },
+    });
   });

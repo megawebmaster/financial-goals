@@ -34,7 +34,7 @@ const createAccount = async (
 
   const signUpPage = await browser.newPage();
   await signUpPage.goto('/signup');
-  await signUpPage.getByLabel('Username').fill(username);
+  await signUpPage.getByLabel('Email').fill(username);
   await signUpPage.getByLabel('Password').fill(password);
   await signUpPage.getByRole('button', { name: 'Create account!' }).click();
   await expect(signUpPage.getByText(`Logged in as: ${username}`)).toBeVisible();
