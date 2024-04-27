@@ -2,6 +2,13 @@ import type { User } from '@prisma/client';
 
 import { prisma } from '~/services/db.server';
 import { generateSalt, hash, safeCompare } from '~/services/helpers.server';
+import {
+  exportPublicKey,
+  generateKeyMaterial,
+  generatePKI,
+  generateWrappingKey,
+  lockKey,
+} from '~/services/encryption';
 
 export const login = async (
   username: string,
@@ -33,11 +40,19 @@ export const createUser = async (
     throw new Error('User already exists!');
   }
 
+  const pki = await generatePKI();
+  const wrappingKey = await generateWrappingKey(
+    await generateKeyMaterial(password),
+    salt,
+  );
+
   return prisma.user.create({
     data: {
       username,
       password: hashed,
       salt,
+      publicKey: await exportPublicKey(pki.publicKey),
+      privateKey: await lockKey(wrappingKey, pki.privateKey),
     },
   });
 };

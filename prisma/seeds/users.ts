@@ -1,13 +1,5 @@
-import { prisma } from '~/services/db.server';
-import { generateSalt, hash } from '~/services/helpers.server';
+import { createUser } from '~/services/user.server';
 
 export async function seedUsers() {
-  const salt = generateSalt();
-  await prisma.user.create({
-    data: {
-      username: 'test',
-      password: await hash('test', salt),
-      salt,
-    },
-  });
+  await createUser('test@example.com', 'test');
 }

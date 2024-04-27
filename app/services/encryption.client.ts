@@ -1,10 +1,12 @@
 import {
-  decodeUrlSafeBase64ToArrayBuffer,
-  encodeArrayBufferToUrlSafeBase64,
-} from '~/helpers/encoding';
-
-const encoder = new TextEncoder();
-const decoder = new TextDecoder();
+  decrypt,
+  encrypt,
+  generateEncryptionKey,
+  generateKeyMaterial,
+  generateWrappingKey,
+  lockKey as encryptLockKey,
+  unlockKey as encryptUnlockKey,
+} from '~/services/encryption';
 
 class KeyStore {
   private db?: IDBDatabase;
@@ -109,22 +111,11 @@ const store = new KeyStore();
 const KEY_MATERIAL = 'source-material';
 
 export const storeKeyMaterial = async (password: string): Promise<void> => {
-  const digest = await window.crypto.subtle.digest(
-    'SHA-512',
-    encoder.encode(password),
+  globalThis.sessionStorage.setItem(
+    KEY_MATERIAL,
+    await generateKeyMaterial(password),
   );
-  window.sessionStorage.setItem(KEY_MATERIAL, decoder.decode(digest));
 };
-
-export const generateEncryptionKey = async (): Promise<CryptoKey> =>
-  await window.crypto.subtle.generateKey(
-    {
-      name: 'AES-GCM',
-      length: 256,
-    },
-    true,
-    ['encrypt', 'decrypt'],
-  );
 
 export const buildWrappingKey = async (salt: string) => {
   if (await store.getKey('wrapping')) {
@@ -137,27 +128,9 @@ export const buildWrappingKey = async (salt: string) => {
     throw new Error('Unable to build wrapping key!');
   }
 
-  const keyMaterial = await window.crypto.subtle.importKey(
-    'raw',
-    encoder.encode(digest),
-    { name: 'PBKDF2' },
-    false,
-    ['deriveBits', 'deriveKey'],
-  );
-  const key = await window.crypto.subtle.deriveKey(
-    {
-      name: 'PBKDF2',
-      salt: encoder.encode(salt),
-      iterations: 100000,
-      hash: 'SHA-256',
-    },
-    keyMaterial,
-    { name: 'AES-KW', length: 256 },
-    false,
-    ['wrapKey', 'unwrapKey'],
-  );
+  const key = await generateWrappingKey(digest, salt);
   await store.setKey('wrapping', key);
-  window.sessionStorage.removeItem(KEY_MATERIAL);
+  globalThis.sessionStorage.removeItem(KEY_MATERIAL);
 };
 
 export const clearEncryption = async () => await store.clear();
@@ -174,15 +147,7 @@ export const unlockKey = async (encryptedKey: string) => {
     throw new Error('Wrapping key is missing! Invalid encryption usage!');
   }
 
-  const key = await window.crypto.subtle.unwrapKey(
-    'raw',
-    decodeUrlSafeBase64ToArrayBuffer(encryptedKey),
-    wrappingKey,
-    'AES-KW',
-    'AES-GCM',
-    false,
-    ['encrypt', 'decrypt'],
-  );
+  const key = await encryptUnlockKey(wrappingKey, encryptedKey);
   await store.setKey(encryptedKey, key);
 
   return key;
@@ -195,47 +160,7 @@ export const lockKey = async (key: CryptoKey) => {
     throw new Error('Wrapping key is missing! Invalid encryption usage!');
   }
 
-  const wrappedKey = await window.crypto.subtle.wrapKey(
-    'raw',
-    key,
-    wrappingKey,
-    'AES-KW',
-  );
-
-  return encodeArrayBufferToUrlSafeBase64(wrappedKey);
+  return await encryptLockKey(wrappingKey, key);
 };
 
-export const encrypt = async (
-  value: string,
-  key: CryptoKey,
-): Promise<string> => {
-  const iv = await window.crypto.getRandomValues(new Uint8Array(12));
-  const encrypted = await window.crypto.subtle.encrypt(
-    { name: 'AES-GCM', iv },
-    key,
-    encoder.encode(value),
-  );
-
-  return JSON.stringify({
-    value: encodeArrayBufferToUrlSafeBase64(encrypted),
-    iv: encodeArrayBufferToUrlSafeBase64(iv),
-  });
-};
-
-export const decrypt = async (
-  encrypted: string,
-  key: CryptoKey,
-): Promise<string> => {
-  const { value, iv } = JSON.parse(encrypted);
-
-  const decrypted = await window.crypto.subtle.decrypt(
-    {
-      name: 'AES-GCM',
-      iv: decodeUrlSafeBase64ToArrayBuffer(iv),
-    },
-    key,
-    decodeUrlSafeBase64ToArrayBuffer(value),
-  );
-
-  return decoder.decode(decrypted);
-};
+export { encrypt, decrypt, generateEncryptionKey };

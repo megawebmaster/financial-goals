@@ -77,13 +77,16 @@ export default function () {
     event.preventDefault();
     const encryptionKey = await generateEncryptionKey();
     const formData = new FormData(event.target as HTMLFormElement);
-
-    const name = await encrypt(formData.get('name') as string, encryptionKey);
+    const name = formData.get('name') as string;
     const zeroValue = await encrypt('0', encryptionKey);
-    const key = await lockKey(encryptionKey);
 
     submit(
-      { name, key, currentSavings: zeroValue, freeSavings: zeroValue },
+      {
+        name: await encrypt(name, encryptionKey),
+        key: await lockKey(encryptionKey),
+        currentSavings: zeroValue,
+        freeSavings: zeroValue,
+      },
       { method: 'post' },
     );
   };
