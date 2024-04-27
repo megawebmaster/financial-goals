@@ -28,6 +28,7 @@ export const createSavingsEntry = async (
       data: {
         value: entryValue,
         userId,
+        budgetId,
       },
     });
 
