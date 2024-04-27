@@ -79,7 +79,7 @@ export default function () {
         </p>
       )}
       <h3>{t('budget.view.goals')}:</h3>
-      {goals.length === 0 && <p>{t('budget.view.list.goals.empty')}</p>}
+      {goals.length === 0 && <p>{t('budget.view.goals.empty')}</p>}
       <ul>
         {goals.map((goal) => (
           <li key={goal.id}>
