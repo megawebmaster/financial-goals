@@ -60,7 +60,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
   return await authenticator.authenticate('user-pass', request, {
     successRedirect: '/budgets',
-    failureRedirect: '/',
+    failureRedirect: LOGIN_ROUTE,
   });
 }
 

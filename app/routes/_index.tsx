@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 
 import { authenticator } from '~/services/auth.server';
 import { storeKeyMaterial } from '~/services/encryption.client';
+import { LOGIN_ROUTE } from '~/routes';
 import i18next from '~/i18n.server';
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => [
@@ -36,7 +37,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 export async function action({ request }: ActionFunctionArgs) {
   return await authenticator.authenticate('user-pass', request, {
     successRedirect: '/budgets',
-    failureRedirect: '/',
+    failureRedirect: LOGIN_ROUTE,
   });
 }
 

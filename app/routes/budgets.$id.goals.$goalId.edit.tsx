@@ -27,6 +27,7 @@ import {
   removeGoal,
   updateGoal,
 } from '~/services/budget-goals.client';
+import { LOGIN_ROUTE } from '~/routes';
 import i18next from '~/i18n.server';
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => [
@@ -48,7 +49,7 @@ export async function action({ params, request }: ActionFunctionArgs) {
 
   if (!userId) {
     // TODO: Handle errors notifications
-    return redirect('/');
+    return redirect(LOGIN_ROUTE);
   }
 
   try {
@@ -84,7 +85,7 @@ export async function action({ params, request }: ActionFunctionArgs) {
   } catch (e) {
     // TODO: Handle errors notifications
     console.error('Updating goal failed', e);
-    return redirect('/');
+    return redirect(`/budgets/${params.id}/goals/${params.goalId}/edit`);
   }
 }
 

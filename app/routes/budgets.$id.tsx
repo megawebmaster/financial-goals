@@ -4,19 +4,20 @@ import { Outlet, useLoaderData } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
 import invariant from 'tiny-invariant';
 
+import type { BudgetsLayoutContext } from '~/helpers/budgets';
 import { authenticator } from '~/services/auth.server';
 import { getBudget } from '~/services/budgets.server';
 import { getBudgetGoals } from '~/services/budget-goals.server';
 import { Budget } from '~/components/budget';
 import { GoalsList } from '~/components/budgets/goals-list';
-import type { BudgetsLayoutContext } from '~/helpers/budgets';
+import { LOGIN_ROUTE } from '~/routes';
 
 export async function loader({ params, request }: LoaderFunctionArgs) {
   const userId = await authenticator.isAuthenticated(request);
 
   if (!userId) {
     // TODO: Handle errors notifications
-    return redirect('/');
+    return redirect(LOGIN_ROUTE);
   }
 
   try {

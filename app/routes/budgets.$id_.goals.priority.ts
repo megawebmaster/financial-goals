@@ -4,13 +4,14 @@ import invariant from 'tiny-invariant';
 
 import { authenticator } from '~/services/auth.server';
 import { updateBudgetGoalsPriority } from '~/services/budget-goals.server';
+import { LOGIN_ROUTE } from '~/routes';
 
 export async function action({ params, request }: ActionFunctionArgs) {
   const userId = await authenticator.isAuthenticated(request);
 
   if (!userId) {
     // TODO: Handle errors notifications
-    return redirect('/');
+    return redirect(LOGIN_ROUTE);
   }
 
   try {

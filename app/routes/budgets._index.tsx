@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { authenticator } from '~/services/auth.server';
 import { getBudgets } from '~/services/budgets.server';
 import { BudgetsList } from '~/components/budgets-list';
+import { LOGIN_ROUTE } from '~/routes';
 import i18next from '~/i18n.server';
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => [
@@ -20,7 +21,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
   if (!userId) {
     // TODO: Handle errors notifications
-    return redirect('/');
+    return redirect(LOGIN_ROUTE);
   }
 
   const t = await i18next.getFixedT(await i18next.getLocale(request));

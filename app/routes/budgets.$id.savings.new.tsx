@@ -1,3 +1,4 @@
+import type { FormEvent } from 'react';
 import type {
   ActionFunctionArgs,
   LoaderFunctionArgs,
@@ -8,9 +9,9 @@ import { useOutletContext, useSubmit } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
 import invariant from 'tiny-invariant';
 
+import type { BudgetsLayoutContext } from '~/helpers/budgets';
 import { authenticator } from '~/services/auth.server';
 import { getBudget } from '~/services/budgets.server';
-import type { FormEvent } from 'react';
 import { encrypt, unlockKey } from '~/services/encryption.client';
 import { getBudgetGoals } from '~/services/budget-goals.server';
 import { BudgetSavingsEntryForm } from '~/components/budget-savings-entry-form';
@@ -21,7 +22,7 @@ import {
   encryptBudgetGoal,
 } from '~/services/budget-goals.client';
 import { getGoalsSum } from '~/helpers/budget-goals';
-import type { BudgetsLayoutContext } from '~/helpers/budgets';
+import { LOGIN_ROUTE } from '~/routes';
 import i18next from '~/i18n.server';
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => [
@@ -35,7 +36,7 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 
   if (!userId) {
     // TODO: Handle errors notifications
-    return redirect('/');
+    return redirect(LOGIN_ROUTE);
   }
 
   const t = await i18next.getFixedT(await i18next.getLocale(request));
@@ -63,7 +64,7 @@ export async function action({ params, request }: ActionFunctionArgs) {
 
   if (!userId) {
     // TODO: Handle errors notifications
-    return redirect('/');
+    return redirect(LOGIN_ROUTE);
   }
 
   try {

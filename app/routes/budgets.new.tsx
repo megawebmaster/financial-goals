@@ -17,6 +17,7 @@ import {
 } from '~/services/encryption.client';
 import { createBudget } from '~/services/budgets.server';
 import { BudgetForm } from '~/components/budget-form';
+import { LOGIN_ROUTE } from '~/routes';
 import i18next from '~/i18n.server';
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => [
@@ -38,7 +39,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
   if (!userId) {
     // TODO: Handle errors notifications
-    return redirect('/');
+    return redirect(LOGIN_ROUTE);
   }
 
   try {

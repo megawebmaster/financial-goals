@@ -9,11 +9,12 @@ import { Form, useOutletContext, useSubmit } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
 import invariant from 'tiny-invariant';
 
+import type { BudgetsLayoutContext } from '~/helpers/budgets';
 import { authenticator } from '~/services/auth.server';
 import { encrypt, unlockKey } from '~/services/encryption.client';
 import { updateBudget } from '~/services/budgets.server';
 import { BudgetForm } from '~/components/budget-form';
-import type { BudgetsLayoutContext } from '~/helpers/budgets';
+import { LOGIN_ROUTE } from '~/routes';
 import i18next from '~/i18n.server';
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => [
@@ -35,7 +36,7 @@ export async function action({ params, request }: ActionFunctionArgs) {
 
   if (!userId) {
     // TODO: Handle errors notifications
-    return redirect('/');
+    return redirect(LOGIN_ROUTE);
   }
 
   try {

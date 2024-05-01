@@ -3,6 +3,7 @@ import { redirect } from '@remix-run/node';
 
 import { authenticator } from '~/services/auth.server';
 import { deleteUser } from '~/services/user.server';
+import { LOGIN_ROUTE } from '~/routes';
 
 export async function action({ request }: ActionFunctionArgs) {
   // If the user is not already authenticated redirect to / directly
@@ -10,7 +11,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
   if (!userId) {
     // TODO: Handle errors notifications
-    return redirect('/');
+    return redirect(LOGIN_ROUTE);
   }
 
   try {

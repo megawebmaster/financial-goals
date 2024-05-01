@@ -13,6 +13,7 @@ import {
   buildWrappingKey,
   clearEncryption,
 } from '~/services/encryption.client';
+import { LOGIN_ROUTE } from '~/routes';
 
 export async function action({ request }: ActionFunctionArgs) {
   return await authenticator.logout(request, {
@@ -31,7 +32,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
   if (!userId) {
     // TODO: Handle errors notifications
-    return redirect('/');
+    return redirect(LOGIN_ROUTE);
   }
 
   try {
