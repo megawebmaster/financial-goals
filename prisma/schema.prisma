@@ -41,7 +41,7 @@ model BudgetInvitation {
   budget    Budget   @relation("BudgetInvitations", fields: [budgetId], references: [id], onDelete: Restrict)
   userId    Int
   user      User     @relation("BudgetInvitations", fields: [userId], references: [id], onDelete: Cascade)
-  key       String
+  data      String
   expiresAt DateTime
 
   @@unique([budgetId, userId])

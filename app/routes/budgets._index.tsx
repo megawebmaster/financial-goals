@@ -38,6 +38,7 @@ export default function () {
 
   return (
     <>
+      <a href="/budgets/invitations">Invitations</a>
       <p>{t('budgets.page.title')}:</p>
       <BudgetsList budgets={data.budgets}>
         <BudgetsList.Pending>

@@ -7,4 +7,8 @@ export class BudgetsPage {
   createBudget() {
     return this.page.getByRole('link', { name: 'Create budget' }).click();
   }
+
+  visitInvitations() {
+    return this.page.getByRole('link', { name: 'Invitations' }).click();
+  }
 }

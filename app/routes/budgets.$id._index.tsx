@@ -66,11 +66,17 @@ export default function () {
     <>
       <a href="/budgets">{t('budget.view.back')}</a>
       <h2>
-        <span>{t('budget.view.name', { name: budget.name })} </span>
+        <span>
+          {t(`budget.view.${budget.isOwner ? 'owner' : 'shared'}.name`, {
+            name: budget.name,
+          })}
+        </span>
         <a href={`/budgets/${budget.budgetId}/edit`}>{t('budget.view.edit')}</a>
-        <a href={`/budgets/${budget.budgetId}/share`}>
-          {t('budget.view.share')}
-        </a>
+        {budget.isOwner && (
+          <a href={`/budgets/${budget.budgetId}/share`}>
+            {t('budget.view.share')}
+          </a>
+        )}
       </h2>
       <p>
         <strong>{t('budget.view.current-savings')}:</strong>{' '}

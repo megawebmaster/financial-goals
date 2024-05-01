@@ -1,16 +1,7 @@
-import type {
-  BudgetGoal,
-  BudgetSavingsEntry,
-  BudgetUser,
-} from '@prisma/client';
+import type { BudgetGoal, BudgetSavingsEntry } from '@prisma/client';
 import { reduce } from 'ramda';
 
 import type { PickFieldsOfType } from '~/helpers/types';
-
-export type ClientBudget = BudgetUser & {
-  currentSavings: number;
-  freeSavings: number;
-};
 
 export type ClientBudgetGoal = Omit<
   BudgetGoal,

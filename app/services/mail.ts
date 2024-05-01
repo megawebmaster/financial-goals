@@ -1,6 +1,6 @@
 import { initializeI18n } from '~/i18n.server';
 
-export const BASE_URL = process.env.PUBLIC_URL ?? '';
+export const BASE_URL = process?.env.PUBLIC_URL ?? '';
 
 export const DATE_TIME_FORMAT = {
   year: 'numeric',

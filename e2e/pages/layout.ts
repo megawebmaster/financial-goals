@@ -5,7 +5,7 @@ export class Layout {
   private readonly logoutButton: Locator;
 
   constructor(private readonly page: Page) {
-    this.logoutButton = page.getByRole('button', { name: 'Logout' });
+    this.logoutButton = page.getByRole('button', { name: 'Log out' });
   }
 
   async logout() {

@@ -53,14 +53,22 @@ export async function action({ params, request }: ActionFunctionArgs) {
 
     const data = await request.formData();
     const username = data.get('username');
-    const key = data.get('key');
+    const invitationData = data.get('data');
 
     invariant(username, 'Name of the user is required');
     invariant(typeof username === 'string', 'Name of the user must be a text');
-    invariant(key, 'Budget encryption key is required');
-    invariant(typeof key === 'string', 'Encryption key must be a text');
+    invariant(invitationData, 'Invitation data is required');
+    invariant(
+      typeof invitationData === 'string',
+      'Invitation data must be a text',
+    );
 
-    const invitation = await shareBudget(userId, budgetId, username, key);
+    const invitation = await shareBudget(
+      userId,
+      budgetId,
+      username,
+      invitationData,
+    );
 
     const author = await getUser(userId);
     const t = await i18next.getFixedT(
@@ -91,7 +99,7 @@ export async function action({ params, request }: ActionFunctionArgs) {
 
 export default function () {
   const { t } = useTranslation();
-  const { budget } = useOutletContext<BudgetsLayoutContext>();
+  const { budget, user } = useOutletContext<BudgetsLayoutContext>();
   const submit = useSubmit();
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -111,11 +119,16 @@ export default function () {
     const result = await response.json();
     const publicKey = await importKey(result.key, ['encrypt']);
     const encryptionKey = await exportKey(await unlockKey(budget.key));
+    const data = JSON.stringify({
+      key: encryptionKey,
+      budget: budget.name,
+      user: user.username,
+    });
 
     submit(
       {
         username: formData.get('username') as string,
-        key: await encrypt(encryptionKey, publicKey),
+        data: await encrypt(data, publicKey),
       },
       { method: 'post' },
     );

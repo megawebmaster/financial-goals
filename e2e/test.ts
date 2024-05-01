@@ -17,10 +17,12 @@ type FixtureAccount = {
 
 type Fixtures = {
   account: FixtureAccount;
+  account2: FixtureAccount;
   loggedIn: Page;
   budget: Page;
   goals: Page;
   savings: Page;
+  sharedBudget: Page;
 };
 type WorkerFixtures = {};
 
@@ -56,6 +58,12 @@ const login = async (page: Page, account: FixtureAccount) => {
 export const test = base.extend<Fixtures, WorkerFixtures>({
   account: async ({ browser, baseURL }, use, workerInfo) => {
     const username = 'test-user-' + workerInfo.workerIndex + '@example.com';
+    const password = await createAccount(browser, username);
+    await use({ username, password });
+  },
+
+  account2: async ({ browser, baseURL }, use, workerInfo) => {
+    const username = 'test-user-2-' + workerInfo.workerIndex + '@example.com';
     const password = await createAccount(browser, username);
     await use({ username, password });
   },
@@ -115,6 +123,20 @@ export const test = base.extend<Fixtures, WorkerFixtures>({
     await budgetPage.addSavings();
     await savingsForm.amount.fill('2000');
     await savingsForm.submit();
+
+    await use(page);
+  },
+
+  sharedBudget: async ({ savings: page, account2 }, use) => {
+    const budgetPage = new BudgetPage(page);
+    await budgetPage.share();
+    const shareForm = new BudgetShareForm(page);
+    await shareForm.username.fill(account2.username);
+    await shareForm.submit();
+
+    const layout = new Layout(page);
+    await layout.logout();
+    await login(page, account2);
 
     await use(page);
   },

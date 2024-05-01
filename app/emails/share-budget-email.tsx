@@ -25,7 +25,7 @@ export default function ShareBudgetEmail({
     <Html>
       <Heading>{t('share-budget.header', { name: recipientName })}</Heading>
       <Text>{t('share-budget.description', { name: authorName })}</Text>
-      <Button href={`${BASE_URL}/budgets/accept-invitation/${token}`}>
+      <Button href={`${BASE_URL}/budgets/invitations/${token}`}>
         {t('share-budget.accept')}
       </Button>
       <Text>
