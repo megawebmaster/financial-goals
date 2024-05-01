@@ -12,8 +12,8 @@ test('edit goal and recalculate current savings', async ({ savings: page }) => {
   await goalForm.submit();
 
   await expect(page.getByText('New goal')).toBeVisible();
-  await expect(page.getByRole('listitem')).toHaveCount(3);
-  await expect(page.getByRole('listitem').nth(0)).toContainText('100%');
-  await expect(page.getByRole('listitem').nth(1)).toContainText('0%');
-  await expect(page.getByRole('listitem').nth(2)).toContainText('0%');
+  await expect(budgetPage.goals).toHaveCount(3);
+  await expect(budgetPage.goals.nth(0)).toContainText('100%');
+  await expect(budgetPage.goals.nth(1)).toContainText('0%');
+  await expect(budgetPage.goals.nth(2)).toContainText('0%');
 });

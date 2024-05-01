@@ -4,6 +4,8 @@ import { expect } from '../test';
 export class BudgetPage {
   public readonly currentSavings: Locator;
   public readonly freeSavings: Locator;
+  public readonly goals: Locator;
+
   private readonly addGoalLink: Locator;
   private readonly addSavingsLink: Locator;
   private readonly shareLink: Locator;
@@ -11,6 +13,8 @@ export class BudgetPage {
   constructor(private readonly page: Page) {
     this.addGoalLink = page.getByRole('link', { name: 'Create goal' });
     this.addSavingsLink = page.getByRole('link', { name: 'Add savings' });
+    this.goals = page.getByRole('listitem');
+
     this.shareLink = page.getByRole('link', { name: 'Share' });
     this.currentSavings = page.locator('p', {
       has: page.getByText('Current savings'),
