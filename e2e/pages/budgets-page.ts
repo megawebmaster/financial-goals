@@ -1,9 +1,10 @@
-import type { Locator, Page } from 'playwright/test';
+import type { Page } from 'playwright/test';
 
 export class BudgetsPage {
-  public readonly newBudget: Locator;
+  // eslint-disable-next-line no-useless-constructor
+  constructor(private readonly page: Page) {}
 
-  constructor(page: Page) {
-    this.newBudget = page.getByRole('link', { name: 'Create budget' });
+  createBudget() {
+    return this.page.getByRole('link', { name: 'Create budget' }).click();
   }
 }

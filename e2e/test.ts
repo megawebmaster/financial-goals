@@ -1,17 +1,22 @@
-import type { Page } from '@playwright/test';
+import type { Browser, Page } from '@playwright/test';
 import { expect, test as base } from 'playwright/test';
+
 import { LoginForm } from './pages/login-form';
 import { BudgetsPage } from './pages/budgets-page';
 import { BudgetForm } from './pages/budget-form';
 import { BudgetGoalForm } from './pages/budget-goal-form';
 import { BudgetPage } from './pages/budget-page';
 import { BudgetSavingsForm } from './pages/budget-savings-form';
+import { Layout } from './pages/layout';
+import { BudgetShareForm } from './pages/budget-share-form';
+
+type FixtureAccount = {
+  username: string;
+  password: string;
+};
 
 type Fixtures = {
-  account: {
-    username: string;
-    password: string;
-  };
+  account: FixtureAccount;
   loggedIn: Page;
   budget: Page;
   goals: Page;
@@ -20,45 +25,44 @@ type Fixtures = {
 type WorkerFixtures = {};
 
 export { expect };
+
+const createAccount = async (
+  browser: Browser,
+  username: string,
+): Promise<string> => {
+  const password = 'very-secure';
+
+  const signUpPage = await browser.newPage();
+  await signUpPage.goto('/signup');
+  await signUpPage.getByLabel('Username').fill(username);
+  await signUpPage.getByLabel('Password').fill(password);
+  await signUpPage.getByRole('button', { name: 'Create account!' }).click();
+  await expect(signUpPage.getByText(`Logged in as: ${username}`)).toBeVisible();
+  await signUpPage.close();
+
+  return password;
+};
+
+const login = async (page: Page, account: FixtureAccount) => {
+  const form = new LoginForm(page);
+  await form.login.fill(account.username);
+  await form.password.fill(account.password);
+  await form.submit();
+  await expect(
+    page.getByText(`Logged in as: ${account.username}`),
+  ).toBeVisible();
+};
+
 export const test = base.extend<Fixtures, WorkerFixtures>({
   account: async ({ browser, baseURL }, use, workerInfo) => {
-    const username = 'test-user-' + workerInfo.workerIndex;
-    const password = 'very-secure';
-
-    const signUpPage = await browser.newPage();
-    await signUpPage.goto('/signup');
-    await signUpPage.getByLabel('Username').fill(username);
-    await signUpPage.getByLabel('Password').fill(password);
-    await signUpPage.getByRole('button', { name: 'Create account!' }).click();
-    await expect(
-      signUpPage.getByText(`Logged in as: ${username}`),
-    ).toBeVisible();
-    await signUpPage.close();
-
+    const username = 'test-user-' + workerInfo.workerIndex + '@example.com';
+    const password = await createAccount(browser, username);
     await use({ username, password });
-
-    const deleteAccountPage = await browser.newPage();
-    await deleteAccountPage.goto(baseURL || 'http://127.0.0.1:5173');
-    const form = new LoginForm(deleteAccountPage);
-    await form.login.fill(username);
-    await form.password.fill(password);
-    await form.submit.click();
-    await deleteAccountPage
-      .getByRole('button', { name: 'Delete account' })
-      .click();
-    await expect(deleteAccountPage.getByText('Sign up')).toBeVisible();
   },
 
   loggedIn: async ({ page, account }, use) => {
     await page.goto('/');
-    const form = new LoginForm(page);
-    await form.login.fill(account.username);
-    await form.password.fill(account.password);
-    await form.submit.click();
-    await expect(
-      page.getByText(`Logged in as: ${account.username}`),
-    ).toBeVisible();
-
+    await login(page, account);
     await use(page);
   },
 
@@ -66,9 +70,9 @@ export const test = base.extend<Fixtures, WorkerFixtures>({
     const budgetsPage = new BudgetsPage(page);
     const budgetForm = new BudgetForm(page);
 
-    await budgetsPage.newBudget.click();
+    await budgetsPage.createBudget();
     await budgetForm.name.fill('First budget');
-    await budgetForm.submit.click();
+    await budgetForm.submit();
 
     await expect(page.getByText('First budget')).toBeVisible();
 
@@ -110,7 +114,7 @@ export const test = base.extend<Fixtures, WorkerFixtures>({
     // Add first savings value
     await budgetPage.addSavings();
     await savingsForm.amount.fill('2000');
-    await savingsForm.submit.click();
+    await savingsForm.submit();
 
     await use(page);
   },
