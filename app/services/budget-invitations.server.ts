@@ -5,10 +5,25 @@ import { prisma } from '~/services/db.server';
 import { getBudget } from '~/services/budgets.server';
 
 export const getInvitation = (id: string, userId: number) =>
-  prisma.budgetInvitation.findFirstOrThrow({ where: { id, userId } });
+  prisma.budgetInvitation.findFirstOrThrow({
+    where: {
+      id,
+      userId,
+      expiresAt: {
+        gt: new Date(),
+      },
+    },
+  });
 
 export const getInvitations = (userId: number) =>
-  prisma.budgetInvitation.findMany({ where: { userId } });
+  prisma.budgetInvitation.findMany({
+    where: {
+      userId,
+      expiresAt: {
+        gt: new Date(),
+      },
+    },
+  });
 
 export const shareBudget = (
   userId: number,
@@ -37,7 +52,13 @@ export const acceptInvitation = (
 ) =>
   prisma.$transaction(async (tx) => {
     const invitation = await tx.budgetInvitation.findFirstOrThrow({
-      where: { id, userId },
+      where: {
+        id,
+        userId,
+        expiresAt: {
+          gt: new Date(),
+        },
+      },
     });
 
     const budget = await tx.budgetUser.create({

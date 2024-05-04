@@ -38,7 +38,7 @@ model BudgetUser {
 model BudgetInvitation {
   id        String   @id @default(uuid())
   budgetId  Int
-  budget    Budget   @relation("BudgetInvitations", fields: [budgetId], references: [id], onDelete: Restrict)
+  budget    Budget   @relation("BudgetInvitations", fields: [budgetId], references: [id], onDelete: Cascade)
   userId    Int
   user      User     @relation("BudgetInvitations", fields: [userId], references: [id], onDelete: Cascade)
   data      String
@@ -61,8 +61,8 @@ model BudgetSavingsEntry {
   id       Int    @id @default(autoincrement())
   budgetId Int
   budget   Budget @relation("BudgetSavingsEntries", fields: [budgetId], references: [id], onDelete: Cascade)
-  userId   Int
-  user     User   @relation("UserSavingEntries", fields: [userId], references: [id], onDelete: Restrict)
+  userId   Int?
+  user     User?  @relation("UserSavingEntries", fields: [userId], references: [id], onDelete: SetNull)
   value    String
 }
 

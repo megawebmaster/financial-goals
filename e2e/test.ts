@@ -45,6 +45,23 @@ const createAccount = async (
   return password;
 };
 
+const deleteAccount = async (
+  browser: Browser,
+  baseURL: string | undefined,
+  account: FixtureAccount,
+) => {
+  const deleteAccountPage = await browser.newPage();
+  await deleteAccountPage.goto(baseURL || 'http://127.0.0.1:5173');
+  const form = new LoginForm(deleteAccountPage);
+  await form.login.fill(account.username);
+  await form.password.fill(account.password);
+  await form.submit();
+  await deleteAccountPage
+    .getByRole('button', { name: 'Delete account' })
+    .click();
+  await expect(deleteAccountPage.getByText('Sign up')).toBeVisible();
+};
+
 const login = async (page: Page, account: FixtureAccount) => {
   const form = new LoginForm(page);
   await form.login.fill(account.username);
@@ -60,12 +77,14 @@ export const test = base.extend<Fixtures, WorkerFixtures>({
     const username = 'test-user-' + workerInfo.workerIndex + '@example.com';
     const password = await createAccount(browser, username);
     await use({ username, password });
+    await deleteAccount(browser, baseURL, { username, password });
   },
 
   account2: async ({ browser, baseURL }, use, workerInfo) => {
     const username = 'test-user-2-' + workerInfo.workerIndex + '@example.com';
     const password = await createAccount(browser, username);
     await use({ username, password });
+    await deleteAccount(browser, baseURL, { username, password });
   },
 
   loggedIn: async ({ page, account }, use) => {
@@ -133,6 +152,7 @@ export const test = base.extend<Fixtures, WorkerFixtures>({
     const shareForm = new BudgetShareForm(page);
     await shareForm.username.fill(account2.username);
     await shareForm.submit();
+    await expect(page.getByText('First budget')).toBeVisible();
 
     const layout = new Layout(page);
     await layout.logout();
