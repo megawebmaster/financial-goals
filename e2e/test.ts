@@ -73,15 +73,17 @@ const login = async (page: Page, account: FixtureAccount) => {
 };
 
 export const test = base.extend<Fixtures, WorkerFixtures>({
-  account: async ({ browser, baseURL }, use, workerInfo) => {
-    const username = 'test-user-' + workerInfo.workerIndex + '@example.com';
+  account: async ({ browser, baseURL }, use) => {
+    const { workerIndex, parallelIndex } = test.info();
+    const username = `test-user-${workerIndex}-${parallelIndex}@example.com`;
     const password = await createAccount(browser, username);
     await use({ username, password });
     await deleteAccount(browser, baseURL, { username, password });
   },
 
   account2: async ({ browser, baseURL }, use, workerInfo) => {
-    const username = 'test-user-2-' + workerInfo.workerIndex + '@example.com';
+    const { workerIndex, parallelIndex } = test.info();
+    const username = `secondary-user-${workerIndex}-${parallelIndex}@example.com`;
     const password = await createAccount(browser, username);
     await use({ username, password });
     await deleteAccount(browser, baseURL, { username, password });
