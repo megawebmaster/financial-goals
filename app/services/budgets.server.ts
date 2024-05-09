@@ -83,7 +83,7 @@ export const shareBudget = (
   userId: number,
   budgetId: number,
   username: string,
-  key: string,
+  data: string,
 ): Promise<BudgetInvitation> =>
   prisma.$transaction(async (tx) => {
     await fetchBudget(userId, budgetId);
@@ -91,7 +91,7 @@ export const shareBudget = (
     return tx.budgetInvitation.create({
       data: {
         budgetId,
-        key,
+        data,
         userId: user.id,
         expiresAt: addDays(new Date(), 3),
       },

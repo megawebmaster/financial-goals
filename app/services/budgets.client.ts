@@ -1,7 +1,7 @@
 import type { BudgetUser } from '@prisma/client';
 
 import { decrypt } from '~/services/encryption.client';
-import type { ClientBudget } from '~/helpers/budget-goals';
+import type { ClientBudget } from '~/helpers/budgets';
 import type { Budget } from '~/services/budgets.server';
 
 export const decryptBudget = async (
