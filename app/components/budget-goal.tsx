@@ -1,16 +1,19 @@
-import type { ClientBudgetGoal } from '~/helpers/budget-goals';
+import type { FormEvent, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { FormEvent } from 'react';
+
+import type { ClientBudgetGoal } from '~/helpers/budget-goals';
 import { ChangePriorityButton } from '~/components/budget-goal/change-priority-button';
 
 type BudgetGoalProps = {
   budgetId: number;
+  children?: ReactNode;
   goal: ClientBudgetGoal;
   onPriorityChange: (event: FormEvent<HTMLFormElement>) => void;
 };
 
 export function BudgetGoal({
   budgetId,
+  children,
   goal,
   onPriorityChange,
 }: BudgetGoalProps) {
@@ -26,6 +29,7 @@ export function BudgetGoal({
       <a href={`/budgets/${budgetId}/goals/${goal.id}/edit`}>
         {t('budget.view.goals.edit')}
       </a>{' '}
+      {children}
       <ChangePriorityButton
         goalId={goal.id}
         priority={goal.priority - 1}

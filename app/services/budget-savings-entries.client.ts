@@ -1,8 +1,9 @@
 import type { BudgetSavingsEntry } from '@prisma/client';
-import { map, pipe, sum } from 'ramda';
+import { length, map, pipe, sum, uniq } from 'ramda';
+import { lightFormat } from 'date-fns';
 
-import { decrypt, encrypt } from '~/services/encryption.client';
 import type { ClientBudgetSavingsEntry } from '~/helpers/budget-goals';
+import { decrypt } from '~/services/encryption.client';
 
 export const decryptBudgetSavingsEntry = async (
   entry: BudgetSavingsEntry,
@@ -15,15 +16,15 @@ export const decryptBudgetSavingsEntry = async (
   };
 };
 
-export const getAverageSavings = (savings: ClientBudgetSavingsEntry[]) =>
-  pipe(
-    map((entry: ClientBudgetSavingsEntry) => entry.amount),
-    sum,
-  )(savings) / savings.length;
+const sumSavings = pipe(
+  map((entry: ClientBudgetSavingsEntry) => entry.amount),
+  sum,
+);
+const countSavingsMonths = pipe(
+  map((entry: ClientBudgetSavingsEntry) => lightFormat(entry.date, 'yyyy-MM')),
+  uniq,
+  length,
+);
 
-export const encryptBudgetSavingsEntry = async (
-  date: Date,
-  amount: number,
-  key: CryptoKey,
-): Promise<string> =>
-  await encrypt(JSON.stringify({ amount, date: date.toISOString() }), key);
+export const getAverageSavings = (savings: ClientBudgetSavingsEntry[]) =>
+  sumSavings(savings) / countSavingsMonths(savings);

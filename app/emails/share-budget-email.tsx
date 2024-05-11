@@ -1,10 +1,8 @@
 import { Button, Heading, Hr, Html, Text } from '@react-email/components';
-import {
-  BASE_URL,
-  DATE_TIME_FORMAT,
-  emailPreviewTranslate,
-} from '~/services/mail';
 import type { TFunction } from 'i18next';
+
+import { BASE_URL, emailPreviewTranslate } from '~/services/mail';
+import { DATE_TIME_FORMAT } from '~/helpers/dates';
 
 type ShareBudgetProps = {
   authorName: string;

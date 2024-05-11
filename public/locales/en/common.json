@@ -86,6 +86,7 @@
   "goal.edit.delete.submit": "Delete goal",
   "goal.edit.changes-saved": "Goal changes saved!",
   "goal.edit.not-found": "Goal not found!",
+  "goals.estimation": "Estimated completion on: {{- date, dateTime }}",
   "savings.new.title": "Add savings | $t(app.name)",
   "savings.new.page.title": "Add savings to {{ budget }} budget",
   "savings.new.back": "Go back: List of budgets",

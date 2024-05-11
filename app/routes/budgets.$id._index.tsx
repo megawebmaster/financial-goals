@@ -6,12 +6,14 @@ import { useTranslation } from 'react-i18next';
 
 import { unlockKey } from '~/services/encryption.client';
 import {
+  buildAmountToSaveCalculator,
   buildGoalsFiller,
   buildGoalsSorting,
   encryptBudgetGoal,
 } from '~/services/budget-goals.client';
 import { getAverageSavings } from '~/services/budget-savings-entries.client';
 import { BudgetGoal } from '~/components/budget-goal';
+import { GoalEstimate } from '~/components/budget-goal/goal-estimate';
 import type { BudgetsLayoutContext } from '~/helpers/budgets';
 import i18next from '~/i18n.server';
 
@@ -64,6 +66,9 @@ export default function () {
     );
   };
 
+  const averageSavings = getAverageSavings(savings);
+  const amountToSaveCalculator = buildAmountToSaveCalculator(goals);
+
   return (
     <>
       <a href="/budgets">{t('budget.view.back')}</a>
@@ -84,7 +89,7 @@ export default function () {
         <strong>{t('budget.view.current-savings')}:</strong>{' '}
         {budget.currentSavings}{' '}
         {t('budget.view.average-savings', {
-          average: getAverageSavings(savings),
+          average: averageSavings,
           formatParams: {
             // TODO: Properly ask about currency of the budget
             average: { currency: 'PLN', locale: 'pl-PL' },
@@ -105,7 +110,12 @@ export default function () {
             budgetId={budget.budgetId}
             goal={goal}
             onPriorityChange={changePriority}
-          />
+          >
+            <GoalEstimate
+              averageSavings={averageSavings}
+              amountToSave={amountToSaveCalculator(goal.id)}
+            />
+          </BudgetGoal>
         ))}
       </ul>
       <a href={`/budgets/${budget.budgetId}/goals/new`}>

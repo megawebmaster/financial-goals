@@ -1,4 +1,13 @@
-import { map, pipe, prop, propEq, reduce, reject, sortBy } from 'ramda';
+import {
+  map,
+  pipe,
+  prop,
+  propEq,
+  reduce,
+  reduced,
+  reject,
+  sortBy,
+} from 'ramda';
 import type { BudgetGoal } from '@prisma/client';
 
 import { decrypt, encrypt } from '~/services/encryption.client';
@@ -98,3 +107,15 @@ export const updateGoal = (
         }
       : goal,
   );
+
+export const buildAmountToSaveCalculator =
+  (goals: ClientBudgetGoal[]) =>
+  (goalId: number): number =>
+    reduce((amountToSave, goal: ClientBudgetGoal) => {
+      const amount = amountToSave + (goal.requiredAmount - goal.currentAmount);
+      if (goal.id === goalId) {
+        return reduced(amount);
+      }
+
+      return amount;
+    }, 0)(goals);

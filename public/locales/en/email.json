@@ -1,11 +1,11 @@
 {
   "new-account.subject": "Your new Financial Goals account",
-  "new-account.header": "Hello {{name}}!",
+  "new-account.header": "Hello {{ name }}!",
   "new-account.description": "Your new account has been created!",
   "share-budget.subject": "New budget invitation",
-  "share-budget.header": "Hello {{name}}!",
-  "share-budget.description": "{{name}} just shared a budget with you. If you are not interested in joining you can ignore this email",
+  "share-budget.header": "Hello {{ name }}!",
+  "share-budget.description": "{{ name }} just shared a budget with you. If you are not interested in joining you can ignore this email",
   "share-budget.accept": "Accept the invitation",
-  "share-budget.expiration": "The invitation will expire on {{expiration, dateTime}}",
+  "share-budget.expiration": "The invitation will expire on {{- expiration, dateTime }}",
   "signature": "Financial Goals app"
 }
