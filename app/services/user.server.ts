@@ -10,6 +10,8 @@ import {
   lockKey,
 } from '~/services/encryption';
 
+export class InvalidUsernamePasswordError extends Error {}
+
 export const login = async (
   username: string,
   password: string,
@@ -18,7 +20,7 @@ export const login = async (
   const hashedPassword = await hash(password, user.salt);
 
   if (!safeCompare(user.password, hashedPassword)) {
-    throw new Error('Email and/or password is not valid.');
+    throw new InvalidUsernamePasswordError();
   }
 
   return user;
@@ -26,6 +28,8 @@ export const login = async (
 
 export const getUser = (id: number): Promise<User> =>
   prisma.user.findUniqueOrThrow({ where: { id } });
+
+export class UserExistsError extends Error {}
 
 export const createUser = async (
   username: string,
@@ -37,7 +41,7 @@ export const createUser = async (
   const user = await prisma.user.findFirst({ where: { username } });
 
   if (user) {
-    throw new Error('User already exists!');
+    throw new UserExistsError();
   }
 
   const pki = await generatePKI();

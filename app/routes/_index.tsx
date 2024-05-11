@@ -20,7 +20,6 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => [
 ];
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  // If the user is already authenticated redirect to /budgets directly
   const userId = await authenticator.isAuthenticated(request);
 
   if (userId) {

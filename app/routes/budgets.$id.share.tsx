@@ -1,24 +1,27 @@
 import type { FormEvent } from 'react';
-import type {
-  ActionFunctionArgs,
-  LoaderFunctionArgs,
-  MetaFunction,
-} from '@remix-run/node';
-import { redirect } from '@remix-run/node';
+import type { LoaderFunctionArgs, MetaFunction } from '@remix-run/node';
 import { useOutletContext, useSubmit } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
 import { render } from '@react-email/render';
+import {
+  redirectWithError,
+  redirectWithInfo,
+  redirectWithSuccess,
+} from 'remix-toast';
+import { toast } from 'sonner';
 import invariant from 'tiny-invariant';
 
 import type { BudgetsLayoutContext } from '~/helpers/budgets';
-import { authenticator } from '~/services/auth.server';
 import { encrypt, unlockKey } from '~/services/encryption.client';
 import { BudgetShareForm } from '~/components/budget-share-form';
 import { exportKey, importKey } from '~/services/encryption';
-import { shareBudget } from '~/services/budget-invitations.server';
+import {
+  BudgetAlreadySharedError,
+  shareBudget,
+} from '~/services/budget-invitations.server';
 import { mailer } from '~/services/mail.server';
 import { getUser } from '~/services/user.server';
-import { LOGIN_ROUTE } from '~/routes';
+import { authenticatedAction } from '~/helpers/auth';
 import ShareBudgetEmail from '~/emails/share-budget-email';
 import i18next from '~/i18n.server';
 
@@ -36,66 +39,82 @@ export async function loader({ request }: LoaderFunctionArgs) {
   };
 }
 
-export async function action({ params, request }: ActionFunctionArgs) {
-  const userId = await authenticator.isAuthenticated(request);
+export const action = authenticatedAction(
+  async ({ params, request }, userId) => {
+    try {
+      invariant(params.id, 'Budget ID is required');
+      invariant(typeof params.id === 'string');
 
-  if (!userId) {
-    // TODO: Handle errors notifications
-    return redirect(LOGIN_ROUTE);
-  }
+      const budgetId = parseInt(params.id, 10);
+      invariant(!isNaN(budgetId), 'Budget ID must be a number');
 
-  try {
-    invariant(params.id, 'Budget ID is required');
-    invariant(typeof params.id === 'string');
+      const data = await request.formData();
+      const username = data.get('username');
+      const invitationData = data.get('data');
 
-    const budgetId = parseInt(params.id, 10);
-    invariant(!isNaN(budgetId), 'Budget ID must be a number');
+      invariant(username, 'Name of the user is required');
+      invariant(
+        typeof username === 'string',
+        'Name of the user must be a text',
+      );
+      invariant(invitationData, 'Invitation data is required');
+      invariant(
+        typeof invitationData === 'string',
+        'Invitation data must be a text',
+      );
 
-    const data = await request.formData();
-    const username = data.get('username');
-    const invitationData = data.get('data');
+      const invitation = await shareBudget(
+        userId,
+        budgetId,
+        username,
+        invitationData,
+      );
 
-    invariant(username, 'Name of the user is required');
-    invariant(typeof username === 'string', 'Name of the user must be a text');
-    invariant(invitationData, 'Invitation data is required');
-    invariant(
-      typeof invitationData === 'string',
-      'Invitation data must be a text',
-    );
+      const author = await getUser(userId);
+      const emailT = await i18next.getFixedT(
+        await i18next.getLocale(request),
+        'email',
+      );
+      await mailer.sendMail({
+        to: username,
+        subject: emailT('share-budget.subject'),
+        html: render(
+          <ShareBudgetEmail
+            authorName={author.username}
+            expiration={invitation.expiresAt}
+            recipientName={username}
+            token={invitation.id}
+            t={emailT}
+          />,
+        ),
+      });
 
-    const invitation = await shareBudget(
-      userId,
-      budgetId,
-      username,
-      invitationData,
-    );
+      const t = await i18next.getFixedT(await i18next.getLocale(request));
 
-    const author = await getUser(userId);
-    const t = await i18next.getFixedT(
-      await i18next.getLocale(request),
-      'email',
-    );
-    await mailer.sendMail({
-      to: username,
-      subject: t('share-budget.subject'),
-      html: render(
-        <ShareBudgetEmail
-          authorName={author.username}
-          expiration={invitation.expiresAt}
-          recipientName={username}
-          token={invitation.id}
-          t={t}
-        />,
-      ),
-    });
+      return redirectWithSuccess(`/budgets/${budgetId}`, {
+        message: t('budget.share.created', { username }),
+      });
+    } catch (e) {
+      if (e instanceof BudgetAlreadySharedError) {
+        const t = await i18next.getFixedT(await i18next.getLocale(request));
 
-    return redirect(`/budgets/${budgetId}`);
-  } catch (e) {
-    console.error('Sharing budget failed', e);
-    // TODO: Handle errors notifications
-    return redirect(`/budgets/${params.id}/share`);
-  }
-}
+        return redirectWithInfo(`/budgets/${params.id}`, {
+          message: t('budget.share.already-shared'),
+        });
+      }
+
+      console.error('Sharing budget failed', e);
+      const t = await i18next.getFixedT(
+        await i18next.getLocale(request),
+        'errors',
+      );
+
+      return redirectWithError(`/budgets/${params.id}/share`, {
+        message: t('budget.share.failed'),
+      });
+    }
+  },
+);
 
 export default function () {
   const { t } = useTranslation();
@@ -110,9 +129,10 @@ export default function () {
       method: 'POST',
       body: formData,
     });
+    const username = formData.get('username') as string;
 
     if (!response.ok) {
-      // TODO: Show the error
+      toast.error(t('budget.share.user-not-found', { username }));
       return;
     }
 
@@ -127,7 +147,7 @@ export default function () {
 
     submit(
       {
-        username: formData.get('username') as string,
+        username,
         data: await encrypt(data, publicKey),
       },
       { method: 'post' },

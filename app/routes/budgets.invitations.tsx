@@ -1,32 +1,28 @@
-import type { LoaderFunctionArgs } from '@remix-run/node';
-import { redirect } from '@remix-run/node';
 import { Outlet, useLoaderData, useOutletContext } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
 import type { User } from '@prisma/client';
+import { redirectWithError } from 'remix-toast';
 
 import type { BudgetInvitationsLayoutContext } from '~/helpers/budget-invitations';
-import { authenticator } from '~/services/auth.server';
 import { getInvitations } from '~/services/budget-invitations.server';
 import { BudgetInvitationsList } from '~/components/budget-invitations-list';
-import { LOGIN_ROUTE } from '~/routes';
+import { authenticatedLoader } from '~/helpers/auth';
+import i18next from '~/i18n.server';
 
-export async function loader({ request }: LoaderFunctionArgs) {
-  const userId = await authenticator.isAuthenticated(request);
-
-  if (!userId) {
-    // TODO: Handle errors notifications
-    return redirect(LOGIN_ROUTE);
-  }
-
+export const loader = authenticatedLoader(async ({ request }, userId) => {
   try {
     return {
       invitations: await getInvitations(userId),
     };
   } catch (e) {
-    // TODO: Handle errors notifications
-    return redirect('/');
+    const t = await i18next.getFixedT(
+      await i18next.getLocale(request),
+      'error',
+    );
+
+    return redirectWithError('/', { message: t('budget.not-found') });
   }
-}
+});
 
 export default function () {
   const { t } = useTranslation();

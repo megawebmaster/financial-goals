@@ -1,12 +1,10 @@
-import type { LoaderFunctionArgs, MetaFunction } from '@remix-run/node';
-import { redirect } from '@remix-run/node';
+import type { MetaFunction } from '@remix-run/node';
 import { Link, useLoaderData } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
 
-import { authenticator } from '~/services/auth.server';
 import { getBudgets } from '~/services/budgets.server';
 import { BudgetsList } from '~/components/budgets-list';
-import { LOGIN_ROUTE } from '~/routes';
+import { authenticatedLoader } from '~/helpers/auth';
 import i18next from '~/i18n.server';
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => [
@@ -15,22 +13,14 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => [
   },
 ];
 
-export async function loader({ request }: LoaderFunctionArgs) {
-  // If the user is not already authenticated redirect to / directly
-  const userId = await authenticator.isAuthenticated(request);
-
-  if (!userId) {
-    // TODO: Handle errors notifications
-    return redirect(LOGIN_ROUTE);
-  }
-
+export const loader = authenticatedLoader(async ({ request }, userId) => {
   const t = await i18next.getFixedT(await i18next.getLocale(request));
 
   return {
     budgets: await getBudgets(userId),
     title: t('budgets.title'),
   };
-}
+});
 
 export default function () {
   const { t } = useTranslation();

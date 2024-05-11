@@ -5,16 +5,18 @@ import { BudgetsPage } from './pages/budgets-page';
 import { InvitationsPage } from './pages/invitations-page';
 import { BudgetAcceptForm } from './pages/budget-accept-form';
 
-test('share budget', async ({ savings: page }) => {
+test('share budget', async ({ savings: page, account2 }) => {
   const budgetPage = new BudgetPage(page);
 
   await budgetPage.share();
   const shareForm = new BudgetShareForm(page);
-  await shareForm.username.fill('test2@example.com');
+  await shareForm.username.fill(account2.username);
   await shareForm.submit();
 
   await expect(page.getByText('First budget')).toBeVisible();
-  // TODO: Add a test for a correct notification
+  await expect(
+    page.getByText(`Successfully shared budget with ${account2.username}`),
+  ).toBeVisible();
 });
 
 test('accept shared budget', async ({ sharedBudget: page }) => {

@@ -1,3 +1,21 @@
 {
-  "login.required": "You need to log in first!"
+  "login.required": "You need to log in first!",
+  "signup.failed": "Couldn't create new account.",
+  "user.deletion-failed": "Couldn't delete your account. Do you have some existing budgets?",
+  "user.not-found": "User doesn't exist!",
+  "user.invalid-login": "Email and/or password is not valid.",
+  "user.exists": "User already exists!",
+  "budget.not-found": "Budget not found!",
+  "budget.new.creation-failed": "Creating new budget failed. Please try again.",
+  "budget.edit.updating-failed": "Updating budget failed. Please try again.",
+  "budget.deletion-failed": "Couldn't delete budget. Please try again.",
+  "budget-invitations.not-found": "Invitation not found!",
+  "budget-invitations.accepting-failed": "Couldn't accept the invitation. Please try again.",
+  "budget-invitations.decline-failed": "Couldn't decline the invitation. Please try again.",
+  "budget.share.failed": "Sharing the budget failed. Please try again.",
+  "goal.new.creation-failed": "Couldn't create goal. Please try again.",
+  "goal.edit.updating-failed": "Updating goal failed. Please try again.",
+  "goal.deletion-failed": "Couldn't delete goal. Please try again.",
+  "goal.priority.change-failed": "Couldn't change goal priorities. Please try again.",
+  "savings.new.creation-failed": "Couldn't add savings. Please try again."
 }

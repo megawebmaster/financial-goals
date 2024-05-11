@@ -1,31 +1,33 @@
-import type { ActionFunctionArgs } from '@remix-run/node';
-import { redirect } from '@remix-run/node';
 import invariant from 'tiny-invariant';
+import { redirectWithError, redirectWithSuccess } from 'remix-toast';
 
-import { authenticator } from '~/services/auth.server';
 import { deleteBudget } from '~/services/budgets.server';
-import { LOGIN_ROUTE } from '~/routes';
+import { authenticatedAction } from '~/helpers/auth';
+import i18next from '~/i18n.server';
 
-export async function action({ params, request }: ActionFunctionArgs) {
-  const userId = await authenticator.isAuthenticated(request);
+export const action = authenticatedAction(
+  async ({ params, request }, userId) => {
+    try {
+      invariant(params.id, 'Budget ID is required');
+      invariant(typeof params.id === 'string');
 
-  if (!userId) {
-    // TODO: Handle errors notifications
-    return redirect(LOGIN_ROUTE);
-  }
+      const budgetId = parseInt(params.id, 10);
+      invariant(!isNaN(budgetId), 'Budget ID must be a number');
 
-  try {
-    invariant(params.id, 'Budget ID is required');
-    invariant(typeof params.id === 'string');
+      await deleteBudget(userId, budgetId);
+      const t = await i18next.getFixedT(await i18next.getLocale(request));
 
-    const budgetId = parseInt(params.id, 10);
-    invariant(!isNaN(budgetId), 'Budget ID must be a number');
+      return redirectWithSuccess('/budgets', { message: t('budget.deleted') });
+    } catch (e) {
+      console.error('Deleting budget failed', e);
+      const t = await i18next.getFixedT(
+        await i18next.getLocale(request),
+        'error',
+      );
 
-    await deleteBudget(userId, budgetId);
-    return redirect('/budgets');
-  } catch (e) {
-    console.error('Deleting budget failed', e);
-    // TODO: Handle errors notifications
-    return redirect(`/budgets/${params.id}/edit`);
-  }
-}
+      return redirectWithError(`/budgets/${params.id}/edit`, {
+        message: t('budget.deletion-failed'),
+      });
+    }
+  },
+);

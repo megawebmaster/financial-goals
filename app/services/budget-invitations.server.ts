@@ -25,6 +25,8 @@ export const getInvitations = (userId: number) =>
     },
   });
 
+export class BudgetAlreadySharedError extends Error {}
+
 export const shareBudget = (
   userId: number,
   budgetId: number,
@@ -34,6 +36,11 @@ export const shareBudget = (
   prisma.$transaction(async (tx) => {
     await getBudget(userId, budgetId);
     const user = await tx.user.findFirstOrThrow({ where: { username } });
+
+    if (await getBudget(user.id, budgetId)) {
+      throw new BudgetAlreadySharedError();
+    }
+
     return tx.budgetInvitation.create({
       data: {
         budgetId,

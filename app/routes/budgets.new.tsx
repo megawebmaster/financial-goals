@@ -1,15 +1,10 @@
 import type { FormEvent } from 'react';
-import type {
-  ActionFunctionArgs,
-  LoaderFunctionArgs,
-  MetaFunction,
-} from '@remix-run/node';
-import { redirect } from '@remix-run/node';
+import type { LoaderFunctionArgs, MetaFunction } from '@remix-run/node';
 import { useSubmit } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
+import { redirectWithError, redirectWithSuccess } from 'remix-toast';
 import invariant from 'tiny-invariant';
 
-import { authenticator } from '~/services/auth.server';
 import {
   encrypt,
   generateEncryptionKey,
@@ -17,7 +12,7 @@ import {
 } from '~/services/encryption.client';
 import { createBudget } from '~/services/budgets.server';
 import { BudgetForm } from '~/components/budget-form';
-import { LOGIN_ROUTE } from '~/routes';
+import { authenticatedAction } from '~/helpers/auth';
 import i18next from '~/i18n.server';
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => [
@@ -34,14 +29,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   };
 }
 
-export async function action({ request }: ActionFunctionArgs) {
-  const userId = await authenticator.isAuthenticated(request);
-
-  if (!userId) {
-    // TODO: Handle errors notifications
-    return redirect(LOGIN_ROUTE);
-  }
-
+export const action = authenticatedAction(async ({ request }, userId) => {
   try {
     const data = await request.formData();
     const name = data.get('name');
@@ -63,13 +51,23 @@ export async function action({ request }: ActionFunctionArgs) {
       { currentSavings, freeSavings },
       { name, key },
     );
-    return redirect(`/budgets/${budget.budgetId}`);
+    const t = await i18next.getFixedT(await i18next.getLocale(request));
+
+    return redirectWithSuccess(`/budgets/${budget.budgetId}`, {
+      message: t('budget.new.created'),
+    });
   } catch (e) {
     console.error('Creating budget failed', e);
-    // TODO: Handle errors notifications
-    return redirect('/budgets/new');
+    const t = await i18next.getFixedT(
+      await i18next.getLocale(request),
+      'error',
+    );
+
+    return redirectWithError('/budgets/new', {
+      message: t('budget.new.creation-failed'),
+    });
   }
-}
+});
 
 export default function () {
   const { t } = useTranslation();

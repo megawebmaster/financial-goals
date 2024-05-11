@@ -1,21 +1,16 @@
-import type {
-  ActionFunctionArgs,
-  LoaderFunctionArgs,
-  MetaFunction,
-} from '@remix-run/node';
-import { redirect } from '@remix-run/node';
+import type { LoaderFunctionArgs, MetaFunction } from '@remix-run/node';
 import type { FormEvent } from 'react';
 import { useOutletContext, useSubmit } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
+import { redirectWithError, redirectWithSuccess } from 'remix-toast';
 import invariant from 'tiny-invariant';
 
 import type { BudgetsLayoutContext } from '~/helpers/budgets';
-import { authenticator } from '~/services/auth.server';
 import { BudgetGoalForm } from '~/components/budget-goal-form';
 import { createBudgetGoal } from '~/services/budget-goals.server';
 import { encrypt, unlockKey } from '~/services/encryption.client';
 import { getCurrentAmount } from '~/helpers/budget-goals';
-import { LOGIN_ROUTE } from '~/routes';
+import { authenticatedAction } from '~/helpers/auth';
 import i18next from '~/i18n.server';
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => [
@@ -32,49 +27,54 @@ export async function loader({ request }: LoaderFunctionArgs) {
   };
 }
 
-export async function action({ params, request }: ActionFunctionArgs) {
-  const userId = await authenticator.isAuthenticated(request);
+export const action = authenticatedAction(
+  async ({ params, request }, userId) => {
+    try {
+      invariant(params.id, 'Budget ID is required');
+      invariant(typeof params.id === 'string');
 
-  if (!userId) {
-    // TODO: Handle errors notifications
-    return redirect(LOGIN_ROUTE);
-  }
+      const budgetId = parseInt(params.id, 10);
+      invariant(!isNaN(budgetId), 'Budget ID must be a number');
 
-  try {
-    invariant(params.id, 'Budget ID is required');
-    invariant(typeof params.id === 'string');
+      const data = await request.formData();
+      const name = data.get('name');
+      const requiredAmount = data.get('requiredAmount');
+      const currentAmount = data.get('currentAmount');
+      const freeSavings = data.get('freeSavings');
 
-    const budgetId = parseInt(params.id, 10);
-    invariant(!isNaN(budgetId), 'Budget ID must be a number');
+      invariant(name, 'Name of the goal is required');
+      invariant(typeof name === 'string');
+      invariant(requiredAmount, 'Goal required amount is required');
+      invariant(typeof requiredAmount === 'string');
+      invariant(currentAmount, 'Goal required amount is required');
+      invariant(typeof currentAmount === 'string');
+      invariant(freeSavings, 'Free savings amount is required');
+      invariant(typeof freeSavings === 'string');
 
-    const data = await request.formData();
-    const name = data.get('name');
-    const requiredAmount = data.get('requiredAmount');
-    const currentAmount = data.get('currentAmount');
-    const freeSavings = data.get('freeSavings');
+      await createBudgetGoal(userId, budgetId, freeSavings, {
+        name,
+        requiredAmount,
+        currentAmount,
+        status: 'active',
+      });
+      const t = await i18next.getFixedT(await i18next.getLocale(request));
 
-    invariant(name, 'Name of the goal is required');
-    invariant(typeof name === 'string');
-    invariant(requiredAmount, 'Goal required amount is required');
-    invariant(typeof requiredAmount === 'string');
-    invariant(currentAmount, 'Goal required amount is required');
-    invariant(typeof currentAmount === 'string');
-    invariant(freeSavings, 'Free savings amount is required');
-    invariant(typeof freeSavings === 'string');
+      return redirectWithSuccess(`/budgets/${budgetId}`, {
+        message: t('goal.new.created'),
+      });
+    } catch (e) {
+      console.error('Creating goal failed', e);
+      const t = await i18next.getFixedT(
+        await i18next.getLocale(request),
+        'errors',
+      );
 
-    await createBudgetGoal(userId, budgetId, freeSavings, {
-      name,
-      requiredAmount,
-      currentAmount,
-      status: 'active',
-    });
-    return redirect(`/budgets/${budgetId}`);
-  } catch (e) {
-    // TODO: Handle errors notifications
-    console.error('Creating goal failed', e);
-    return redirect(`/budgets/${params.id}/goals/new`);
-  }
-}
+      return redirectWithError(`/budgets/${params.id}/goals/new`, {
+        message: t('goal.new.creation-failed'),
+      });
+    }
+  },
+);
 
 export default function () {
   const { t } = useTranslation();

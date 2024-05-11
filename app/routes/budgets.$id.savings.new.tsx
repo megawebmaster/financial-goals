@@ -1,16 +1,11 @@
 import type { FormEvent } from 'react';
-import type {
-  ActionFunctionArgs,
-  LoaderFunctionArgs,
-  MetaFunction,
-} from '@remix-run/node';
-import { redirect } from '@remix-run/node';
+import type { MetaFunction } from '@remix-run/node';
 import { useOutletContext, useSubmit } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
+import { redirectWithError, redirectWithSuccess } from 'remix-toast';
 import invariant from 'tiny-invariant';
 
 import type { BudgetsLayoutContext } from '~/helpers/budgets';
-import { authenticator } from '~/services/auth.server';
 import { getBudget } from '~/services/budgets.server';
 import { encrypt, unlockKey } from '~/services/encryption.client';
 import { getBudgetGoals } from '~/services/budget-goals.server';
@@ -22,7 +17,7 @@ import {
   encryptBudgetGoal,
 } from '~/services/budget-goals.client';
 import { getGoalsSum } from '~/helpers/budget-goals';
-import { LOGIN_ROUTE } from '~/routes';
+import { authenticatedAction, authenticatedLoader } from '~/helpers/auth';
 import i18next from '~/i18n.server';
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => [
@@ -31,75 +26,80 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => [
   },
 ];
 
-export async function loader({ params, request }: LoaderFunctionArgs) {
-  const userId = await authenticator.isAuthenticated(request);
+export const loader = authenticatedLoader(
+  async ({ params, request }, userId) => {
+    try {
+      invariant(params.id, 'Budget ID is required');
+      invariant(typeof params.id === 'string');
 
-  if (!userId) {
-    // TODO: Handle errors notifications
-    return redirect(LOGIN_ROUTE);
-  }
+      const budgetId = parseInt(params.id, 10);
+      invariant(!isNaN(budgetId), 'Budget ID must be a number');
 
-  const t = await i18next.getFixedT(await i18next.getLocale(request));
+      const t = await i18next.getFixedT(await i18next.getLocale(request));
 
-  try {
-    invariant(params.id, 'Budget ID is required');
-    invariant(typeof params.id === 'string');
+      return {
+        budget: await getBudget(userId, budgetId),
+        goals: await getBudgetGoals(userId, budgetId),
+        title: t('savings.new.title'),
+      };
+    } catch (e) {
+      const t = await i18next.getFixedT(await i18next.getLocale(request), [
+        'errors',
+      ]);
 
-    const budgetId = parseInt(params.id, 10);
-    invariant(!isNaN(budgetId), 'Budget ID must be a number');
+      return redirectWithError('/budgets', {
+        message: t('budget.not-found'),
+      });
+    }
+  },
+);
 
-    return {
-      budget: await getBudget(userId, budgetId),
-      goals: await getBudgetGoals(userId, budgetId),
-      title: t('savings.new.title'),
-    };
-  } catch (e) {
-    // TODO: Handle errors notifications
-    return redirect('/budgets');
-  }
-}
+export const action = authenticatedAction(
+  async ({ params, request }, userId) => {
+    try {
+      invariant(params.id, 'Budget ID is required');
+      invariant(typeof params.id === 'string');
 
-export async function action({ params, request }: ActionFunctionArgs) {
-  const userId = await authenticator.isAuthenticated(request);
+      const budgetId = parseInt(params.id, 10);
+      invariant(!isNaN(budgetId), 'Budget ID must be a number');
 
-  if (!userId) {
-    // TODO: Handle errors notifications
-    return redirect(LOGIN_ROUTE);
-  }
+      const data = await request.formData();
+      const entryValue = data.get('entryValue');
+      const budgetData = data.get('budgetData');
+      const goals = data.get('goals');
 
-  try {
-    invariant(params.id, 'Budget ID is required');
-    invariant(typeof params.id === 'string');
+      invariant(entryValue, 'Value for entry is required');
+      invariant(typeof entryValue === 'string');
+      invariant(budgetData, 'Budget data is required');
+      invariant(typeof budgetData === 'string');
+      invariant(goals, 'Goals are required');
+      invariant(typeof goals === 'string');
 
-    const budgetId = parseInt(params.id, 10);
-    invariant(!isNaN(budgetId), 'Budget ID must be a number');
+      await createSavingsEntry(
+        userId,
+        budgetId,
+        JSON.parse(budgetData),
+        entryValue,
+        JSON.parse(goals),
+      );
+      const t = await i18next.getFixedT(await i18next.getLocale(request));
 
-    const data = await request.formData();
-    const entryValue = data.get('entryValue');
-    const budgetData = data.get('budgetData');
-    const goals = data.get('goals');
+      return redirectWithSuccess(`/budgets/${budgetId}`, {
+        message: t('savings.new.created'),
+      });
+    } catch (e) {
+      console.error('Creating entry failed', e);
+      const t = await i18next.getFixedT(
+        await i18next.getLocale(request),
+        'errors',
+      );
 
-    invariant(entryValue, 'Value for entry is required');
-    invariant(typeof entryValue === 'string');
-    invariant(budgetData, 'Budget data is required');
-    invariant(typeof budgetData === 'string');
-    invariant(goals, 'Goals are required');
-    invariant(typeof goals === 'string');
-
-    await createSavingsEntry(
-      userId,
-      budgetId,
-      JSON.parse(budgetData),
-      entryValue,
-      JSON.parse(goals),
-    );
-    return redirect(`/budgets/${budgetId}`);
-  } catch (e) {
-    // TODO: Handle errors notifications
-    console.error('Creating entry failed', e);
-    return redirect(`/budgets/${params.id}/savings/new`);
-  }
-}
+      return redirectWithError(`/budgets/${params.id}/savings/new`, {
+        message: t('savings.new.creation-failed'),
+      });
+    }
+  },
+);
 
 const getGoalsCurrentAmount = getGoalsSum('currentAmount');
 

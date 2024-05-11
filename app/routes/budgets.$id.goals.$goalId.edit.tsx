@@ -1,9 +1,4 @@
-import type {
-  ActionFunctionArgs,
-  LoaderFunctionArgs,
-  MetaFunction,
-} from '@remix-run/node';
-import { redirect } from '@remix-run/node';
+import type { LoaderFunctionArgs, MetaFunction } from '@remix-run/node';
 import {
   useNavigate,
   useOutletContext,
@@ -13,9 +8,10 @@ import {
 import type { FormEvent } from 'react';
 import { pipe, propEq } from 'ramda';
 import { useTranslation } from 'react-i18next';
+import { redirectWithError, redirectWithSuccess } from 'remix-toast';
+import { toast } from 'sonner';
 import invariant from 'tiny-invariant';
 
-import { authenticator } from '~/services/auth.server';
 import { updateBudgetGoal } from '~/services/budget-goals.server';
 import { getGoalsSum } from '~/helpers/budget-goals';
 import type { BudgetsLayoutContext } from '~/helpers/budgets';
@@ -27,7 +23,7 @@ import {
   removeGoal,
   updateGoal,
 } from '~/services/budget-goals.client';
-import { LOGIN_ROUTE } from '~/routes';
+import { authenticatedAction } from '~/helpers/auth';
 import i18next from '~/i18n.server';
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => [
@@ -44,50 +40,57 @@ export async function loader({ request }: LoaderFunctionArgs) {
   };
 }
 
-export async function action({ params, request }: ActionFunctionArgs) {
-  const userId = await authenticator.isAuthenticated(request);
+export const action = authenticatedAction(
+  async ({ params, request }, userId) => {
+    try {
+      invariant(params.id, 'Budget ID is required');
+      invariant(typeof params.id === 'string');
 
-  if (!userId) {
-    // TODO: Handle errors notifications
-    return redirect(LOGIN_ROUTE);
-  }
+      const budgetId = parseInt(params.id, 10);
+      invariant(!isNaN(budgetId), 'Budget ID must be a number');
 
-  try {
-    invariant(params.id, 'Budget ID is required');
-    invariant(typeof params.id === 'string');
+      invariant(params.goalId, 'Goal ID is required');
+      invariant(typeof params.goalId === 'string');
 
-    const budgetId = parseInt(params.id, 10);
-    invariant(!isNaN(budgetId), 'Budget ID must be a number');
+      const goalId = parseInt(params.goalId, 10);
+      invariant(!isNaN(goalId), 'Goal ID must be a number');
 
-    invariant(params.goalId, 'Goal ID is required');
-    invariant(typeof params.goalId === 'string');
+      const data = await request.formData();
+      const freeSavings = data.get('freeSavings');
+      const goals = data.get('goals');
 
-    const goalId = parseInt(params.goalId, 10);
-    invariant(!isNaN(goalId), 'Goal ID must be a number');
+      invariant(freeSavings, 'Free budget savings is required');
+      invariant(typeof freeSavings === 'string');
+      invariant(goals, 'Updated goals are required');
+      invariant(typeof goals === 'string');
 
-    const data = await request.formData();
-    const freeSavings = data.get('freeSavings');
-    const goals = data.get('goals');
+      await updateBudgetGoal(
+        userId,
+        budgetId,
+        goalId,
+        freeSavings,
+        JSON.parse(goals),
+      );
 
-    invariant(freeSavings, 'Free budget savings is required');
-    invariant(typeof freeSavings === 'string');
-    invariant(goals, 'Updated goals are required');
-    invariant(typeof goals === 'string');
+      const t = await i18next.getFixedT(await i18next.getLocale(request));
 
-    await updateBudgetGoal(
-      userId,
-      budgetId,
-      goalId,
-      freeSavings,
-      JSON.parse(goals),
-    );
-    return redirect(`/budgets/${budgetId}`);
-  } catch (e) {
-    // TODO: Handle errors notifications
-    console.error('Updating goal failed', e);
-    return redirect(`/budgets/${params.id}/goals/${params.goalId}/edit`);
-  }
-}
+      return redirectWithSuccess(`/budgets/${budgetId}`, {
+        message: t('goal.edit.changes-saved'),
+      });
+    } catch (e) {
+      console.error('Updating goal failed', e);
+      const t = await i18next.getFixedT(
+        await i18next.getLocale(request),
+        'errors',
+      );
+
+      return redirectWithError(
+        `/budgets/${params.id}/goals/${params.goalId}/edit`,
+        { message: t('goal.edit.updating-failed') },
+      );
+    }
+  },
+);
 
 const getGoalsCurrentAmount = getGoalsSum('currentAmount');
 
@@ -100,7 +103,7 @@ export default function () {
   const goal = goals.find(propEq(parseInt(goalId || ''), 'id'));
 
   if (!goal) {
-    // TODO: Handle errors notifications
+    toast.warning(t('goal.edit.not-found'));
     navigate(`/budgets/${budget.budgetId}`);
     return null;
   }

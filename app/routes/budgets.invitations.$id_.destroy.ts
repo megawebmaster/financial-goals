@@ -1,28 +1,32 @@
-import type { ActionFunctionArgs } from '@remix-run/node';
-import { redirect } from '@remix-run/node';
+import { redirectWithError, redirectWithSuccess } from 'remix-toast';
 import invariant from 'tiny-invariant';
 
-import { authenticator } from '~/services/auth.server';
 import { declineInvitation } from '~/services/budget-invitations.server';
-import { LOGIN_ROUTE } from '~/routes';
+import { authenticatedAction } from '~/helpers/auth';
+import i18next from '~/i18n.server';
 
-export async function action({ params, request }: ActionFunctionArgs) {
-  const userId = await authenticator.isAuthenticated(request);
+export const action = authenticatedAction(
+  async ({ params, request }, userId) => {
+    try {
+      invariant(params.id, 'Invitations ID is required');
+      invariant(typeof params.id === 'string');
 
-  if (!userId) {
-    // TODO: Handle errors notifications
-    return redirect(LOGIN_ROUTE);
-  }
+      await declineInvitation(params.id, userId);
+      const t = await i18next.getFixedT(await i18next.getLocale(request));
 
-  try {
-    invariant(params.id, 'Invitations ID is required');
-    invariant(typeof params.id === 'string');
+      return redirectWithSuccess('/budgets/invitations', {
+        message: t('budget-invitations.declined'),
+      });
+    } catch (e) {
+      console.error('Deleting invitations failed', e);
+      const t = await i18next.getFixedT(
+        await i18next.getLocale(request),
+        'error',
+      );
 
-    await declineInvitation(params.id, userId);
-    return redirect('/budgets/invitations');
-  } catch (e) {
-    console.error('Deleting invitations failed', e);
-    // TODO: Handle errors notifications
-    return redirect(`/budgets/invitations/${params.id}`);
-  }
-}
+      return redirectWithError(`/budgets/invitations/${params.id}`, {
+        message: t('budget-invitations.decline-failed'),
+      });
+    }
+  },
+);

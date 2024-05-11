@@ -42,13 +42,20 @@ export const action = authenticatedAction(
       invariant(typeof name === 'string', 'Name must be a text');
 
       await updateBudget(userId, budgetId, { name });
+      const t = await i18next.getFixedT(await i18next.getLocale(request));
+
       return redirectWithSuccess(`/budgets/${budgetId}`, {
-        message: 'Changes saved!',
+        message: t('budget.edit.changes-saved'),
       });
     } catch (e) {
       console.error('Updating budget failed', e);
+      const t = await i18next.getFixedT(
+        await i18next.getLocale(request),
+        'errors',
+      );
+
       return redirectWithError(`/budgets/${params.id}/edit`, {
-        message: 'Something went wrong! Please try again.',
+        message: t('budget.edit.updating-failed'),
       });
     }
   },

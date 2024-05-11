@@ -1,31 +1,30 @@
-import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
-import { redirect } from '@remix-run/node';
+import type { LoaderFunctionArgs } from '@remix-run/node';
+import { redirectWithError } from 'remix-toast';
 
 import { authenticator } from '~/services/auth.server';
 import { deleteUser } from '~/services/user.server';
-import { LOGIN_ROUTE } from '~/routes';
+import { authenticatedAction } from '~/helpers/auth';
+import i18next from '~/i18n.server';
 
-export async function action({ request }: ActionFunctionArgs) {
-  // If the user is not already authenticated redirect to / directly
-  const userId = await authenticator.isAuthenticated(request);
-
-  if (!userId) {
-    // TODO: Handle errors notifications
-    return redirect(LOGIN_ROUTE);
-  }
-
+export const action = authenticatedAction(async ({ request }, userId) => {
   try {
     await deleteUser(userId);
   } catch (e) {
     console.error('Unable to delete user', e);
-    // TODO: Handle errors notifications
-    return redirect('/budgets');
+    const t = await i18next.getFixedT(
+      await i18next.getLocale(request),
+      'error',
+    );
+
+    return redirectWithError('/budgets', {
+      message: t('user.deletion-failed'),
+    });
   }
 
   return await authenticator.logout(request, {
     redirectTo: '/',
   });
-}
+});
 
 export async function loader({ request }: LoaderFunctionArgs) {
   return await authenticator.isAuthenticated(request);

@@ -1,42 +1,40 @@
-import type { LoaderFunctionArgs } from '@remix-run/node';
-import { redirect } from '@remix-run/node';
 import { Outlet, useLoaderData, useOutletContext } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
+import { redirectWithError } from 'remix-toast';
 import type { User } from '@prisma/client';
 import invariant from 'tiny-invariant';
 
 import type { BudgetsLayoutContext } from '~/helpers/budgets';
-import { authenticator } from '~/services/auth.server';
 import { getBudget } from '~/services/budgets.server';
 import { getBudgetGoals } from '~/services/budget-goals.server';
 import { Budget } from '~/components/budget';
 import { GoalsList } from '~/components/budgets/goals-list';
-import { LOGIN_ROUTE } from '~/routes';
+import { authenticatedLoader } from '~/helpers/auth';
+import i18next from '~/i18n.server';
 
-export async function loader({ params, request }: LoaderFunctionArgs) {
-  const userId = await authenticator.isAuthenticated(request);
+export const loader = authenticatedLoader(
+  async ({ params, request }, userId) => {
+    try {
+      invariant(params.id, 'Budget ID is required');
+      invariant(typeof params.id === 'string');
 
-  if (!userId) {
-    // TODO: Handle errors notifications
-    return redirect(LOGIN_ROUTE);
-  }
+      const budgetId = parseInt(params.id, 10);
+      invariant(!isNaN(budgetId), 'Budget ID must be a number');
 
-  try {
-    invariant(params.id, 'Budget ID is required');
-    invariant(typeof params.id === 'string');
+      return {
+        budget: await getBudget(userId, budgetId),
+        goals: await getBudgetGoals(userId, budgetId),
+      };
+    } catch (e) {
+      const t = await i18next.getFixedT(
+        await i18next.getLocale(request),
+        'error',
+      );
 
-    const budgetId = parseInt(params.id, 10);
-    invariant(!isNaN(budgetId), 'Budget ID must be a number');
-
-    return {
-      budget: await getBudget(userId, budgetId),
-      goals: await getBudgetGoals(userId, budgetId),
-    };
-  } catch (e) {
-    // TODO: Handle errors notifications
-    return redirect('/budgets');
-  }
-}
+      return redirectWithError('/budgets', { message: t('budget.not-found') });
+    }
+  },
+);
 
 export default function () {
   const { t } = useTranslation();

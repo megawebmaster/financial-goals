@@ -8,10 +8,11 @@ import { redirect } from '@remix-run/node';
 import { Form, json } from '@remix-run/react';
 import { render } from '@react-email/render';
 import { useTranslation } from 'react-i18next';
+import { redirectWithError } from 'remix-toast';
 
 import { authenticator } from '~/services/auth.server';
 import { storeKeyMaterial } from '~/services/encryption.client';
-import { createUser } from '~/services/user.server';
+import { createUser, UserExistsError } from '~/services/user.server';
 import { mailer } from '~/services/mail.server';
 import { LOGIN_ROUTE } from '~/routes';
 import NewAccountEmail from '~/emails/new-account-email';
@@ -56,8 +57,16 @@ export async function action({ request }: ActionFunctionArgs) {
     });
   } catch (e) {
     console.error('Unable to create new user', e);
-    // TODO: Show user exists?
-    return redirect('/signup');
+    // TODO: Why can new account creation fail? Improve user experience here
+    const t = await i18next.getFixedT(
+      await i18next.getLocale(request),
+      'error',
+    );
+
+    const error =
+      e instanceof UserExistsError ? 'user.exists' : 'signup.failed';
+
+    return redirectWithError('/signup', { message: t(error) });
   }
 
   return await authenticator.authenticate('user-pass', request, {

@@ -1,9 +1,5 @@
 import type { FormEvent } from 'react';
-import type {
-  ActionFunctionArgs,
-  LoaderFunctionArgs,
-  MetaFunction,
-} from '@remix-run/node';
+import type { MetaFunction } from '@remix-run/node';
 import { redirect } from '@remix-run/node';
 import {
   useNavigate,
@@ -13,10 +9,10 @@ import {
 } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
 import { propEq } from 'ramda';
+import { redirectWithError, redirectWithSuccess } from 'remix-toast';
 import invariant from 'tiny-invariant';
 
 import type { BudgetInvitationsLayoutContext } from '~/helpers/budget-invitations';
-import { authenticator } from '~/services/auth.server';
 import { encrypt, lockKey } from '~/services/encryption.client';
 import { importKey } from '~/services/encryption';
 import {
@@ -24,7 +20,7 @@ import {
   getInvitation,
 } from '~/services/budget-invitations.server';
 import { BudgetAcceptForm } from '~/components/budget-accept-form';
-import { LOGIN_ROUTE } from '~/routes';
+import { authenticatedAction, authenticatedLoader } from '~/helpers/auth';
 import i18next from '~/i18n.server';
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => [
@@ -33,63 +29,67 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => [
   },
 ];
 
-export async function loader({ request, params }: LoaderFunctionArgs) {
-  // If the user is not already authenticated redirect to / directly
-  const userId = await authenticator.isAuthenticated(request);
+export const loader = authenticatedLoader(
+  async ({ request, params }, userId) => {
+    if (!params.id) {
+      return redirect('/');
+    }
 
-  if (!userId) {
-    // TODO: Handle errors notifications
-    return redirect(LOGIN_ROUTE);
-  }
+    try {
+      const t = await i18next.getFixedT(await i18next.getLocale(request));
+      await getInvitation(params.id, userId);
 
-  if (!params.id) {
-    return redirect('/');
-  }
+      return {
+        title: t('budget.share.accept.title'),
+      };
+    } catch (e) {
+      console.error('Budget invitation error', e);
+      const t = await i18next.getFixedT(
+        await i18next.getLocale(request),
+        'error',
+      );
 
-  try {
-    const t = await i18next.getFixedT(await i18next.getLocale(request));
-    await getInvitation(params.id, userId);
+      return redirectWithError('/', {
+        message: t('budget-invitations.not-found'),
+      });
+    }
+  },
+);
 
-    return {
-      title: t('budget.share.accept.title'),
-    };
-  } catch (e) {
-    console.error('Budget invitation error', e);
-    // TODO: Handle errors notifications
-    return redirect('/');
-  }
-}
+export const action = authenticatedAction(
+  async ({ params, request }, userId) => {
+    try {
+      invariant(params.id, 'Invitation ID is required');
+      invariant(typeof params.id === 'string');
 
-export async function action({ params, request }: ActionFunctionArgs) {
-  const userId = await authenticator.isAuthenticated(request);
+      const data = await request.formData();
+      const name = data.get('name');
+      const key = data.get('key');
 
-  if (!userId) {
-    // TODO: Handle errors notifications
-    return redirect(LOGIN_ROUTE);
-  }
+      invariant(name, 'Name of the budget is required');
+      invariant(typeof name === 'string', 'Budget name must be a text');
+      invariant(key, 'Budget encryption key is required');
+      invariant(typeof key === 'string', 'Encryption key must be a text');
 
-  try {
-    invariant(params.id, 'Invitation ID is required');
-    invariant(typeof params.id === 'string');
+      const budget = await acceptInvitation(params.id, userId, name, key);
+      const t = await i18next.getFixedT(await i18next.getLocale(request));
 
-    const data = await request.formData();
-    const name = data.get('name');
-    const key = data.get('key');
+      return redirectWithSuccess(`/budgets/${budget.budgetId}`, {
+        message: t('budget-invitations.accepted'),
+      });
+    } catch (e) {
+      console.error('Accepting budget invitation failed', e);
+      const t = await i18next.getFixedT(
+        await i18next.getLocale(request),
+        'error',
+      );
 
-    invariant(name, 'Name of the budget is required');
-    invariant(typeof name === 'string', 'Budget name must be a text');
-    invariant(key, 'Budget encryption key is required');
-    invariant(typeof key === 'string', 'Encryption key must be a text');
-
-    const budget = await acceptInvitation(params.id, userId, name, key);
-
-    return redirect(`/budgets/${budget.budgetId}`);
-  } catch (e) {
-    console.error('Accepting budget invitation failed', e);
-    // TODO: Handle errors notifications
-    return redirect('/');
-  }
-}
+      return redirectWithError('/', {
+        message: t('budget-invitations.accepting-failed'),
+      });
+    }
+  },
+);
 
 export default function () {
   const { t } = useTranslation();

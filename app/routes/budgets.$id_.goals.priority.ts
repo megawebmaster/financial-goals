@@ -1,36 +1,38 @@
-import type { ActionFunctionArgs } from '@remix-run/node';
 import { redirect } from '@remix-run/node';
+import { redirectWithError } from 'remix-toast';
 import invariant from 'tiny-invariant';
 
-import { authenticator } from '~/services/auth.server';
 import { updateBudgetGoalsPriority } from '~/services/budget-goals.server';
-import { LOGIN_ROUTE } from '~/routes';
+import { authenticatedAction } from '~/helpers/auth';
+import i18next from '~/i18n.server';
 
-export async function action({ params, request }: ActionFunctionArgs) {
-  const userId = await authenticator.isAuthenticated(request);
+export const action = authenticatedAction(
+  async ({ params, request }, userId) => {
+    try {
+      invariant(params.id, 'Budget ID is required');
+      invariant(typeof params.id === 'string');
 
-  if (!userId) {
-    // TODO: Handle errors notifications
-    return redirect(LOGIN_ROUTE);
-  }
+      const budgetId = parseInt(params.id, 10);
+      invariant(!isNaN(budgetId), 'Budget ID must be a number');
 
-  try {
-    invariant(params.id, 'Budget ID is required');
-    invariant(typeof params.id === 'string');
+      const data = await request.formData();
+      const goals = data.get('goals');
+      invariant(goals, 'Goals are required');
+      invariant(typeof goals === 'string');
 
-    const budgetId = parseInt(params.id, 10);
-    invariant(!isNaN(budgetId), 'Budget ID must be a number');
+      await updateBudgetGoalsPriority(userId, budgetId, JSON.parse(goals));
 
-    const data = await request.formData();
-    const goals = data.get('goals');
-    invariant(goals, 'Goals are required');
-    invariant(typeof goals === 'string');
+      return redirect(`/budgets/${budgetId}`);
+    } catch (e) {
+      console.error('Changing goal priority failed', e);
+      const t = await i18next.getFixedT(
+        await i18next.getLocale(request),
+        'error',
+      );
 
-    await updateBudgetGoalsPriority(userId, budgetId, JSON.parse(goals));
-    return redirect(`/budgets/${budgetId}`);
-  } catch (e) {
-    console.error('Changing goal priority failed', e);
-    // TODO: Handle errors notifications
-    return redirect(`/budgets/${params.id}`);
-  }
-}
+      return redirectWithError(`/budgets/${params.id}`, {
+        message: t('goal.priority.change-failed'),
+      });
+    }
+  },
+);
