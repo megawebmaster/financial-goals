@@ -12,6 +12,8 @@ import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getToast } from 'remix-toast';
 import { toast as notify, Toaster } from 'sonner';
+import { z } from 'zod';
+import { makeZodI18nMap } from 'zod-i18n-map';
 
 import i18next from '~/i18n.server';
 import './tailwind.css';
@@ -39,7 +41,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 export default function App() {
   const { locale, toast } = useLoaderData<typeof loader>();
-  const { i18n } = useTranslation();
+  const { i18n, t } = useTranslation();
 
   useEffect(() => {
     switch (toast?.type) {
@@ -57,6 +59,8 @@ export default function App() {
         break;
     }
   }, [toast?.type, toast?.message]);
+
+  z.setErrorMap(makeZodI18nMap({ t, handlePath: { ns: ['zod'] } }));
 
   return (
     <html lang={locale} dir={i18n.dir()}>
