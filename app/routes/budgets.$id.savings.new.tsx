@@ -11,7 +11,6 @@ import { encrypt, unlockKey } from '~/services/encryption.client';
 import { getBudgetGoals } from '~/services/budget-goals.server';
 import { BudgetSavingsEntryForm } from '~/components/budget-savings-entry-form';
 import { createSavingsEntry } from '~/services/budget-savings-entries.server';
-import { encryptBudgetSavingsEntry } from '~/services/budget-savings-entries.client';
 import {
   buildGoalsFiller,
   encryptBudgetGoal,
@@ -64,12 +63,12 @@ export const action = authenticatedAction(
       invariant(!isNaN(budgetId), 'Budget ID must be a number');
 
       const data = await request.formData();
-      const entryValue = data.get('entryValue');
+      const entryData = data.get('entryData');
       const budgetData = data.get('budgetData');
       const goals = data.get('goals');
 
-      invariant(entryValue, 'Value for entry is required');
-      invariant(typeof entryValue === 'string');
+      invariant(entryData, 'Data for entry is required');
+      invariant(typeof entryData === 'string');
       invariant(budgetData, 'Budget data is required');
       invariant(typeof budgetData === 'string');
       invariant(goals, 'Goals are required');
@@ -79,7 +78,7 @@ export const action = authenticatedAction(
         userId,
         budgetId,
         JSON.parse(budgetData),
-        entryValue,
+        JSON.parse(entryData),
         JSON.parse(goals),
       );
       const t = await i18next.getFixedT(await i18next.getLocale(request));
@@ -119,16 +118,13 @@ export default function () {
     const processGoals = buildGoalsFiller(currentSavings);
     const updatedGoals = processGoals(goals);
     const freeSavings = currentSavings - getGoalsCurrentAmount(updatedGoals);
-    const entryValue = await encryptBudgetSavingsEntry(
-      // TODO: Why did I decide to encrypt date here?
-      date,
-      amount,
-      encryptionKey,
-    );
 
     submit(
       {
-        entryValue,
+        entryData: JSON.stringify({
+          date,
+          amount: await encrypt(amount.toString(10), encryptionKey),
+        }),
         budgetData: JSON.stringify({
           currentSavings: await encrypt(
             currentSavings.toString(10),

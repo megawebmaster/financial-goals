@@ -58,12 +58,13 @@ model Budget {
 }
 
 model BudgetSavingsEntry {
-  id       Int    @id @default(autoincrement())
+  id       Int      @id @default(autoincrement())
   budgetId Int
-  budget   Budget @relation("BudgetSavingsEntries", fields: [budgetId], references: [id], onDelete: Cascade)
+  budget   Budget   @relation("BudgetSavingsEntries", fields: [budgetId], references: [id], onDelete: Cascade)
   userId   Int?
-  user     User?  @relation("UserSavingEntries", fields: [userId], references: [id], onDelete: SetNull)
-  value    String
+  user     User?    @relation("UserSavingEntries", fields: [userId], references: [id], onDelete: SetNull)
+  date     DateTime
+  amount   String
 }
 
 model BudgetGoal {

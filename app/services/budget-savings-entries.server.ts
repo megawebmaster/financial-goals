@@ -1,16 +1,13 @@
 import type { Budget, BudgetGoal, BudgetSavingsEntry } from '@prisma/client';
-import { pick } from 'ramda';
 
 import { prisma } from '~/services/db.server';
-
-const getCurrentAmount = pick<(keyof BudgetGoal)[]>(['currentAmount']);
 
 export const createSavingsEntry = async (
   userId: number,
   budgetId: number,
   budgetData: Omit<Budget, 'id'>,
-  entryValue: string,
-  goals: BudgetGoal[],
+  entryData: Omit<BudgetSavingsEntry, 'id' | 'userId' | 'budgetId'>,
+  goals: Pick<BudgetGoal, 'id' | 'currentAmount'>[],
 ): Promise<BudgetSavingsEntry> =>
   await prisma.$transaction(async (tx) => {
     // TODO: Does this update ensure the budget exists?
@@ -26,7 +23,7 @@ export const createSavingsEntry = async (
 
     const entry = await tx.budgetSavingsEntry.create({
       data: {
-        value: entryValue,
+        ...entryData,
         userId,
         budgetId,
       },
@@ -38,7 +35,9 @@ export const createSavingsEntry = async (
           where: {
             id: goal.id,
           },
-          data: getCurrentAmount(goal),
+          data: {
+            currentAmount: goal.currentAmount,
+          },
         }),
       ),
     );

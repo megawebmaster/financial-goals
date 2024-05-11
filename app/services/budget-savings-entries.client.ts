@@ -7,12 +7,10 @@ export const decryptBudgetSavingsEntry = async (
   entry: BudgetSavingsEntry,
   key: CryptoKey,
 ): Promise<ClientBudgetSavingsEntry> => {
-  const value = JSON.parse(await decrypt(entry.value, key));
-
   return {
     ...entry,
-    date: value.date,
-    amount: value.amount,
+    date: new Date(entry.date),
+    amount: parseFloat(await decrypt(entry.amount, key)),
   };
 };
 
