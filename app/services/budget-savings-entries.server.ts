@@ -1,6 +1,17 @@
 import type { Budget, BudgetGoal, BudgetSavingsEntry } from '@prisma/client';
+import { startOfMonth, subMonths } from 'date-fns';
 
 import { prisma } from '~/services/db.server';
+
+export const getBudgetSavings = (budgetId: number) =>
+  prisma.budgetSavingsEntry.findMany({
+    where: {
+      budgetId,
+      date: {
+        gte: startOfMonth(subMonths(new Date(), 12)),
+      },
+    },
+  });
 
 export const createSavingsEntry = async (
   userId: number,

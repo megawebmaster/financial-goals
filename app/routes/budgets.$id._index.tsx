@@ -10,6 +10,8 @@ import {
   buildGoalsSorting,
   encryptBudgetGoal,
 } from '~/services/budget-goals.client';
+import { getAverageSavings } from '~/services/budget-savings-entries.client';
+import { BudgetGoal } from '~/components/budget-goal';
 import type { BudgetsLayoutContext } from '~/helpers/budgets';
 import i18next from '~/i18n.server';
 
@@ -29,10 +31,10 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 export default function () {
   const { t } = useTranslation();
-  const { budget, goals } = useOutletContext<BudgetsLayoutContext>();
+  const { budget, goals, savings } = useOutletContext<BudgetsLayoutContext>();
   const submit = useSubmit();
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const changePriority = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const encryptionKey = await unlockKey(budget.key);
     const formData = new FormData(event.target as HTMLFormElement);
@@ -91,26 +93,12 @@ export default function () {
       {goals.length === 0 && <p>{t('budget.view.goals.empty')}</p>}
       <ul>
         {goals.map((goal) => (
-          <li key={goal.id}>
-            {goal.name} - {goal.requiredAmount} (
-            {goal.currentAmount !== 0 &&
-              goal.currentAmount !== goal.requiredAmount &&
-              `${goal.currentAmount}, `}
-            {Math.round((goal.currentAmount / goal.requiredAmount) * 100)}%){' '}
-            <a href={`/budgets/${budget.budgetId}/goals/${goal.id}/edit`}>
-              {t('budget.view.goals.edit')}
-            </a>{' '}
-            <form onSubmit={handleSubmit}>
-              <input type="hidden" name="goalId" value={goal.id} />
-              <input type="hidden" name="priority" value={goal.priority - 1} />
-              <button type="submit">{t('budget.view.goals.move-up')}</button>
-            </form>{' '}
-            <form onSubmit={handleSubmit}>
-              <input type="hidden" name="goalId" value={goal.id} />
-              <input type="hidden" name="priority" value={goal.priority + 1} />
-              <button type="submit">{t('budget.view.goals.move-down')}</button>
-            </form>
-          </li>
+          <BudgetGoal
+            key={goal.id}
+            budgetId={budget.budgetId}
+            goal={goal}
+            onPriorityChange={changePriority}
+          />
         ))}
       </ul>
       <a href={`/budgets/${budget.budgetId}/goals/new`}>
