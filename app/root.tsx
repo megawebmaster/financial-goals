@@ -14,6 +14,7 @@ import { getToast } from 'remix-toast';
 import { toast as notify, Toaster } from 'sonner';
 
 import i18next from '~/i18n.server';
+import './tailwind.css';
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => [
   {
