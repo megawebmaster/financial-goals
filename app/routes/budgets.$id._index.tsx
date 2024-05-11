@@ -82,7 +82,14 @@ export default function () {
       </h2>
       <p>
         <strong>{t('budget.view.current-savings')}:</strong>{' '}
-        {budget.currentSavings}
+        {budget.currentSavings}{' '}
+        {t('budget.view.average-savings', {
+          average: getAverageSavings(savings),
+          formatParams: {
+            // TODO: Properly ask about currency of the budget
+            average: { currency: 'PLN', locale: 'pl-PL' },
+          },
+        })}
       </p>
       {budget.freeSavings > 0 && (
         <p>
