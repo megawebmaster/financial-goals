@@ -1,5 +1,4 @@
-import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
-import { redirect } from '@remix-run/node';
+import type { ActionFunctionArgs } from '@remix-run/node';
 import type {
   ClientActionFunctionArgs,
   ClientLoaderFunctionArgs,
@@ -13,7 +12,7 @@ import {
   buildWrappingKey,
   clearEncryption,
 } from '~/services/encryption.client';
-import { LOGIN_ROUTE } from '~/routes';
+import { authenticatedLoader } from '~/helpers/auth';
 
 export async function action({ request }: ActionFunctionArgs) {
   return await authenticator.logout(request, {
@@ -26,26 +25,17 @@ export async function clientAction({ serverAction }: ClientActionFunctionArgs) {
   return await serverAction();
 }
 
-export async function loader({ request }: LoaderFunctionArgs) {
-  // If the user is not already authenticated redirect to / directly
-  const userId = await authenticator.isAuthenticated(request);
-
-  if (!userId) {
-    // TODO: Handle errors notifications
-    return redirect(LOGIN_ROUTE);
-  }
-
+export const loader = authenticatedLoader(async ({ request }, userId) => {
   try {
     return {
       user: await getUser(userId),
     };
   } catch (e) {
-    // TODO: Handle logged out notification
     return await authenticator.logout(request, {
       redirectTo: '/',
     });
   }
-}
+});
 
 export async function clientLoader({ serverLoader }: ClientLoaderFunctionArgs) {
   const data = await serverLoader<typeof loader>();

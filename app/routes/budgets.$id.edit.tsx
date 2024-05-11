@@ -1,20 +1,15 @@
 import type { FormEvent } from 'react';
-import type {
-  ActionFunctionArgs,
-  LoaderFunctionArgs,
-  MetaFunction,
-} from '@remix-run/node';
-import { redirect } from '@remix-run/node';
+import type { LoaderFunctionArgs, MetaFunction } from '@remix-run/node';
 import { Form, useOutletContext, useSubmit } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
+import { redirectWithError, redirectWithSuccess } from 'remix-toast';
 import invariant from 'tiny-invariant';
 
 import type { BudgetsLayoutContext } from '~/helpers/budgets';
-import { authenticator } from '~/services/auth.server';
 import { encrypt, unlockKey } from '~/services/encryption.client';
 import { updateBudget } from '~/services/budgets.server';
 import { BudgetForm } from '~/components/budget-form';
-import { LOGIN_ROUTE } from '~/routes';
+import { authenticatedAction } from '~/helpers/auth';
 import i18next from '~/i18n.server';
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => [
@@ -31,35 +26,33 @@ export async function loader({ request }: LoaderFunctionArgs) {
   };
 }
 
-export async function action({ params, request }: ActionFunctionArgs) {
-  const userId = await authenticator.isAuthenticated(request);
+export const action = authenticatedAction(
+  async ({ params, request }, userId) => {
+    try {
+      invariant(params.id, 'Budget ID is required');
+      invariant(typeof params.id === 'string');
 
-  if (!userId) {
-    // TODO: Handle errors notifications
-    return redirect(LOGIN_ROUTE);
-  }
+      const budgetId = parseInt(params.id, 10);
+      invariant(!isNaN(budgetId), 'Budget ID must be a number');
 
-  try {
-    invariant(params.id, 'Budget ID is required');
-    invariant(typeof params.id === 'string');
+      const data = await request.formData();
+      const name = data.get('name');
 
-    const budgetId = parseInt(params.id, 10);
-    invariant(!isNaN(budgetId), 'Budget ID must be a number');
+      invariant(name, 'Name of the budget is required');
+      invariant(typeof name === 'string', 'Name must be a text');
 
-    const data = await request.formData();
-    const name = data.get('name');
-
-    invariant(name, 'Name of the budget is required');
-    invariant(typeof name === 'string', 'Name must be a text');
-
-    await updateBudget(userId, budgetId, { name });
-    return redirect('/budgets');
-  } catch (e) {
-    console.error('Updating budget failed', e);
-    // TODO: Handle errors notifications
-    return redirect(`/budgets/${params.id}/edit`);
-  }
-}
+      await updateBudget(userId, budgetId, { name });
+      return redirectWithSuccess(`/budgets/${budgetId}`, {
+        message: 'Changes saved!',
+      });
+    } catch (e) {
+      console.error('Updating budget failed', e);
+      return redirectWithError(`/budgets/${params.id}/edit`, {
+        message: 'Something went wrong! Please try again.',
+      });
+    }
+  },
+);
 
 export default function () {
   const { t } = useTranslation();
