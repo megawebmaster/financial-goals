@@ -1,20 +1,21 @@
-import type { FormEvent } from 'react';
 import type {
   ActionFunctionArgs,
   LoaderFunctionArgs,
   MetaFunction,
 } from '@remix-run/node';
 import { redirect } from '@remix-run/node';
-import { Form, json } from '@remix-run/react';
+import { json } from '@remix-run/react';
 import { render } from '@react-email/render';
-import { useTranslation } from 'react-i18next';
 import { redirectWithError } from 'remix-toast';
 
 import { authenticator } from '~/services/auth.server';
-import { storeKeyMaterial } from '~/services/encryption.client';
 import { createUser, UserExistsError } from '~/services/user.server';
 import { mailer } from '~/services/mail.server';
 import { LOGIN_ROUTE } from '~/routes';
+import { PageHeader } from '~/components/ui/page-header';
+import { PageMainNav } from '~/components/ui/page-main-nav';
+import { PageBody } from '~/components/ui/page-body';
+import { SignupForm } from '~/components/signup-form';
 import NewAccountEmail from '~/emails/new-account-email';
 import i18next from '~/i18n.server';
 
@@ -76,38 +77,14 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 
 export default function () {
-  const { t } = useTranslation();
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    const data = new FormData(e.currentTarget);
-    const password = data.get('password');
-
-    if (password) {
-      await storeKeyMaterial(password.toString());
-    }
-  };
-
   return (
-    <>
-      <h2>{t('register.page.title')}</h2>
-      <Form method="post" onSubmit={handleSubmit}>
-        <label htmlFor="username">{t('register.form.username')}</label>
-        <input
-          id="username"
-          type="email"
-          name="username"
-          required
-          autoComplete="email"
-        />
-        <label htmlFor="password">{t('register.form.password')}</label>
-        <input
-          id="password"
-          type="password"
-          name="password"
-          required
-          autoComplete="password"
-        />
-        <button type="submit">{t('register.form.submit')}</button>
-      </Form>
-    </>
+    <div className="flex min-h-screen w-full flex-col">
+      <PageHeader>
+        <PageMainNav />
+      </PageHeader>
+      <PageBody className="items-start justify-start py-8 md:py-12 lg:py-24">
+        <SignupForm />
+      </PageBody>
+    </div>
   );
 }

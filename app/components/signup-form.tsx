@@ -23,26 +23,26 @@ import {
   CardTitle,
 } from '~/components/ui/card';
 
-const loginFormSchema = z.object({
+const signupFormSchema = z.object({
   username: z.string().min(4).max(64),
-  password: z.string().min(12),
+  password: z.string().min(4),
 });
 
-export function LoginForm() {
+export function SignupForm() {
   const { t } = useTranslation();
   const submit = useSubmit();
 
-  const form = useForm<z.infer<typeof loginFormSchema>>({
-    resolver: zodResolver(loginFormSchema),
+  const form = useForm<z.infer<typeof signupFormSchema>>({
+    resolver: zodResolver(signupFormSchema),
     defaultValues: {
       username: '',
       password: '',
     },
   });
 
-  const handleSubmit = async (values: z.infer<typeof loginFormSchema>) => {
+  const handleSubmit = async (values: z.infer<typeof signupFormSchema>) => {
     await storeKeyMaterial(values.password);
-    submit(values, { method: 'post', action: '/login' });
+    submit(values, { method: 'post', action: '/signup' });
   };
 
   return (
@@ -50,10 +50,10 @@ export function LoginForm() {
       <Card className="mx-auto max-w-lg">
         <CardHeader>
           <CardTitle className="text-2xl">
-            {t('component.login-form.title')}
+            {t('component.signup-form.title')}
           </CardTitle>
           <CardDescription>
-            {t('component.login-form.description')}
+            {t('component.signup-form.description')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -65,14 +65,14 @@ export function LoginForm() {
               name="username"
               render={({ field }) => (
                 <FormItem className="grid gap-2">
-                  <FormLabel>{t('component.login-form.username')}</FormLabel>
+                  <FormLabel>{t('component.signup-form.username')}</FormLabel>
                   <FormControl>
                     <Input
                       {...field}
                       autoComplete="email"
                       type="email"
                       placeholder={t(
-                        'component.login-form.username-placeholder',
+                        'component.signup-form.username-placeholder',
                       )}
                     />
                   </FormControl>
@@ -84,14 +84,14 @@ export function LoginForm() {
               name="password"
               render={({ field }) => (
                 <FormItem className="grid gap-2">
-                  <FormLabel>{t('component.login-form.password')}</FormLabel>
+                  <FormLabel>{t('component.signup-form.password')}</FormLabel>
                   <FormControl>
                     <Input
                       {...field}
                       autoComplete="password"
                       type="password"
                       placeholder={t(
-                        'component.login-form.password-placeholder',
+                        'component.signup-form.password-placeholder',
                       )}
                     />
                   </FormControl>
@@ -100,13 +100,13 @@ export function LoginForm() {
               )}
             />
             <Button type="submit" className="w-full">
-              {t('component.login-form.submit')}
+              {t('component.signup-form.submit')}
             </Button>
           </form>
           <div className="mt-4 text-center text-sm">
-            {t('component.login-form.register.description')}{' '}
-            <Link to="/signup" className="underline">
-              {t('component.login-form.register.action')}
+            {t('component.signup-form.login.description')}{' '}
+            <Link to="/" className="underline">
+              {t('component.signup-form.login.action')}
             </Link>
           </div>
         </CardContent>
