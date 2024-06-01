@@ -16,6 +16,10 @@ import {
   CardTitle,
 } from '~/components/ui/card';
 import { Button } from '~/components/ui/button';
+import { PageTitle } from '~/components/ui/page-title';
+import { PageBody } from '~/components/ui/page-body';
+import { PageContent } from '~/components/ui/page-content';
+import { PageNavLink } from '~/components/ui/page-nav-link';
 
 export const loader = authenticatedLoader(async ({ request }, userId) => {
   try {
@@ -36,16 +40,16 @@ export default function () {
   return (
     <div className="flex min-h-screen w-full flex-col">
       <PageHeader>
-        <PageMainNav />
+        <PageMainNav>
+          <PageNavLink to="/budgets">{t('nav.budgets')}</PageNavLink>
+        </PageMainNav>
         <PageUserNav>
           <UserMenu user={user} />
         </PageUserNav>
       </PageHeader>
-      <main className="flex flex-1 flex-col py-4 px-12">
-        <div className="mx-auto w-2/3">
-          <h1 className="text-4xl font-semibold leading-none tracking-tight mt-4 mb-8">
-            {t('user-settings.title')}
-          </h1>
+      <PageBody>
+        <PageTitle>{t('user-settings.title')}</PageTitle>
+        <PageContent>
           <Card>
             <CardHeader>
               <CardTitle className="text-2xl">
@@ -63,8 +67,8 @@ export default function () {
               </Form>
             </CardContent>
           </Card>
-        </div>
-      </main>
+        </PageContent>
+      </PageBody>
     </div>
   );
 }

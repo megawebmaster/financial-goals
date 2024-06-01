@@ -11,6 +11,7 @@ import { PageMainNav } from '~/components/ui/page-main-nav';
 import { PageUserNav } from '~/components/ui/page-user-nav';
 import { UserMenu } from '~/components/ui/user-menu';
 import { PageNavLink } from '~/components/ui/page-nav-link';
+import { PageBody } from '~/components/ui/page-body';
 
 export const loader = authenticatedLoader(async ({ request }, userId) => {
   try {
@@ -39,19 +40,18 @@ export default function () {
     <div className="flex min-h-screen w-full flex-col">
       <PageHeader>
         <PageMainNav>
+          <PageNavLink to="/budgets">{t('nav.budgets')}</PageNavLink>
           <PageNavLink to="/budgets/invitations">
-            {t('budgets.invitations')}
+            {t('nav.budget-invitations')}
           </PageNavLink>
         </PageMainNav>
         <PageUserNav>
           <UserMenu user={user} />
         </PageUserNav>
       </PageHeader>
-      <main className="flex flex-1 flex-col py-4 px-12">
-        <div className="mx-auto w-2/3">
-          <Outlet context={user} />
-        </div>
-      </main>
+      <PageBody>
+        <Outlet context={user} />
+      </PageBody>
     </div>
   );
 }
