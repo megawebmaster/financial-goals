@@ -78,6 +78,9 @@
   "component.login-form.submit": "Login",
   "component.login-form.register.description": "Don't have an account?",
   "component.login-form.register.action": "Sign up",
+  "component.user-menu.toggle": "Toggle user menu",
+  "component.user-menu.settings": "Settings",
+  "component.user-menu.logout": "Log out",
   "goal.deleted": "Goal deleted successfully!",
   "goal.new.title": "Create new goal | $t(app.name)",
   "goal.new.back": "Go back: {{ budget }} budget",
@@ -96,5 +99,9 @@
   "savings.new.page.title": "Add savings to {{ budget }} budget",
   "savings.new.back": "Go back: List of budgets",
   "savings.new.form.submit": "Add savings!",
-  "savings.new.created": "Added new savings to your budget!"
+  "savings.new.created": "Added new savings to your budget!",
+  "user-settings.title": "Settings",
+  "user-settings.delete-account.title": "Delete account",
+  "user-settings.delete-account.description": "You can completely delete your account along with all its data here.",
+  "user-settings.delete-account.submit": "Yes, delete my account"
 }
