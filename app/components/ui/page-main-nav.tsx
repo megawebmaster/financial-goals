@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
-import { Link } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
+
+import { PageNavLink } from '~/components/ui/page-nav-link';
 
 type PageMainNavProps = {
   children?: ReactNode;
@@ -11,12 +12,9 @@ export function PageMainNav({ children }: PageMainNavProps) {
 
   return (
     <nav className="flex flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
-      <Link
-        to="/"
-        className="flex items-center gap-2 text-lg font-semibold text-nowrap md:text-base"
-      >
+      <PageNavLink to="/" className="text-lg font-semibold">
         {t('app.name')}
-      </Link>
+      </PageNavLink>
       {children}
     </nav>
   );

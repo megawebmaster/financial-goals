@@ -11,6 +11,7 @@
   "budgets.encryption.decrypting": "Decrypting data…",
   "budgets.list.empty": "No budgets yet!",
   "budgets.list.create": "Create budget",
+  "budgets.invitations": "Invitations",
   "budget.edit.title": "Update a budget | $t(app.name)",
   "budget.edit.back": "Go back",
   "budget.edit.page.title": "Update \"{{ name }}\" budget",

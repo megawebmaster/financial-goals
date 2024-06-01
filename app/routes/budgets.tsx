@@ -1,29 +1,16 @@
-import type { ActionFunctionArgs } from '@remix-run/node';
-import type {
-  ClientActionFunctionArgs,
-  ClientLoaderFunctionArgs,
-} from '@remix-run/react';
-import { Form, Outlet, useLoaderData } from '@remix-run/react';
+import type { ClientLoaderFunctionArgs } from '@remix-run/react';
+import { Outlet, useLoaderData } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
 
 import { authenticator } from '~/services/auth.server';
 import { getUser } from '~/services/user.server';
-import {
-  buildWrappingKey,
-  clearEncryption,
-} from '~/services/encryption.client';
+import { buildWrappingKey } from '~/services/encryption.client';
 import { authenticatedLoader } from '~/helpers/auth';
-
-export async function action({ request }: ActionFunctionArgs) {
-  return await authenticator.logout(request, {
-    redirectTo: '/',
-  });
-}
-
-export async function clientAction({ serverAction }: ClientActionFunctionArgs) {
-  await clearEncryption();
-  return await serverAction();
-}
+import { PageHeader } from '~/components/ui/page-header';
+import { PageMainNav } from '~/components/ui/page-main-nav';
+import { PageUserNav } from '~/components/ui/page-user-nav';
+import { UserMenu } from '~/components/ui/user-menu';
+import { PageNavLink } from '~/components/ui/page-nav-link';
 
 export const loader = authenticatedLoader(async ({ request }, userId) => {
   try {
@@ -49,16 +36,22 @@ export default function () {
   const { t } = useTranslation();
 
   return (
-    <>
-      <h1>{t('app.name')}</h1>
-      <p>Logged in as: {user.username}</p>
-      <Form method="post">
-        <button type="submit">Log out</button>
-      </Form>
-      <Form action="/user/destroy" method="post">
-        <button type="submit">Delete account</button>
-      </Form>
-      <Outlet context={user} />
-    </>
+    <div className="flex min-h-screen w-full flex-col">
+      <PageHeader>
+        <PageMainNav>
+          <PageNavLink to="/budgets/invitations">
+            {t('budgets.invitations')}
+          </PageNavLink>
+        </PageMainNav>
+        <PageUserNav>
+          <UserMenu user={user} />
+        </PageUserNav>
+      </PageHeader>
+      <main className="flex flex-1 flex-col py-4 px-12">
+        <div className="mx-auto w-2/3">
+          <Outlet context={user} />
+        </div>
+      </main>
+    </div>
   );
 }
