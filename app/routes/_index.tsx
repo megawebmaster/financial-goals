@@ -10,6 +10,7 @@ import { LOGIN_ROUTE } from '~/routes';
 import { LoginForm } from '~/components/login-form';
 import { PageHeader } from '~/components/ui/page-header';
 import { PageMainNav } from '~/components/ui/page-main-nav';
+import { PageBody } from '~/components/ui/page-body';
 import i18next from '~/i18n.server';
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => [
@@ -45,9 +46,9 @@ export default function () {
       <PageHeader>
         <PageMainNav />
       </PageHeader>
-      <main className="flex flex-1 items-start justify-center py-8 md:py-12 lg:py-24">
+      <PageBody className="items-start justify-start py-8 md:py-12 lg:py-24">
         <LoginForm />
-      </main>
+      </PageBody>
     </div>
   );
 }

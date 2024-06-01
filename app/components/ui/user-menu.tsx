@@ -31,11 +31,11 @@ export function UserMenu({ user }: UserMenuProps) {
       <DropdownMenuContent align="end">
         <DropdownMenuLabel>{user.username}</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
+        <DropdownMenuItem asChild className="cursor-pointer">
           <Link to="/user/settings">{t('component.user-menu.settings')}</Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
+        <DropdownMenuItem asChild className="cursor-pointer">
           <Link to="/logout">{t('component.user-menu.logout')}</Link>
         </DropdownMenuItem>
       </DropdownMenuContent>
