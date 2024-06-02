@@ -1,7 +1,8 @@
-import { addMonths } from 'date-fns';
 import { useTranslation } from 'react-i18next';
+import { CheckIcon } from 'lucide-react';
 
 import { MONTH_FORMAT } from '~/helpers/dates';
+import { getGoalEstimatedCompletion } from '~/helpers/budget-goals';
 
 type EstimateProps = {
   amountToSave: number;
@@ -10,15 +11,14 @@ type EstimateProps = {
 
 export function GoalEstimate({ averageSavings, amountToSave }: EstimateProps) {
   const { t } = useTranslation();
+  const date = getGoalEstimatedCompletion(amountToSave, averageSavings);
 
-  if (amountToSave === 0) {
-    return null;
+  if (!date) {
+    return <CheckIcon className="text-green-500" />;
   }
 
-  const months = Math.ceil(amountToSave / averageSavings);
-
   return t('goals.estimation', {
-    date: addMonths(new Date(), months),
+    date,
     formatParams: {
       date: MONTH_FORMAT,
     },

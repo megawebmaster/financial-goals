@@ -93,7 +93,7 @@ export default function () {
 
   return (
     <>
-      <PageTitle>{t('budget.new.page.title')}</PageTitle>
+      <PageTitle title={t('budget.new.page.title')} />
       <PageContent>
         <BudgetForm onSubmit={handleSubmit} status="create" />
       </PageContent>

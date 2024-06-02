@@ -84,9 +84,7 @@ export default function () {
 
   return (
     <>
-      <PageTitle>
-        {t('budget.edit.page.title', { name: budget.name })}
-      </PageTitle>
+      <PageTitle title={t('budget.edit.page.title', { name: budget.name })} />
       <PageContent>
         <BudgetForm
           budget={budget}

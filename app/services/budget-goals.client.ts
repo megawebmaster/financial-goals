@@ -1,4 +1,5 @@
 import {
+  find,
   map,
   pipe,
   prop,
@@ -7,6 +8,7 @@ import {
   reduced,
   reject,
   sortBy,
+  sum,
 } from 'ramda';
 import type { BudgetGoal } from '@prisma/client';
 
@@ -38,6 +40,15 @@ export const encryptBudgetGoal = async (
   requiredAmount: await encrypt(goal.requiredAmount.toString(10), key),
   currentAmount: await encrypt(goal.currentAmount.toString(10), key),
 });
+
+export const getCurrentGoal = find(
+  (goal: ClientBudgetGoal) => goal.currentAmount !== goal.requiredAmount,
+);
+
+export const getRequiredAmount = pipe(
+  map((goal: ClientBudgetGoal) => goal.requiredAmount),
+  sum,
+);
 
 export const buildGoalsFiller =
   (amount: number) =>

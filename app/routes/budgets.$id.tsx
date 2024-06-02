@@ -5,13 +5,15 @@ import type { User } from '@prisma/client';
 import invariant from 'tiny-invariant';
 
 import type { BudgetsLayoutContext } from '~/helpers/budgets';
+import { authenticatedLoader } from '~/helpers/auth';
 import { getBudget } from '~/services/budgets.server';
 import { getBudgetGoals } from '~/services/budget-goals.server';
 import { getBudgetSavings } from '~/services/budget-savings-entries.server';
 import { Budget } from '~/components/budget';
 import { GoalsList } from '~/components/budgets/goals-list';
 import { SavingsList } from '~/components/budgets/savings-list';
-import { authenticatedLoader } from '~/helpers/auth';
+import { PageContent } from '~/components/ui/page-content';
+import { Card, CardContent } from '~/components/ui/card';
 import i18next from '~/i18n.server';
 
 export const loader = authenticatedLoader(
@@ -39,6 +41,20 @@ export const loader = authenticatedLoader(
   },
 );
 
+const Decrypting = () => {
+  const { t } = useTranslation();
+
+  return (
+    <PageContent>
+      <Card>
+        <CardContent className="pt-6">
+          {t('budget.encryption.decrypting')}
+        </CardContent>
+      </Card>
+    </PageContent>
+  );
+};
+
 export default function () {
   const { t } = useTranslation();
   const data = useLoaderData<typeof loader>();
@@ -48,18 +64,20 @@ export default function () {
     <Budget budget={data.budget}>
       <GoalsList encryptionKey={data.budget.key} goals={data.goals}>
         <SavingsList encryptionKey={data.budget.key} savings={data.savings}>
-          <Budget.Pending>{t('budget.encryption.decrypting')}</Budget.Pending>
+          <Budget.Pending>
+            <Decrypting />
+          </Budget.Pending>
           <Budget.Fulfilled>
             {(budget) => (
               <>
                 <GoalsList.Pending>
-                  {t('budget.encryption.decrypting')}
+                  <Decrypting />
                 </GoalsList.Pending>
                 <GoalsList.Fulfilled>
                   {(goals) => (
                     <>
                       <SavingsList.Pending>
-                        {t('budget.encryption.decrypting')}
+                        <Decrypting />
                       </SavingsList.Pending>
                       <SavingsList.Fulfilled>
                         {(savings) => (

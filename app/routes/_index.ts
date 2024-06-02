@@ -10,7 +10,11 @@ export async function loader({ request }: LoaderFunctionArgs) {
   if (userId) {
     const defaultBudget = await getDefaultBudget(userId);
 
-    return redirect(`/budgets/${defaultBudget.budgetId}`);
+    if (defaultBudget) {
+      return redirect(`/budgets/${defaultBudget.budgetId}`);
+    }
+
+    return redirect('/budgets/new');
   }
 
   return redirect('/login');

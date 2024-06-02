@@ -1,20 +1,37 @@
 import type { FormEvent } from 'react';
 import type { LoaderFunctionArgs, MetaFunction } from '@remix-run/node';
-import { useOutletContext, useSubmit } from '@remix-run/react';
-import { pipe } from 'ramda';
+import { Link, useOutletContext, useSubmit } from '@remix-run/react';
+import { DollarSignIcon, EditIcon, PlusIcon, ShareIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { pipe } from 'ramda';
 
+import type { BudgetsLayoutContext } from '~/helpers/budgets';
 import { unlockKey } from '~/services/encryption.client';
 import {
   buildAmountToSaveCalculator,
   buildGoalsFiller,
   buildGoalsSorting,
   encryptBudgetGoal,
+  getCurrentGoal,
+  getRequiredAmount,
 } from '~/services/budget-goals.client';
 import { getAverageSavings } from '~/services/budget-savings-entries.client';
 import { BudgetGoal } from '~/components/budget-goal';
 import { GoalEstimate } from '~/components/budget-goal/goal-estimate';
-import type { BudgetsLayoutContext } from '~/helpers/budgets';
+import { PageTitle } from '~/components/ui/page-title';
+import { PageContent } from '~/components/ui/page-content';
+import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
+import { Button } from '~/components/ui/button';
+import { CurrentBudgetGoal } from '~/components/budgets/current-budget-goal';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '~/components/ui/table';
 import i18next from '~/i18n.server';
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => [
@@ -68,63 +85,167 @@ export default function () {
 
   const averageSavings = getAverageSavings(savings);
   const amountToSaveCalculator = buildAmountToSaveCalculator(goals);
+  const currentGoal = getCurrentGoal(goals);
+  // TODO: Properly ask about currency of the budget
+  const FORMAT_CURRENCY = { currency: 'PLN', locale: 'pl-PL' };
 
   return (
     <>
-      <a href="/budgets">{t('budget.view.back')}</a>
-      <h2>
-        <span>
-          {t(`budget.view.${budget.isOwner ? 'owner' : 'shared'}.name`, {
-            name: budget.name,
-          })}
-        </span>
-        <a href={`/budgets/${budget.budgetId}/edit`}>{t('budget.view.edit')}</a>
-        {budget.isOwner && (
-          <a href={`/budgets/${budget.budgetId}/share`}>
-            {t('budget.view.share')}
-          </a>
-        )}
-      </h2>
-      <p>
-        <strong>{t('budget.view.current-savings')}:</strong>{' '}
-        {budget.currentSavings}{' '}
-        {t('budget.view.average-savings', {
-          average: averageSavings,
-          formatParams: {
-            // TODO: Properly ask about currency of the budget
-            average: { currency: 'PLN', locale: 'pl-PL' },
-          },
+      <PageTitle
+        title={t(`budget.view.${budget.isOwner ? 'owner' : 'shared'}.name`, {
+          name: budget.name,
         })}
-      </p>
-      {budget.freeSavings > 0 && (
-        <p>
-          <strong>{t('budget.view.free-savings')}:</strong> {budget.freeSavings}
-        </p>
-      )}
-      <h3>{t('budget.view.goals')}:</h3>
-      {goals.length === 0 && <p>{t('budget.view.goals.empty')}</p>}
-      <ul>
-        {goals.map((goal) => (
-          <BudgetGoal
-            key={goal.id}
-            budgetId={budget.budgetId}
-            goal={goal}
-            onPriorityChange={changePriority}
-          >
-            <GoalEstimate
-              averageSavings={averageSavings}
-              amountToSave={amountToSaveCalculator(goal.id)}
-            />
-          </BudgetGoal>
-        ))}
-      </ul>
-      <a href={`/budgets/${budget.budgetId}/goals/new`}>
-        {t('budget.view.goals.create')}
-      </a>
-      <br />
-      <a href={`/budgets/${budget.budgetId}/savings/new`}>
-        {t('budget.view.savings.add')}
-      </a>
+      >
+        <Button asChild variant="outline">
+          <Link to={`/budgets/${budget.budgetId}/edit`}>
+            <EditIcon className="mr-2 size-4" />
+            <span>{t('budget.view.edit')}</span>
+          </Link>
+        </Button>
+        {budget.isOwner && (
+          <Button asChild variant="outline">
+            <Link to={`/budgets/${budget.budgetId}/share`}>
+              <ShareIcon className="mr-2 size-4" />
+              <span>{t('budget.view.share')}</span>
+            </Link>
+          </Button>
+        )}
+        <Button
+          asChild
+          variant="outline"
+          className="bg-green-300 hover:bg-green-200"
+        >
+          <Link to={`/budgets/${budget.budgetId}/savings/new`}>
+            <DollarSignIcon className="mr-2 size-4" />
+            <span>{t('budget.view.savings.add')}</span>
+          </Link>
+        </Button>
+      </PageTitle>
+      <PageContent>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl">
+              {t('budget.view.status')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p>
+              <strong>{t('budget.view.current-savings')}:</strong>{' '}
+              {t('budget.view.savings-value', {
+                average: averageSavings,
+                value: budget.currentSavings,
+                formatParams: {
+                  average: FORMAT_CURRENCY,
+                  value: FORMAT_CURRENCY,
+                },
+              })}
+            </p>
+            {budget.freeSavings > 0 && (
+              <p>
+                <strong>{t('budget.view.free-savings')}:</strong>{' '}
+                {t('budget.view.free-savings-value', {
+                  value: budget.freeSavings,
+                  formatParams: {
+                    value: FORMAT_CURRENCY,
+                  },
+                })}
+              </p>
+            )}
+          </CardContent>
+        </Card>
+        {currentGoal && (
+          <CurrentBudgetGoal budgetId={budget.budgetId} goal={currentGoal}>
+            <p className="flex gap-1">
+              <strong>
+                {t('budget.view.current-goal.estimated-completion')}:
+              </strong>
+              <GoalEstimate
+                averageSavings={averageSavings}
+                amountToSave={amountToSaveCalculator(currentGoal.id)}
+              />
+            </p>
+          </CurrentBudgetGoal>
+        )}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex gap-2 text-2xl">
+              <span className="flex-1">{t('budget.view.goals')}</span>
+              <Button asChild variant="outline">
+                <Link to={`/budgets/${budget.budgetId}/goals/new`}>
+                  <PlusIcon className="mr-2 size-4" />
+                  <span>{t('budget.view.goals.create')}</span>
+                </Link>
+              </Button>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>{t('budget.view.goals.table.name')}</TableHead>
+                  <TableHead>
+                    {t('budget.view.goals.table.required-amount')}
+                  </TableHead>
+                  <TableHead>
+                    {t('budget.view.goals.table.current-amount')}
+                  </TableHead>
+                  <TableHead>
+                    {t('budget.view.goals.table.completion')}
+                  </TableHead>
+                  <TableHead>
+                    {t('budget.view.goals.table.estimated-completion')}
+                  </TableHead>
+                  <TableHead />
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {goals.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={6}>
+                      {t('budget.view.goals.empty')}
+                    </TableCell>
+                  </TableRow>
+                )}
+                {goals.map((goal) => (
+                  <BudgetGoal
+                    key={goal.id}
+                    budgetId={budget.budgetId}
+                    goal={goal}
+                    onPriorityChange={changePriority}
+                  >
+                    <GoalEstimate
+                      averageSavings={averageSavings}
+                      amountToSave={amountToSaveCalculator(goal.id)}
+                    />
+                  </BudgetGoal>
+                ))}
+              </TableBody>
+              <TableFooter>
+                <TableRow>
+                  <TableCell>Total</TableCell>
+                  <TableCell>
+                    {t('budget.view.goals.table.total-value', {
+                      value: getRequiredAmount(goals),
+                      formatParams: {
+                        value: FORMAT_CURRENCY,
+                      },
+                    })}
+                  </TableCell>
+                  <TableCell>
+                    {t('budget.view.goals.table.total-value', {
+                      value: budget.currentSavings,
+                      formatParams: {
+                        value: FORMAT_CURRENCY,
+                      },
+                    })}
+                  </TableCell>
+                  <TableCell colSpan={3} />
+                </TableRow>
+              </TableFooter>
+            </Table>
+          </CardContent>
+        </Card>
+      </PageContent>
     </>
   );
 }

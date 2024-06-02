@@ -4,6 +4,7 @@ import type {
   BudgetUser,
 } from '@prisma/client';
 import { addDays } from 'date-fns';
+import { omit } from 'ramda';
 
 import type { ThenArg } from '~/helpers/types';
 import { prisma } from '~/services/db.server';
@@ -27,8 +28,8 @@ export type Budget = ThenArg<ReturnType<typeof fetchBudget>>;
 export const getBudget = (userId: number, budgetId: number): Promise<Budget> =>
   fetchBudget(userId, budgetId);
 
-export const getDefaultBudget = (userId: number): Promise<BudgetUser> =>
-  prisma.budgetUser.findFirstOrThrow({
+export const getDefaultBudget = (userId: number): Promise<BudgetUser | null> =>
+  prisma.budgetUser.findFirst({
     where: {
       isDefault: true,
       userId,
@@ -65,14 +66,35 @@ export const updateBudget = (
   budgetId: number,
   data: Partial<Omit<BudgetUser, 'budgetId' | 'userId' | 'key' | 'isOwner'>>,
 ): Promise<BudgetUser> =>
-  prisma.budgetUser.update({
-    data,
-    where: {
-      budgetId_userId: {
-        budgetId,
-        userId,
+  prisma.$transaction(async (tx) => {
+    if (data.isDefault) {
+      const result = await tx.budgetUser.updateMany({
+        where: { isDefault: true },
+        data: { isDefault: false },
+      });
+
+      if (result.count > 0) {
+        return tx.budgetUser.update({
+          data,
+          where: {
+            budgetId_userId: {
+              budgetId,
+              userId,
+            },
+          },
+        });
+      }
+    }
+
+    return tx.budgetUser.update({
+      data: omit(['isDefault'], data),
+      where: {
+        budgetId_userId: {
+          budgetId,
+          userId,
+        },
       },
-    },
+    });
   });
 
 export const deleteBudget = (userId: number, budgetId: number): Promise<void> =>

@@ -51,7 +51,7 @@ export default function () {
         </PageUserNav>
       </PageHeader>
       <PageBody>
-        <PageTitle>{t('user-settings.title')}</PageTitle>
+        <PageTitle title={t('user-settings.title')} />
         <PageContent>
           <Card>
             <CardHeader>
