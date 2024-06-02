@@ -1,37 +1,122 @@
-import type { FormEvent } from 'react';
-import type { BudgetUser } from '@prisma/client';
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 
 import type { ClientBudgetGoal } from '~/helpers/budget-goals';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '~/components/ui/form';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '~/components/ui/card';
+import { Input } from '~/components/ui/input';
+import { Button } from '~/components/ui/button';
+
+const goalFormSchema = z.object({
+  name: z.string().min(1).max(64),
+  amount: z.number().min(0),
+});
+
+export type BudgetGoalFormValues = z.infer<typeof goalFormSchema>;
 
 type BudgetGoalFormProps = {
-  budget: BudgetUser;
+  children?: ReactNode;
+  className?: string;
   goal?: ClientBudgetGoal;
-  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
-  submit: string;
+  onSubmit: (values: BudgetGoalFormValues) => void;
+  status: 'create' | 'update';
 };
 
 export const BudgetGoalForm = ({
-  budget,
+  children,
+  className,
   goal,
   onSubmit,
-  submit,
+  status,
 }: BudgetGoalFormProps) => {
   const { t } = useTranslation();
 
+  // TODO: Properly ask about currency of the budget
+  const FORMAT_CURRENCY = { currency: 'PLN', locale: 'pl-PL' };
+
+  const form = useForm<BudgetGoalFormValues>({
+    resolver: zodResolver(goalFormSchema),
+    defaultValues: {
+      name: goal?.name || '',
+      amount: goal?.requiredAmount,
+    },
+  });
+
   return (
-    <form onSubmit={onSubmit}>
-      <input type="hidden" name="budgetId" value={budget.budgetId} />
-      <label htmlFor="name">{t('component.goal-form.name')}</label>
-      <input id="name" defaultValue={goal?.name} name="name" type="text" />
-      <label htmlFor="amount">{t('component.goal-form.amount')}</label>
-      <input
-        id="amount"
-        defaultValue={goal?.requiredAmount}
-        name="requiredAmount"
-        type="number"
-      />
-      <button type="submit">{submit}</button>
-    </form>
+    <Form {...form}>
+      <Card className="mx-auto max-w-lg">
+        <CardHeader>
+          <CardTitle className="text-2xl">
+            {t(`component.goal-form.${status}.title`)}
+          </CardTitle>
+          <CardDescription>
+            {t(`component.goal-form.${status}.description`)}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className={className}>
+          <form className="grid gap-4" onSubmit={form.handleSubmit(onSubmit)}>
+            <FormField
+              name="name"
+              render={({ field }) => (
+                <FormItem className="grid gap-2">
+                  <FormLabel>{t('component.goal-form.name')}</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      placeholder={t('component.goal-form.name-placeholder')}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              name="amount"
+              render={({ field }) => (
+                <FormItem className="grid gap-2">
+                  <FormLabel>
+                    {t('component.goal-form.required-amount')}
+                  </FormLabel>
+                  <FormControl>
+                    <div className="flex w-full max-w-sm items-center space-x-2">
+                      <Input
+                        {...field}
+                        type="number"
+                        step={0.01}
+                        placeholder={t(
+                          'component.goal-form.required-amount-placeholder',
+                        )}
+                      />
+                      <p>{FORMAT_CURRENCY.currency}</p>
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button type="submit" className="w-full">
+              {t(`component.goal-form.${status}.submit`)}
+            </Button>
+          </form>
+          {children}
+        </CardContent>
+      </Card>
+    </Form>
   );
 };

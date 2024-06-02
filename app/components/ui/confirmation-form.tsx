@@ -20,6 +20,7 @@ type ConfirmationFormProps = SubmitOptions & {
   confirmation?: string;
   className?: string;
   description?: string;
+  onSubmit?: () => void;
 };
 
 export function ConfirmationForm({
@@ -27,14 +28,17 @@ export function ConfirmationForm({
   confirmation,
   className,
   description,
+  onSubmit,
   ...options
 }: ConfirmationFormProps) {
   const { t } = useTranslation();
   const submit = useSubmit();
 
-  const handleConfirm = () => {
-    submit({}, options);
-  };
+  const handleConfirm =
+    onSubmit ||
+    (() => {
+      submit({}, options);
+    });
 
   return (
     <Dialog>

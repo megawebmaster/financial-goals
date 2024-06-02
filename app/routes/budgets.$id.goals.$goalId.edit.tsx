@@ -5,17 +5,16 @@ import {
   useParams,
   useSubmit,
 } from '@remix-run/react';
-import type { FormEvent } from 'react';
 import { pipe, propEq } from 'ramda';
 import { useTranslation } from 'react-i18next';
 import { redirectWithError, redirectWithSuccess } from 'remix-toast';
 import { toast } from 'sonner';
 import invariant from 'tiny-invariant';
 
-import { updateBudgetGoal } from '~/services/budget-goals.server';
+import { authenticatedAction } from '~/helpers/auth';
 import { getGoalsSum } from '~/helpers/budget-goals';
 import type { BudgetsLayoutContext } from '~/helpers/budgets';
-import { BudgetGoalForm } from '~/components/budget-goal-form';
+import { updateBudgetGoal } from '~/services/budget-goals.server';
 import { encrypt, unlockKey } from '~/services/encryption.client';
 import {
   buildGoalsFiller,
@@ -23,7 +22,12 @@ import {
   removeGoal,
   updateGoal,
 } from '~/services/budget-goals.client';
-import { authenticatedAction } from '~/helpers/auth';
+import type { BudgetGoalFormValues } from '~/components/budget-goal-form';
+import { BudgetGoalForm } from '~/components/budget-goal-form';
+import { PageTitle } from '~/components/ui/page-title';
+import { PageContent } from '~/components/ui/page-content';
+import { Separator } from '~/components/ui/separator';
+import { ConfirmationForm } from '~/components/ui/confirmation-form';
 import i18next from '~/i18n.server';
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => [
@@ -108,14 +112,10 @@ export default function () {
     return null;
   }
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const handleSubmit = async (values: BudgetGoalFormValues) => {
     const encryptionKey = await unlockKey(budget.key);
-    const formData = new FormData(event.target as HTMLFormElement);
-    const name = formData.get('name') as string;
-    const requiredAmount = parseFloat(formData.get('requiredAmount') as string);
     const processGoals = pipe(
-      updateGoal(goal.id, { name, requiredAmount }),
+      updateGoal(goal.id, { name: values.name, requiredAmount: values.amount }),
       buildGoalsFiller(budget.currentSavings),
     );
 
@@ -136,8 +136,7 @@ export default function () {
     );
   };
 
-  const handleDelete = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const handleDelete = async () => {
     const encryptionKey = await unlockKey(budget.key);
 
     const processGoals = pipe(
@@ -168,17 +167,26 @@ export default function () {
 
   return (
     <>
-      <a href={`/budgets/${budget.budgetId}`}>{t('goal.edit.back')}</a>
-      <h2>{t('goal.edit.page.title', { budget: budget.name })}</h2>
-      <BudgetGoalForm
-        budget={budget}
-        goal={goal}
-        onSubmit={handleSubmit}
-        submit={t('goal.edit.form.submit')}
-      />
-      <form onSubmit={handleDelete}>
-        <button type="submit">{t('goal.edit.delete.submit')}</button>
-      </form>
+      <PageTitle title={t('goal.edit.page.title', { budget: budget.name })} />
+      <PageContent>
+        <BudgetGoalForm
+          className="flex flex-col gap-4"
+          goal={goal}
+          onSubmit={handleSubmit}
+          status="update"
+        >
+          <Separator />
+          <ConfirmationForm
+            onSubmit={handleDelete}
+            confirmation={t('goal.edit.delete-confirm')}
+            description={t('goal.edit.delete-description')}
+            className="w-full"
+            replace
+          >
+            {t('goal.edit.delete')}
+          </ConfirmationForm>
+        </BudgetGoalForm>
+      </PageContent>
     </>
   );
 }
