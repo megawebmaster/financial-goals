@@ -37,6 +37,7 @@
   "budget.new.page.title": "Create new budget",
   "budget.new.form.submit": "Create budget!",
   "budget.new.created": "New budget created!",
+  "budget.new.default-name": "Default",
   "budget.share.title": "Share the budget | $t(app.name)",
   "budget.share.back": "Go back",
   "budget.share.page.title": "Share the budget with family",

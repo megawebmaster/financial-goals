@@ -10,6 +10,14 @@ import { redirectWithError } from 'remix-toast';
 
 import { authenticator } from '~/services/auth.server';
 import { createUser, UserExistsError } from '~/services/user.server';
+import { createBudget } from '~/services/budgets.server';
+import {
+  encrypt,
+  generateEncryptionKey,
+  generateKeyMaterial,
+  generateWrappingKey,
+  lockKey,
+} from '~/services/encryption';
 import { mailer } from '~/services/mail.server';
 import { LOGIN_ROUTE } from '~/routes';
 import { PageHeader } from '~/components/ui/page-header';
@@ -48,10 +56,29 @@ export async function action({ request }: ActionFunctionArgs) {
       data.get('email') as string,
       data.get('password') as string,
     );
-    const t = await i18next.getFixedT(
-      await i18next.getLocale(request),
-      'email',
+
+    const wrappingKey = await generateWrappingKey(
+      await generateKeyMaterial('test'),
+      user.salt,
     );
+    const encryptionKey = await generateEncryptionKey();
+    const encryptedZero = await encrypt('0', encryptionKey);
+
+    let t = await i18next.getFixedT(await i18next.getLocale(request), 'common');
+    await createBudget(
+      user.id,
+      {
+        currentSavings: encryptedZero,
+        freeSavings: encryptedZero,
+      },
+      {
+        name: await encrypt(t('budget.new.default-name'), encryptionKey),
+        key: await lockKey(wrappingKey, encryptionKey),
+        isDefault: true,
+      },
+    );
+
+    t = await i18next.getFixedT(await i18next.getLocale(request), 'email');
     await mailer.sendMail({
       to: user.email,
       subject: t('new-account.subject'),
