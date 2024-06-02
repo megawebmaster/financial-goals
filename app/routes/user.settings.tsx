@@ -65,8 +65,11 @@ export default function () {
             <CardContent>
               <ConfirmationForm
                 action="/user/destroy"
-                method="post"
                 confirmation={t('user-settings.delete-account.confirm')}
+                description={t(
+                  'user-settings.delete-account.confirm-description',
+                )}
+                method="post"
               >
                 {t('user-settings.delete-account.submit')}
               </ConfirmationForm>

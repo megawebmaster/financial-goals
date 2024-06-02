@@ -1,15 +1,18 @@
-import type { FormEvent } from 'react';
 import type { LoaderFunctionArgs, MetaFunction } from '@remix-run/node';
-import { Form, useOutletContext, useSubmit } from '@remix-run/react';
+import { useOutletContext, useSubmit } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
 import { redirectWithError, redirectWithSuccess } from 'remix-toast';
 import invariant from 'tiny-invariant';
 
 import type { BudgetsLayoutContext } from '~/helpers/budgets';
+import { authenticatedAction } from '~/helpers/auth';
 import { encrypt, unlockKey } from '~/services/encryption.client';
 import { updateBudget } from '~/services/budgets.server';
-import { BudgetForm } from '~/components/budget-form';
-import { authenticatedAction } from '~/helpers/auth';
+import { BudgetForm, type BudgetFormValues } from '~/components/budget-form';
+import { PageTitle } from '~/components/ui/page-title';
+import { PageContent } from '~/components/ui/page-content';
+import { ConfirmationForm } from '~/components/ui/confirmation-form';
+import { Separator } from '~/components/ui/separator';
 import i18next from '~/i18n.server';
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => [
@@ -37,11 +40,12 @@ export const action = authenticatedAction(
 
       const data = await request.formData();
       const name = data.get('name');
+      const isDefault = data.get('isDefault') === 'true';
 
       invariant(name, 'Name of the budget is required');
       invariant(typeof name === 'string', 'Name must be a text');
 
-      await updateBudget(userId, budgetId, { name });
+      await updateBudget(userId, budgetId, { name, isDefault });
       const t = await i18next.getFixedT(await i18next.getLocale(request));
 
       return redirectWithSuccess(`/budgets/${budgetId}`, {
@@ -66,32 +70,43 @@ export default function () {
   const { budget } = useOutletContext<BudgetsLayoutContext>();
   const submit = useSubmit();
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
+  const handleSubmit = async (values: BudgetFormValues) => {
     const encryptionKey = await unlockKey(budget.key);
-    const formData = new FormData(event.target as HTMLFormElement);
-    const name = await encrypt(formData.get('name') as string, encryptionKey);
 
-    submit({ name }, { method: 'patch' });
+    submit(
+      {
+        name: await encrypt(values.name, encryptionKey),
+        isDefault: values.isDefault,
+      },
+      { method: 'patch' },
+    );
   };
 
   return (
     <>
-      <a href={`/budgets/${budget.budgetId}`}>{t('budget.edit.back')}</a>
-      <h2>{t('budget.edit.page.title', { name: budget.name })}</h2>
-      <BudgetForm
-        budget={budget}
-        onSubmit={handleSubmit}
-        submit={t('budget.edit.form.submit')}
-      />
-      <Form
-        action={`/budgets/${budget.budgetId}/destroy`}
-        method="post"
-        replace
-      >
-        <button type="submit">{t('budget.edit.delete.submit')}</button>
-      </Form>
+      <PageTitle>
+        {t('budget.edit.page.title', { name: budget.name })}
+      </PageTitle>
+      <PageContent>
+        <BudgetForm
+          budget={budget}
+          className="flex flex-col gap-4"
+          onSubmit={handleSubmit}
+          status="update"
+        >
+          <Separator />
+          <ConfirmationForm
+            action={`/budgets/${budget.budgetId}/destroy`}
+            confirmation={t('budget.edit.delete-confirm')}
+            description={t('budget.edit.delete-description')}
+            className="w-full"
+            method="post"
+            replace
+          >
+            {t('budget.edit.delete')}
+          </ConfirmationForm>
+        </BudgetForm>
+      </PageContent>
     </>
   );
 }

@@ -17,7 +17,7 @@ export const action = authenticatedAction(
       await deleteBudget(userId, budgetId);
       const t = await i18next.getFixedT(await i18next.getLocale(request));
 
-      return redirectWithSuccess('/budgets', { message: t('budget.deleted') });
+      return redirectWithSuccess('/', { message: t('budget.deleted') });
     } catch (e) {
       console.error('Deleting budget failed', e);
       const t = await i18next.getFixedT(

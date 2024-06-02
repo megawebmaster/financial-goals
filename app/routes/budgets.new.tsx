@@ -1,18 +1,20 @@
-import type { FormEvent } from 'react';
 import type { LoaderFunctionArgs, MetaFunction } from '@remix-run/node';
 import { useSubmit } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
 import { redirectWithError, redirectWithSuccess } from 'remix-toast';
 import invariant from 'tiny-invariant';
 
+import { authenticatedAction } from '~/helpers/auth';
 import {
   encrypt,
   generateEncryptionKey,
   lockKey,
 } from '~/services/encryption.client';
 import { createBudget } from '~/services/budgets.server';
+import type { BudgetFormValues } from '~/components/budget-form';
 import { BudgetForm } from '~/components/budget-form';
-import { authenticatedAction } from '~/helpers/auth';
+import { PageTitle } from '~/components/ui/page-title';
+import { PageContent } from '~/components/ui/page-content';
 import i18next from '~/i18n.server';
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => [
@@ -36,6 +38,7 @@ export const action = authenticatedAction(async ({ request }, userId) => {
     const key = data.get('key');
     const currentSavings = data.get('currentSavings');
     const freeSavings = data.get('freeSavings');
+    const isDefault = data.get('isDefault') === 'true';
 
     invariant(name, 'Name of the budget is required');
     invariant(typeof name === 'string', 'Name must be a text');
@@ -49,7 +52,7 @@ export const action = authenticatedAction(async ({ request }, userId) => {
     const budget = await createBudget(
       userId,
       { currentSavings, freeSavings },
-      { name, key },
+      { name, key, isDefault },
     );
     const t = await i18next.getFixedT(await i18next.getLocale(request));
 
@@ -72,17 +75,15 @@ export const action = authenticatedAction(async ({ request }, userId) => {
 export default function () {
   const { t } = useTranslation();
   const submit = useSubmit();
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const handleSubmit = async (values: BudgetFormValues) => {
     const encryptionKey = await generateEncryptionKey();
-    const formData = new FormData(event.target as HTMLFormElement);
-    const name = formData.get('name') as string;
     const zeroValue = await encrypt('0', encryptionKey);
 
     submit(
       {
-        name: await encrypt(name, encryptionKey),
+        name: await encrypt(values.name, encryptionKey),
         key: await lockKey(encryptionKey),
+        isDefault: values.isDefault,
         currentSavings: zeroValue,
         freeSavings: zeroValue,
       },
@@ -92,12 +93,10 @@ export default function () {
 
   return (
     <>
-      <a href="/budgets">{t('budget.new.back')}</a>
-      <h2>{t('budget.new.page.title')}</h2>
-      <BudgetForm
-        onSubmit={handleSubmit}
-        submit={t('budget.new.form.submit')}
-      />
+      <PageTitle>{t('budget.new.page.title')}</PageTitle>
+      <PageContent>
+        <BudgetForm onSubmit={handleSubmit} status="create" />
+      </PageContent>
     </>
   );
 }

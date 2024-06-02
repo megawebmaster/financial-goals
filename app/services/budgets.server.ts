@@ -42,6 +42,14 @@ export const createBudget = (
 ): Promise<BudgetUser> =>
   prisma.$transaction(async (tx) => {
     const budget = await tx.budget.create({ data: budgetData });
+
+    if (budgetUserdata.isDefault) {
+      await tx.budgetUser.updateMany({
+        where: { isDefault: true },
+        data: { isDefault: false },
+      });
+    }
+
     return tx.budgetUser.create({
       data: {
         ...budgetUserdata,

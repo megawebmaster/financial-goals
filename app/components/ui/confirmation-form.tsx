@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
-import type { HTMLFormMethod } from '@remix-run/router';
+import type { SubmitOptions } from '@remix-run/react';
 import { useSubmit } from '@remix-run/react';
+import { useTranslation } from 'react-i18next';
 
 import { Button } from '~/components/ui/button';
 import {
@@ -13,39 +14,39 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '~/components/ui/dialog';
-import { useTranslation } from 'react-i18next';
 
-type ConfirmationFormProps = {
-  action: string;
+type ConfirmationFormProps = SubmitOptions & {
   children: ReactNode;
   confirmation?: string;
-  method?: HTMLFormMethod;
+  className?: string;
+  description?: string;
 };
 
 export function ConfirmationForm({
-  action,
   children,
   confirmation,
-  method,
+  className,
+  description,
+  ...options
 }: ConfirmationFormProps) {
   const { t } = useTranslation();
   const submit = useSubmit();
 
   const handleConfirm = () => {
-    submit({}, { action, method });
+    submit({}, options);
   };
 
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="destructive">{children}</Button>
+        <Button className={className} variant="destructive">
+          {children}
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{t('component.confirmation-form.title')}</DialogTitle>
-          <DialogDescription>
-            {t('component.confirmation-form.description')}
-          </DialogDescription>
+          {description && <DialogDescription>{description}</DialogDescription>}
         </DialogHeader>
         <DialogFooter>
           <DialogClose asChild>
