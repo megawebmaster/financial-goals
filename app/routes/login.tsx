@@ -1,23 +1,13 @@
-import type {
-  ActionFunctionArgs,
-  LoaderFunctionArgs,
-  MetaFunction,
-} from '@remix-run/node';
+import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
 import { redirect } from '@remix-run/node';
 
 import { authenticator } from '~/services/auth.server';
 import { LOGIN_ROUTE } from '~/routes';
-import { LoginForm } from '~/components/login-form';
 import { PageHeader } from '~/components/ui/page-header';
 import { PageMainNav } from '~/components/ui/page-main-nav';
 import { PageBody } from '~/components/ui/page-body';
+import { LoginForm } from '~/components/login-form';
 import i18next from '~/i18n.server';
-
-export const meta: MetaFunction<typeof loader> = ({ data }) => [
-  {
-    title: data?.title || 'Financial Goals',
-  },
-];
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const userId = await authenticator.isAuthenticated(request);

@@ -24,8 +24,9 @@ import {
 } from '~/components/ui/card';
 
 const signupFormSchema = z.object({
-  username: z.string().min(4).max(64),
-  password: z.string().min(4),
+  username: z.string().min(1).max(64),
+  email: z.string().min(4).max(64).email(),
+  password: z.string().min(12),
 });
 
 export function SignupForm() {
@@ -36,6 +37,7 @@ export function SignupForm() {
     resolver: zodResolver(signupFormSchema),
     defaultValues: {
       username: '',
+      email: '',
       password: '',
     },
   });
@@ -65,15 +67,31 @@ export function SignupForm() {
               name="username"
               render={({ field }) => (
                 <FormItem className="grid gap-2">
-                  <FormLabel>{t('component.signup-form.username')}</FormLabel>
+                  <FormLabel>{t('component.signup-form.user-name')}</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      autoComplete="name"
+                      placeholder={t(
+                        'component.signup-form.user-name-placeholder',
+                      )}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              name="email"
+              render={({ field }) => (
+                <FormItem className="grid gap-2">
+                  <FormLabel>{t('component.signup-form.email')}</FormLabel>
                   <FormControl>
                     <Input
                       {...field}
                       autoComplete="email"
                       type="email"
-                      placeholder={t(
-                        'component.signup-form.username-placeholder',
-                      )}
+                      placeholder={t('component.signup-form.email-placeholder')}
                     />
                   </FormControl>
                   <FormMessage />

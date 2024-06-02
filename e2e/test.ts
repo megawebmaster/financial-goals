@@ -12,6 +12,7 @@ import { BudgetShareForm } from './pages/budget-share-form';
 
 type FixtureAccount = {
   username: string;
+  email: string;
   password: string;
 };
 
@@ -31,18 +32,20 @@ export { expect };
 const createAccount = async (
   browser: Browser,
   username: string,
-): Promise<string> => {
-  const password = 'very-secure';
+): Promise<FixtureAccount> => {
+  const email = `${username}@example.com`;
+  const password = 'very-secure-long-password';
 
   const signUpPage = await browser.newPage();
   await signUpPage.goto('/signup');
-  await signUpPage.getByLabel('Email').fill(username);
+  await signUpPage.getByLabel('Your name').fill(username);
+  await signUpPage.getByLabel('Email').fill(email);
   await signUpPage.getByLabel('Password').fill(password);
   await signUpPage.getByRole('button', { name: 'Create account!' }).click();
   await expect(signUpPage.getByText(`Logged in as: ${username}`)).toBeVisible();
   await signUpPage.close();
 
-  return password;
+  return { username, email, password };
 };
 
 const deleteAccount = async (
@@ -53,7 +56,7 @@ const deleteAccount = async (
   const deleteAccountPage = await browser.newPage();
   await deleteAccountPage.goto(baseURL || 'http://127.0.0.1:5173');
   const form = new LoginForm(deleteAccountPage);
-  await form.login.fill(account.username);
+  await form.login.fill(account.email);
   await form.password.fill(account.password);
   await form.submit();
   await deleteAccountPage
@@ -75,18 +78,18 @@ const login = async (page: Page, account: FixtureAccount) => {
 export const test = base.extend<Fixtures, WorkerFixtures>({
   account: async ({ browser, baseURL }, use) => {
     const { workerIndex, parallelIndex } = test.info();
-    const username = `test-user-${workerIndex}-${parallelIndex}@example.com`;
-    const password = await createAccount(browser, username);
-    await use({ username, password });
-    await deleteAccount(browser, baseURL, { username, password });
+    const username = `test-user-${workerIndex}-${parallelIndex}`;
+    const account = await createAccount(browser, username);
+    await use(account);
+    await deleteAccount(browser, baseURL, account);
   },
 
-  account2: async ({ browser, baseURL }, use, workerInfo) => {
+  account2: async ({ browser, baseURL }, use) => {
     const { workerIndex, parallelIndex } = test.info();
-    const username = `secondary-user-${workerIndex}-${parallelIndex}@example.com`;
-    const password = await createAccount(browser, username);
-    await use({ username, password });
-    await deleteAccount(browser, baseURL, { username, password });
+    const username = `secondary-user-${workerIndex}-${parallelIndex}`;
+    const account = await createAccount(browser, username);
+    await use(account);
+    await deleteAccount(browser, baseURL, account);
   },
 
   loggedIn: async ({ page, account }, use) => {

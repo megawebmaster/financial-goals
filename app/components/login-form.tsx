@@ -24,8 +24,8 @@ import {
 } from '~/components/ui/card';
 
 const loginFormSchema = z.object({
-  username: z.string().min(4).max(64),
-  password: z.string().min(12),
+  email: z.string().min(4).max(64),
+  password: z.string().min(4),
 });
 
 export function LoginForm() {
@@ -35,7 +35,7 @@ export function LoginForm() {
   const form = useForm<z.infer<typeof loginFormSchema>>({
     resolver: zodResolver(loginFormSchema),
     defaultValues: {
-      username: '',
+      email: '',
       password: '',
     },
   });
@@ -62,18 +62,16 @@ export function LoginForm() {
             onSubmit={form.handleSubmit(handleSubmit)}
           >
             <FormField
-              name="username"
+              name="email"
               render={({ field }) => (
                 <FormItem className="grid gap-2">
-                  <FormLabel>{t('component.login-form.username')}</FormLabel>
+                  <FormLabel>{t('component.login-form.email')}</FormLabel>
                   <FormControl>
                     <Input
                       {...field}
                       autoComplete="email"
                       type="email"
-                      placeholder={t(
-                        'component.login-form.username-placeholder',
-                      )}
+                      placeholder={t('component.login-form.email-placeholder')}
                     />
                   </FormControl>
                   <FormMessage />

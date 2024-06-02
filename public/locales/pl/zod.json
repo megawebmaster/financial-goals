@@ -141,6 +141,7 @@
     "map": "mapa",
     "set": "zbiór"
   },
-  "username": "E-mail",
+  "username": "Imię",
+  "email": "E-mail",
   "password": "Hasło"
 }

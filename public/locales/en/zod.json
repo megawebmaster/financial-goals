@@ -141,6 +141,7 @@
     "map": "map",
     "set": "set"
   },
-  "username": "Email",
+  "username": "Name",
+  "email": "Email",
   "password": "Password"
 }

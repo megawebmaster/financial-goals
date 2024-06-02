@@ -12,12 +12,12 @@ import { createSavingsEntry } from '~/services/budget-savings-entries.server';
 import { subMonths } from 'date-fns';
 
 export async function seedUsers() {
-  await seedUser('test@example.com');
-  await createUser('test2@example.com', 'test');
+  await seedUser('Test 1', 'test@example.com');
+  await createUser('Test 2', 'test2@example.com', 'test');
 }
 
-async function seedUser(username: string) {
-  const user = await createUser(username, 'test');
+async function seedUser(username: string, email: string) {
+  const user = await createUser(username, email, 'test');
 
   const wrappingKey = await generateWrappingKey(
     await generateKeyMaterial('test'),

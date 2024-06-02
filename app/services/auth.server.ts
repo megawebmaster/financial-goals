@@ -11,15 +11,15 @@ export const authenticator = new Authenticator<number>(sessionStorage);
 authenticator.use(
   new FormStrategy(async ({ form, request }) => {
     try {
-      const username = form.get('username');
+      const email = form.get('email');
       const password = form.get('password');
 
-      invariant(typeof username === 'string', 'Username must be a string');
-      invariant(username.length > 0, 'Username must not be empty');
+      invariant(typeof email === 'string', 'Email must be a string');
+      invariant(email.length > 0, 'Email must not be empty');
       invariant(typeof password === 'string', 'Password must be a string');
       invariant(password.length > 0, 'Password must not be empty');
 
-      const user = await login(username, password);
+      const user = await login(email, password);
 
       return user.id;
     } catch (e) {

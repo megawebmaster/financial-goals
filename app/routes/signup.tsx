@@ -45,6 +45,7 @@ export async function action({ request }: ActionFunctionArgs) {
     const data = await request.clone().formData();
     const user = await createUser(
       data.get('username') as string,
+      data.get('email') as string,
       data.get('password') as string,
     );
     const t = await i18next.getFixedT(
@@ -52,7 +53,7 @@ export async function action({ request }: ActionFunctionArgs) {
       'email',
     );
     await mailer.sendMail({
-      to: user.username,
+      to: user.email,
       subject: t('new-account.subject'),
       html: render(<NewAccountEmail name={user.username} t={t} />),
     });
