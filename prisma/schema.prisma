@@ -24,13 +24,14 @@ model User {
 }
 
 model BudgetUser {
-  budgetId Int
-  budget   Budget  @relation("BudgetUsers", fields: [budgetId], references: [id], onDelete: Restrict)
-  userId   Int
-  user     User    @relation("AccessibleBudgets", fields: [userId], references: [id], onDelete: Cascade)
-  name     String
-  key      String
-  isOwner  Boolean @default(false)
+  budgetId  Int
+  budget    Budget  @relation("BudgetUsers", fields: [budgetId], references: [id], onDelete: Restrict)
+  userId    Int
+  user      User    @relation("AccessibleBudgets", fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  key       String
+  isOwner   Boolean @default(false)
+  isDefault Boolean @default(false)
 
   @@id([budgetId, userId])
   @@unique([userId, name])

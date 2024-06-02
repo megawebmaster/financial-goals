@@ -2,8 +2,10 @@ import type { ClientLoaderFunctionArgs } from '@remix-run/react';
 import { Outlet, useLoaderData } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
 
+import { INDEX_ROUTE } from '~/routes';
 import { authenticator } from '~/services/auth.server';
 import { getUser } from '~/services/user.server';
+import { getBudgets } from '~/services/budgets.server';
 import { buildWrappingKey } from '~/services/encryption.client';
 import { authenticatedLoader } from '~/helpers/auth';
 import { PageHeader } from '~/components/ui/page-header';
@@ -12,15 +14,17 @@ import { PageUserNav } from '~/components/ui/page-user-nav';
 import { UserMenu } from '~/components/ui/user-menu';
 import { PageNavLink } from '~/components/ui/page-nav-link';
 import { PageBody } from '~/components/ui/page-body';
+import { BudgetsMenu } from '~/components/budgets/budgets-menu';
 
 export const loader = authenticatedLoader(async ({ request }, userId) => {
   try {
     return {
       user: await getUser(userId),
+      budgets: await getBudgets(userId),
     };
   } catch (e) {
     return await authenticator.logout(request, {
-      redirectTo: '/',
+      redirectTo: INDEX_ROUTE,
     });
   }
 });
@@ -33,14 +37,14 @@ export async function clientLoader({ serverLoader }: ClientLoaderFunctionArgs) {
 }
 
 export default function () {
-  const { user } = useLoaderData<typeof loader>();
+  const { budgets, user } = useLoaderData<typeof loader>();
   const { t } = useTranslation();
 
   return (
     <div className="flex min-h-screen w-full flex-col">
       <PageHeader>
         <PageMainNav>
-          <PageNavLink to="/budgets">{t('nav.budgets')}</PageNavLink>
+          <BudgetsMenu budgets={budgets}>{t('nav.budgets')}</BudgetsMenu>
           <PageNavLink to="/budgets/invitations">
             {t('nav.budget-invitations')}
           </PageNavLink>

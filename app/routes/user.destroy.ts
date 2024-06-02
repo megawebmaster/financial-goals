@@ -1,6 +1,7 @@
 import type { LoaderFunctionArgs } from '@remix-run/node';
 import { redirectWithError } from 'remix-toast';
 
+import { INDEX_ROUTE } from '~/routes';
 import { authenticator } from '~/services/auth.server';
 import { deleteUser } from '~/services/user.server';
 import { authenticatedAction } from '~/helpers/auth';
@@ -22,7 +23,7 @@ export const action = authenticatedAction(async ({ request }, userId) => {
   }
 
   return await authenticator.logout(request, {
-    redirectTo: '/',
+    redirectTo: INDEX_ROUTE,
   });
 });
 

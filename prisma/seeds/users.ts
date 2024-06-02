@@ -35,6 +35,7 @@ async function seedUser(username: string, email: string) {
     {
       name: await encrypt('Test budget 1', encryptionKey),
       key: await lockKey(wrappingKey, encryptionKey),
+      isDefault: true,
     },
   );
 

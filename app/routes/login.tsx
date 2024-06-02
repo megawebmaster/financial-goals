@@ -2,7 +2,7 @@ import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
 import { redirect } from '@remix-run/node';
 
 import { authenticator } from '~/services/auth.server';
-import { LOGIN_ROUTE } from '~/routes';
+import { INDEX_ROUTE, LOGIN_ROUTE } from '~/routes';
 import { PageHeader } from '~/components/ui/page-header';
 import { PageMainNav } from '~/components/ui/page-main-nav';
 import { PageBody } from '~/components/ui/page-body';
@@ -13,7 +13,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const userId = await authenticator.isAuthenticated(request);
 
   if (userId) {
-    return redirect('/budgets');
+    // TODO: Add support for redirecting back
+    return redirect(INDEX_ROUTE);
   }
 
   const t = await i18next.getFixedT(await i18next.getLocale(request));
@@ -25,7 +26,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 export async function action({ request }: ActionFunctionArgs) {
   return await authenticator.authenticate('user-pass', request, {
-    successRedirect: '/budgets',
+    successRedirect: INDEX_ROUTE,
     failureRedirect: LOGIN_ROUTE,
   });
 }

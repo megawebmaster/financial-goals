@@ -8,7 +8,7 @@ export function PageNavLink({ className, children, ...props }: LinkProps) {
   return (
     <Link
       className={cn(
-        'flex items-center gap-2 text-md font-normal text-nowrap md:text-base',
+        'flex items-center gap-2 font-normal text-nowrap hover:underline hover:underline-offset-4 md:text-base',
         className,
       )}
       {...props}

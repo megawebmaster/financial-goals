@@ -1,8 +1,10 @@
-import { Form, useLoaderData } from '@remix-run/react';
+import { useLoaderData } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
 
+import { INDEX_ROUTE } from '~/routes';
 import { authenticator } from '~/services/auth.server';
 import { getUser } from '~/services/user.server';
+import { getBudgets } from '~/services/budgets.server';
 import { authenticatedLoader } from '~/helpers/auth';
 import { PageHeader } from '~/components/ui/page-header';
 import { PageMainNav } from '~/components/ui/page-main-nav';
@@ -15,33 +17,34 @@ import {
   CardHeader,
   CardTitle,
 } from '~/components/ui/card';
-import { Button } from '~/components/ui/button';
 import { PageTitle } from '~/components/ui/page-title';
 import { PageBody } from '~/components/ui/page-body';
 import { PageContent } from '~/components/ui/page-content';
-import { PageNavLink } from '~/components/ui/page-nav-link';
+import { ConfirmationForm } from '~/components/ui/confirmation-form';
+import { BudgetsMenu } from '~/components/budgets/budgets-menu';
 
 export const loader = authenticatedLoader(async ({ request }, userId) => {
   try {
     return {
       user: await getUser(userId),
+      budgets: await getBudgets(userId),
     };
   } catch (e) {
     return await authenticator.logout(request, {
-      redirectTo: '/',
+      redirectTo: INDEX_ROUTE,
     });
   }
 });
 
 export default function () {
-  const { user } = useLoaderData<typeof loader>();
+  const { budgets, user } = useLoaderData<typeof loader>();
   const { t } = useTranslation();
 
   return (
     <div className="flex min-h-screen w-full flex-col">
       <PageHeader>
         <PageMainNav>
-          <PageNavLink to="/budgets">{t('nav.budgets')}</PageNavLink>
+          <BudgetsMenu budgets={budgets}>{t('nav.budgets')}</BudgetsMenu>
         </PageMainNav>
         <PageUserNav>
           <UserMenu user={user} />

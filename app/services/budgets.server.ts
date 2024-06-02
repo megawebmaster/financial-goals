@@ -27,6 +27,14 @@ export type Budget = ThenArg<ReturnType<typeof fetchBudget>>;
 export const getBudget = (userId: number, budgetId: number): Promise<Budget> =>
   fetchBudget(userId, budgetId);
 
+export const getDefaultBudget = (userId: number): Promise<BudgetUser> =>
+  prisma.budgetUser.findFirstOrThrow({
+    where: {
+      isDefault: true,
+      userId,
+    },
+  });
+
 export const createBudget = (
   userId: number,
   budgetData: Omit<BaseBudget, 'id'>,
