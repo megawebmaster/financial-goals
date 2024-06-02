@@ -63,11 +63,13 @@ export default function () {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Form action="/user/destroy" method="post">
-                <Button type="submit" variant="destructive">
-                  {t('user-settings.delete-account.submit')}
-                </Button>
-              </Form>
+              <ConfirmationForm
+                action="/user/destroy"
+                method="post"
+                confirmation={t('user-settings.delete-account.confirm')}
+              >
+                {t('user-settings.delete-account.submit')}
+              </ConfirmationForm>
             </CardContent>
           </Card>
         </PageContent>

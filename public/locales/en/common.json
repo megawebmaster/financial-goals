@@ -64,6 +64,10 @@
   "component.budget-share-form.username": "Email",
   "component.budget-share-form.submit": "Share the budget",
   "component.budgets-menu.create": "Create new budget",
+  "component.confirmation-form.title": "Are you absolutely sure?",
+  "component.confirmation-form.description": "This action cannot be undone. This will permanently delete your account and remove your data from our servers.",
+  "component.confirmation-form.cancel": "Cancel",
+  "component.confirmation-form.confirm": "Yes, do it",
   "component.goal-form.name": "Goal name",
   "component.goal-form.amount": "Required amount",
   "component.savings-form.date": "Date",
@@ -113,5 +117,6 @@
   "user-settings.title": "Settings",
   "user-settings.delete-account.title": "Delete account",
   "user-settings.delete-account.description": "You can completely delete your account along with all its data here.",
-  "user-settings.delete-account.submit": "Yes, delete my account"
+  "user-settings.delete-account.submit": "Delete my account",
+  "user-settings.delete-account.confirm": "Yes, delete my account"
 }
