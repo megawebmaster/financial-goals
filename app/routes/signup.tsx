@@ -53,14 +53,15 @@ export async function action({ request }: ActionFunctionArgs) {
 
   try {
     const data = await request.clone().formData();
+    const password = data.get('password') as string;
     const user = await createUser(
       data.get('username') as string,
       data.get('email') as string,
-      data.get('password') as string,
+      password,
     );
 
     const wrappingKey = await generateWrappingKey(
-      await generateKeyMaterial('test'),
+      await generateKeyMaterial(password),
       user.salt,
     );
     const encryptionKey = await generateEncryptionKey();

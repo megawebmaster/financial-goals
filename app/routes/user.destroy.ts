@@ -17,7 +17,7 @@ export const action = authenticatedAction(async ({ request }, userId) => {
       'error',
     );
 
-    return redirectWithError('/budgets', {
+    return redirectWithError(INDEX_ROUTE, {
       message: t('user.deletion-failed'),
     });
   }

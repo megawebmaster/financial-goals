@@ -3,6 +3,7 @@ import { redirectWithError } from 'remix-toast';
 import type { User } from '@prisma/client';
 import invariant from 'tiny-invariant';
 
+import { INDEX_ROUTE } from '~/routes';
 import type { BudgetsLayoutContext } from '~/helpers/budgets';
 import { authenticatedLoader } from '~/helpers/auth';
 import { getBudget } from '~/services/budgets.server';
@@ -34,7 +35,7 @@ export const loader = authenticatedLoader(
         'error',
       );
 
-      return redirectWithError('/budgets', { message: t('budget.not-found') });
+      return redirectWithError(INDEX_ROUTE, { message: t('budget.not-found') });
     }
   },
 );

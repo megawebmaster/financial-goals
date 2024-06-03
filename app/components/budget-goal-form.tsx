@@ -93,8 +93,8 @@ export const BudgetGoalForm = ({
                   <FormLabel>
                     {t('component.goal-form.required-amount')}
                   </FormLabel>
-                  <FormControl>
-                    <div className="flex w-full max-w-sm items-center space-x-2">
+                  <div className="flex w-full max-w-sm items-center space-x-2">
+                    <FormControl>
                       <Input
                         {...field}
                         type="number"
@@ -105,9 +105,9 @@ export const BudgetGoalForm = ({
                         )}
                         value={field.value || ''}
                       />
-                      <p>{FORMAT_CURRENCY.currency}</p>
-                    </div>
-                  </FormControl>
+                    </FormControl>
+                    <p>{FORMAT_CURRENCY.currency}</p>
+                  </div>
                   <FormMessage />
                 </FormItem>
               )}

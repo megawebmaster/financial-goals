@@ -125,8 +125,8 @@ export const BudgetSavingsEntryForm = ({
               render={({ field }) => (
                 <FormItem className="grid gap-2">
                   <FormLabel>{t('component.savings-form.amount')}</FormLabel>
-                  <FormControl>
-                    <div className="flex w-full max-w-sm items-center space-x-2">
+                  <div className="flex w-full max-w-sm items-center space-x-2">
+                    <FormControl>
                       <Input
                         {...field}
                         type="number"
@@ -137,9 +137,9 @@ export const BudgetSavingsEntryForm = ({
                         )}
                         value={field.value || ''}
                       />
-                      <p>{FORMAT_CURRENCY.currency}</p>
-                    </div>
-                  </FormControl>
+                    </FormControl>
+                    <p>{FORMAT_CURRENCY.currency}</p>
+                  </div>
                   <FormMessage />
                 </FormItem>
               )}

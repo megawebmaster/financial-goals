@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { redirectWithError, redirectWithSuccess } from 'remix-toast';
 import invariant from 'tiny-invariant';
 
+import { INDEX_ROUTE } from '~/routes';
 import type { BudgetsLayoutContext } from '~/helpers/budgets';
 import { authenticatedAction, authenticatedLoader } from '~/helpers/auth';
 import { getGoalsSum } from '~/helpers/budget-goals';
@@ -48,7 +49,7 @@ export const loader = authenticatedLoader(
         'errors',
       ]);
 
-      return redirectWithError('/budgets', {
+      return redirectWithError(INDEX_ROUTE, {
         message: t('budget.not-found'),
       });
     }
