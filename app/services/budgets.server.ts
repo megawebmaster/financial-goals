@@ -46,7 +46,7 @@ export const createBudget = (
 
     if (budgetUserdata.isDefault) {
       await tx.budgetUser.updateMany({
-        where: { isDefault: true },
+        where: { isDefault: true, userId },
         data: { isDefault: false },
       });
     }
@@ -69,7 +69,7 @@ export const updateBudget = (
   prisma.$transaction(async (tx) => {
     if (data.isDefault) {
       const result = await tx.budgetUser.updateMany({
-        where: { isDefault: true },
+        where: { isDefault: true, userId },
         data: { isDefault: false },
       });
 

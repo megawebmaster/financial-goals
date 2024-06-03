@@ -2,7 +2,6 @@ import type { BudgetInvitation } from '@prisma/client';
 import { addDays } from 'date-fns';
 
 import { prisma } from '~/services/db.server';
-import { getBudget } from '~/services/budgets.server';
 
 export const getInvitation = (id: string, userId: number) =>
   prisma.budgetInvitation.findFirstOrThrow({
@@ -30,14 +29,16 @@ export class BudgetAlreadySharedError extends Error {}
 export const shareBudget = (
   userId: number,
   budgetId: number,
-  username: string,
+  email: string,
   data: string,
 ): Promise<BudgetInvitation> =>
   prisma.$transaction(async (tx) => {
-    await getBudget(userId, budgetId);
-    const user = await tx.user.findFirstOrThrow({ where: { username } });
+    await tx.budgetUser.findFirstOrThrow({ where: { budgetId, userId } });
+    const user = await tx.user.findFirstOrThrow({ where: { email } });
 
-    if (await getBudget(user.id, budgetId)) {
+    if (
+      await tx.budgetUser.findFirst({ where: { budgetId, userId: user.id } })
+    ) {
       throw new BudgetAlreadySharedError();
     }
 

@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { Link } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
-import { ChevronDownIcon, PlusIcon } from 'lucide-react';
+import { ChevronDownIcon, PlusIcon, ShieldIcon } from 'lucide-react';
 
 import type { BudgetUser } from '@prisma/client';
 import {
@@ -57,7 +57,14 @@ export function BudgetsMenu({ budgets, children }: BudgetsMenuProps) {
             )}
           </BudgetsList.Fulfilled>
         </BudgetsList>
-        <DropdownMenuItem asChild>
+        <DropdownMenuItem asChild className="cursor-pointer">
+          <Link to="/budgets/invitations">
+            <ShieldIcon className="mr-2 size-4" />
+            <span>{t('component.budgets-menu.invitations')}</span>
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild className="cursor-pointer">
           <Link to="/budgets/new">
             <PlusIcon className="mr-2 size-4" />
             <span>{t('component.budgets-menu.create')}</span>

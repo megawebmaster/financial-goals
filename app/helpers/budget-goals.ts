@@ -40,6 +40,9 @@ export const getGoalEstimatedCompletion = (
   if (amountToSave === 0) {
     return null;
   }
+  if (averageSavings === 0) {
+    return null;
+  }
 
   const months = Math.ceil(amountToSave / averageSavings);
 

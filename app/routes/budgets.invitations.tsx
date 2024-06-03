@@ -1,12 +1,12 @@
 import { Outlet, useLoaderData, useOutletContext } from '@remix-run/react';
-import { useTranslation } from 'react-i18next';
 import type { User } from '@prisma/client';
 import { redirectWithError } from 'remix-toast';
 
 import type { BudgetInvitationsLayoutContext } from '~/helpers/budget-invitations';
+import { authenticatedLoader } from '~/helpers/auth';
 import { getInvitations } from '~/services/budget-invitations.server';
 import { BudgetInvitationsList } from '~/components/budget-invitations-list';
-import { authenticatedLoader } from '~/helpers/auth';
+import { DecryptingMessage } from '~/components/decrypting-message';
 import i18next from '~/i18n.server';
 
 export const loader = authenticatedLoader(async ({ request }, userId) => {
@@ -25,7 +25,6 @@ export const loader = authenticatedLoader(async ({ request }, userId) => {
 });
 
 export default function () {
-  const { t } = useTranslation();
   const data = useLoaderData<typeof loader>();
   const currentUser = useOutletContext<User>();
 
@@ -35,7 +34,7 @@ export default function () {
       currentUser={currentUser}
     >
       <BudgetInvitationsList.Pending>
-        {t('budget-invitations.encryption.decrypting')}
+        <DecryptingMessage />
       </BudgetInvitationsList.Pending>
       <BudgetInvitationsList.Fulfilled>
         {(invitations) => (

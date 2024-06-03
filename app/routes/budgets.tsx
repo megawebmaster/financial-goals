@@ -12,7 +12,6 @@ import { PageHeader } from '~/components/ui/page-header';
 import { PageMainNav } from '~/components/ui/page-main-nav';
 import { PageUserNav } from '~/components/ui/page-user-nav';
 import { UserMenu } from '~/components/ui/user-menu';
-import { PageNavLink } from '~/components/ui/page-nav-link';
 import { PageBody } from '~/components/ui/page-body';
 import { BudgetsMenu } from '~/components/budgets/budgets-menu';
 
@@ -45,9 +44,6 @@ export default function () {
       <PageHeader>
         <PageMainNav>
           <BudgetsMenu budgets={budgets}>{t('nav.budgets')}</BudgetsMenu>
-          <PageNavLink to="/budgets/invitations">
-            {t('nav.budget-invitations')}
-          </PageNavLink>
         </PageMainNav>
         <PageUserNav>
           <UserMenu user={user} />

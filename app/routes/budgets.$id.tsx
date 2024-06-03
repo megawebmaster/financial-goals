@@ -1,5 +1,4 @@
 import { Outlet, useLoaderData, useOutletContext } from '@remix-run/react';
-import { useTranslation } from 'react-i18next';
 import { redirectWithError } from 'remix-toast';
 import type { User } from '@prisma/client';
 import invariant from 'tiny-invariant';
@@ -12,8 +11,7 @@ import { getBudgetSavings } from '~/services/budget-savings-entries.server';
 import { Budget } from '~/components/budget';
 import { GoalsList } from '~/components/budgets/goals-list';
 import { SavingsList } from '~/components/budgets/savings-list';
-import { PageContent } from '~/components/ui/page-content';
-import { Card, CardContent } from '~/components/ui/card';
+import { DecryptingMessage } from '~/components/decrypting-message';
 import i18next from '~/i18n.server';
 
 export const loader = authenticatedLoader(
@@ -41,22 +39,7 @@ export const loader = authenticatedLoader(
   },
 );
 
-const Decrypting = () => {
-  const { t } = useTranslation();
-
-  return (
-    <PageContent>
-      <Card>
-        <CardContent className="pt-6">
-          {t('budget.encryption.decrypting')}
-        </CardContent>
-      </Card>
-    </PageContent>
-  );
-};
-
 export default function () {
-  const { t } = useTranslation();
   const data = useLoaderData<typeof loader>();
   const user = useOutletContext<User>();
 
@@ -65,19 +48,19 @@ export default function () {
       <GoalsList encryptionKey={data.budget.key} goals={data.goals}>
         <SavingsList encryptionKey={data.budget.key} savings={data.savings}>
           <Budget.Pending>
-            <Decrypting />
+            <DecryptingMessage />
           </Budget.Pending>
           <Budget.Fulfilled>
             {(budget) => (
               <>
                 <GoalsList.Pending>
-                  <Decrypting />
+                  <DecryptingMessage />
                 </GoalsList.Pending>
                 <GoalsList.Fulfilled>
                   {(goals) => (
                     <>
                       <SavingsList.Pending>
-                        <Decrypting />
+                        <DecryptingMessage />
                       </SavingsList.Pending>
                       <SavingsList.Fulfilled>
                         {(savings) => (

@@ -11,8 +11,15 @@ type EstimateProps = {
 
 export function GoalEstimate({ averageSavings, amountToSave }: EstimateProps) {
   const { t } = useTranslation();
-  const date = getGoalEstimatedCompletion(amountToSave, averageSavings);
 
+  if (amountToSave === 0) {
+    return null;
+  }
+  if (averageSavings === 0) {
+    return null;
+  }
+
+  const date = getGoalEstimatedCompletion(amountToSave, averageSavings);
   if (!date) {
     return <CheckIcon className="text-green-500" />;
   }

@@ -155,15 +155,17 @@ export default function () {
         </Card>
         {currentGoal && (
           <CurrentBudgetGoal budgetId={budget.budgetId} goal={currentGoal}>
-            <p className="flex gap-1">
-              <strong>
-                {t('budget.view.current-goal.estimated-completion')}:
-              </strong>
-              <GoalEstimate
-                averageSavings={averageSavings}
-                amountToSave={amountToSaveCalculator(currentGoal.id)}
-              />
-            </p>
+            {averageSavings > 0 && (
+              <p className="flex gap-1">
+                <strong>
+                  {t('budget.view.current-goal.estimated-completion')}:
+                </strong>
+                <GoalEstimate
+                  averageSavings={averageSavings}
+                  amountToSave={amountToSaveCalculator(currentGoal.id)}
+                />
+              </p>
+            )}
           </CurrentBudgetGoal>
         )}
         <Card>
@@ -201,7 +203,7 @@ export default function () {
               <TableBody>
                 {goals.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={6}>
+                    <TableCell colSpan={6} className="text-center">
                       {t('budget.view.goals.empty')}
                     </TableCell>
                   </TableRow>

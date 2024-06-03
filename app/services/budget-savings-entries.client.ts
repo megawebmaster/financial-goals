@@ -1,5 +1,5 @@
 import type { BudgetSavingsEntry } from '@prisma/client';
-import { length, map, pipe, sum, uniq } from 'ramda';
+import { defaultTo, length, map, pipe, sum, uniq } from 'ramda';
 import { lightFormat } from 'date-fns';
 
 import type { ClientBudgetSavingsEntry } from '~/helpers/budget-goals';
@@ -27,4 +27,4 @@ const countSavingsMonths = pipe(
 );
 
 export const getAverageSavings = (savings: ClientBudgetSavingsEntry[]) =>
-  sumSavings(savings) / countSavingsMonths(savings);
+  defaultTo(0, sumSavings(savings) / countSavingsMonths(savings));
