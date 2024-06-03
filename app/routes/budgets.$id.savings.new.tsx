@@ -1,4 +1,3 @@
-import type { FormEvent } from 'react';
 import type { MetaFunction } from '@remix-run/node';
 import { useOutletContext, useSubmit } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
@@ -6,17 +5,20 @@ import { redirectWithError, redirectWithSuccess } from 'remix-toast';
 import invariant from 'tiny-invariant';
 
 import type { BudgetsLayoutContext } from '~/helpers/budgets';
+import { authenticatedAction, authenticatedLoader } from '~/helpers/auth';
+import { getGoalsSum } from '~/helpers/budget-goals';
 import { getBudget } from '~/services/budgets.server';
 import { encrypt, unlockKey } from '~/services/encryption.client';
 import { getBudgetGoals } from '~/services/budget-goals.server';
-import { BudgetSavingsEntryForm } from '~/components/budget-savings-entry-form';
 import { createSavingsEntry } from '~/services/budget-savings-entries.server';
 import {
   buildGoalsFiller,
   encryptBudgetGoal,
 } from '~/services/budget-goals.client';
-import { getGoalsSum } from '~/helpers/budget-goals';
-import { authenticatedAction, authenticatedLoader } from '~/helpers/auth';
+import type { BudgetSavingsFormValues } from '~/components/budget-savings-entry-form';
+import { BudgetSavingsEntryForm } from '~/components/budget-savings-entry-form';
+import { PageTitle } from '~/components/ui/page-title';
+import { PageContent } from '~/components/ui/page-content';
 import i18next from '~/i18n.server';
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => [
@@ -107,14 +109,10 @@ export default function () {
   const { budget, goals } = useOutletContext<BudgetsLayoutContext>();
   const submit = useSubmit();
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const handleSubmit = async (values: BudgetSavingsFormValues) => {
     const encryptionKey = await unlockKey(budget.key);
-    const formData = new FormData(event.target as HTMLFormElement);
 
-    const date = new Date(formData.get('date') as string);
-    const amount = parseFloat(formData.get('amount') as string);
-    const currentSavings = budget.currentSavings + amount;
+    const currentSavings = budget.currentSavings + values.amount;
     const processGoals = buildGoalsFiller(currentSavings);
     const updatedGoals = processGoals(goals);
     const freeSavings = currentSavings - getGoalsCurrentAmount(updatedGoals);
@@ -122,8 +120,8 @@ export default function () {
     submit(
       {
         entryData: JSON.stringify({
-          date,
-          amount: await encrypt(amount.toString(10), encryptionKey),
+          date: values.date,
+          amount: await encrypt(values.amount.toString(10), encryptionKey),
         }),
         budgetData: JSON.stringify({
           currentSavings: await encrypt(
@@ -144,13 +142,13 @@ export default function () {
 
   return (
     <>
-      <a href={`/budgets/${budget.budgetId}`}>{t('savings.new.back')}</a>
-      <h2>{t('savings.new.page.title', { budget: budget.name })}</h2>
-      <BudgetSavingsEntryForm
-        budget={budget}
-        onSubmit={handleSubmit}
-        submit={t('savings.new.form.submit')}
+      <PageTitle
+        back={`/budgets/${budget.budgetId}`}
+        title={t('savings.new.page.title', { budget: budget.name })}
       />
+      <PageContent>
+        <BudgetSavingsEntryForm onSubmit={handleSubmit} status="create" />
+      </PageContent>
     </>
   );
 }

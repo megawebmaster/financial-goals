@@ -25,7 +25,7 @@ import { Button } from '~/components/ui/button';
 
 const goalFormSchema = z.object({
   name: z.string().min(1).max(64),
-  amount: z.number().min(0),
+  amount: z.coerce.number().min(0),
 });
 
 export type BudgetGoalFormValues = z.infer<typeof goalFormSchema>;
@@ -99,9 +99,11 @@ export const BudgetGoalForm = ({
                         {...field}
                         type="number"
                         step={0.01}
+                        min={0}
                         placeholder={t(
                           'component.goal-form.required-amount-placeholder',
                         )}
+                        value={field.value || ''}
                       />
                       <p>{FORMAT_CURRENCY.currency}</p>
                     </div>
