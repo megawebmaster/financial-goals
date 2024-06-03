@@ -38,7 +38,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const userId = await authenticator.isAuthenticated(request);
 
   if (userId) {
-    return redirect('/budgets');
+    return redirect('/');
   }
 
   const t = await i18next.getFixedT(await i18next.getLocale(request));
@@ -49,6 +49,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 export async function action({ request }: ActionFunctionArgs) {
+  let budget;
+
   try {
     const data = await request.clone().formData();
     const user = await createUser(
@@ -65,7 +67,7 @@ export async function action({ request }: ActionFunctionArgs) {
     const encryptedZero = await encrypt('0', encryptionKey);
 
     let t = await i18next.getFixedT(await i18next.getLocale(request), 'common');
-    await createBudget(
+    budget = await createBudget(
       user.id,
       {
         currentSavings: encryptedZero,
@@ -89,7 +91,7 @@ export async function action({ request }: ActionFunctionArgs) {
     // TODO: Why can new account creation fail? Improve user experience here
     const t = await i18next.getFixedT(
       await i18next.getLocale(request),
-      'error',
+      'errors',
     );
 
     const error =
@@ -99,7 +101,7 @@ export async function action({ request }: ActionFunctionArgs) {
   }
 
   return await authenticator.authenticate('user-pass', request, {
-    successRedirect: '/budgets',
+    successRedirect: `/budgets/${budget.budgetId}`,
     failureRedirect: LOGIN_ROUTE,
   });
 }

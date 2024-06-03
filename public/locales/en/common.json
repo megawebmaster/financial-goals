@@ -100,7 +100,7 @@
   "component.confirmation-form.title": "Are you absolutely sure?",
   "component.confirmation-form.cancel": "Cancel",
   "component.confirmation-form.confirm": "Yes, do it",
-  "component.decrypting-message.text": "Decrypting budget data…",
+  "component.decrypting-message.text": "Decrypting data…",
   "component.goal-form.create.title": "Create new goal",
   "component.goal-form.create.description": "Fill in the goal details and start saving towards it.",
   "component.goal-form.create.submit": "Create goal",
