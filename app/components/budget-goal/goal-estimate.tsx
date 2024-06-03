@@ -13,7 +13,7 @@ export function GoalEstimate({ averageSavings, amountToSave }: EstimateProps) {
   const { t } = useTranslation();
 
   if (amountToSave === 0) {
-    return null;
+    return <CheckIcon className="text-green-500" />;
   }
   if (averageSavings === 0) {
     return null;
