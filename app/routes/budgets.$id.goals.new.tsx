@@ -104,7 +104,10 @@ export default function () {
 
   return (
     <>
-      <PageTitle title={t('goal.new.page.title', { budget: budget.name })} />
+      <PageTitle
+        back={`/budgets/${budget.budgetId}`}
+        title={t('goal.new.page.title', { budget: budget.name })}
+      />
       <PageContent>
         <BudgetGoalForm onSubmit={handleSubmit} status="create" />
       </PageContent>

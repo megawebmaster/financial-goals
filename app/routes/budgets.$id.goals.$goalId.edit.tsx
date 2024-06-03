@@ -167,7 +167,10 @@ export default function () {
 
   return (
     <>
-      <PageTitle title={t('goal.edit.page.title', { budget: budget.name })} />
+      <PageTitle
+        back={`/budgets/${budget.budgetId}`}
+        title={t('goal.edit.page.title', { budget: budget.name })}
+      />
       <PageContent>
         <BudgetGoalForm
           className="flex flex-col gap-4"
