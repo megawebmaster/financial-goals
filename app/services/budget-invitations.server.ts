@@ -1,4 +1,4 @@
-import type { BudgetInvitation } from '@prisma/client';
+import type { BudgetInvitation, BudgetUser } from '@prisma/client';
 import { addDays } from 'date-fns';
 
 import { prisma } from '~/services/db.server';
@@ -55,8 +55,7 @@ export const shareBudget = (
 export const acceptInvitation = (
   id: string,
   userId: number,
-  name: string,
-  key: string,
+  data: Omit<BudgetUser, 'id' | 'userId' | 'budgetId' | 'isOwner'>,
 ) =>
   prisma.$transaction(async (tx) => {
     const invitation = await tx.budgetInvitation.findFirstOrThrow({
@@ -71,10 +70,9 @@ export const acceptInvitation = (
 
     const budget = await tx.budgetUser.create({
       data: {
+        ...data,
         budgetId: invitation.budgetId,
         isOwner: false,
-        key,
-        name,
         userId,
       },
     });

@@ -1,4 +1,3 @@
-import type { FormEvent } from 'react';
 import type { MetaFunction } from '@remix-run/node';
 import { redirect } from '@remix-run/node';
 import {
@@ -13,14 +12,17 @@ import { redirectWithError, redirectWithSuccess } from 'remix-toast';
 import invariant from 'tiny-invariant';
 
 import type { BudgetInvitationsLayoutContext } from '~/helpers/budget-invitations';
+import { authenticatedAction, authenticatedLoader } from '~/helpers/auth';
 import { encrypt, lockKey } from '~/services/encryption.client';
 import { importKey } from '~/services/encryption';
 import {
   acceptInvitation,
   getInvitation,
 } from '~/services/budget-invitations.server';
+import type { BudgetAcceptFormValues } from '~/components/budget-accept-form';
 import { BudgetAcceptForm } from '~/components/budget-accept-form';
-import { authenticatedAction, authenticatedLoader } from '~/helpers/auth';
+import { PageTitle } from '~/components/ui/page-title';
+import { PageContent } from '~/components/ui/page-content';
 import i18next from '~/i18n.server';
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => [
@@ -64,6 +66,7 @@ export const action = authenticatedAction(
 
       const data = await request.formData();
       const name = data.get('name');
+      const isDefault = data.get('isDefault') === 'true';
       const key = data.get('key');
 
       invariant(name, 'Name of the budget is required');
@@ -71,7 +74,11 @@ export const action = authenticatedAction(
       invariant(key, 'Budget encryption key is required');
       invariant(typeof key === 'string', 'Encryption key must be a text');
 
-      const budget = await acceptInvitation(params.id, userId, name, key);
+      const budget = await acceptInvitation(params.id, userId, {
+        name,
+        key,
+        isDefault,
+      });
       const t = await i18next.getFixedT(await i18next.getLocale(request));
 
       return redirectWithSuccess(`/budgets/${budget.budgetId}`, {
@@ -103,12 +110,7 @@ export default function () {
     return navigate('/budget/invitations');
   }
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    const formData = new FormData(event.target as HTMLFormElement);
-    const name = formData.get('name') as string;
-
+  const handleSubmit = async (values: BudgetAcceptFormValues) => {
     const budgetEncryptionKey = await importKey(invitation.key, [
       'encrypt',
       'decrypt',
@@ -116,7 +118,8 @@ export default function () {
 
     submit(
       {
-        name: await encrypt(name, budgetEncryptionKey),
+        name: await encrypt(values.name, budgetEncryptionKey),
+        isDefault: values.isDefault,
         key: await lockKey(budgetEncryptionKey),
       },
       { method: 'POST' },
@@ -125,10 +128,13 @@ export default function () {
 
   return (
     <>
-      <a href={'/'}>{t('budget.share.accept.back')}</a>
-      <h2>{t('budget.share.accept.page.title')}</h2>
-      <p>{t('budget.share.accept.page.description')}</p>
-      <BudgetAcceptForm name={invitation.budget} onSubmit={handleSubmit} />
+      <PageTitle
+        back="/budgets/invitations"
+        title={t('budget.share.accept.page.title')}
+      />
+      <PageContent>
+        <BudgetAcceptForm name={invitation.budget} onSubmit={handleSubmit} />
+      </PageContent>
     </>
   );
 }
