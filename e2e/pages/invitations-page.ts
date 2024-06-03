@@ -7,23 +7,25 @@ export class InvitationsPage {
 
   async accept(budgetName: string) {
     await this.getInvitation(budgetName)
-      .getByRole('link', { name: 'Accept' })
+      .locator('a', { hasText: 'Accept' })
       .click();
     await expect(
-      this.page.getByText('Accept the budget invitation'),
+      this.page.getByRole('heading', { name: 'Accept the invitation' }),
     ).toBeVisible();
   }
 
   async decline(budgetName: string) {
     await this.getInvitation(budgetName)
-      .getByRole('button', { name: 'Decline' })
+      .locator('button', { hasText: 'Decline' })
       .click();
 
-    await expect(this.page.getByText('Your invitations:')).toBeVisible();
+    await expect(this.page.getByText('List of your invitations')).toBeVisible();
     await expect(this.page.getByText(budgetName)).not.toBeAttached();
   }
 
   private getInvitation(budgetName: string) {
-    return this.page.getByText(budgetName);
+    return this.page
+      .getByLabel('List of your invitations')
+      .getByRole('row', { name: budgetName });
   }
 }

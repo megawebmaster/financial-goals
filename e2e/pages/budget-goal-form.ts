@@ -11,11 +11,14 @@ export class BudgetGoalForm {
 
   submit() {
     return this.page
-      .getByRole('button', { name: /Create goal!|Update goal!/ })
+      .getByRole('button', { name: /Create goal|Save changes/ })
       .click();
   }
 
-  deleteGoal() {
-    return this.page.getByRole('button', { name: 'Delete goal' }).click();
+  async deleteGoal() {
+    await this.page.getByRole('button', { name: 'Delete this goal' }).click();
+    await this.page
+      .getByRole('button', { name: 'Yes, delete the goal' })
+      .click();
   }
 }

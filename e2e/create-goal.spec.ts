@@ -12,5 +12,5 @@ test('create goal', async ({ budget: page }) => {
   await goalForm.amount.fill('1000');
   await goalForm.submit();
 
-  await expect(page.getByText('First goal')).toBeVisible();
+  await expect(budgetPage.goals.getByText('First goal')).toBeVisible();
 });

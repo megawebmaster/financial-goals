@@ -4,10 +4,12 @@ export class BudgetAcceptForm {
   public readonly name: Locator;
 
   constructor(private readonly page: Page) {
-    this.name = page.getByLabel('Name');
+    this.name = page.getByLabel('Budget name');
   }
 
   submit() {
-    return this.page.getByRole('button', { name: 'Accept invitation' }).click();
+    return this.page
+      .getByRole('button', { name: 'Accept the invitation' })
+      .click();
   }
 }

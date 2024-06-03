@@ -1,10 +1,10 @@
 import type { Locator, Page } from 'playwright/test';
 
 export class BudgetShareForm {
-  public readonly username: Locator;
+  public readonly email: Locator;
 
   constructor(private readonly page: Page) {
-    this.username = page.getByLabel('Email');
+    this.email = page.getByLabel('Email');
   }
 
   submit() {
