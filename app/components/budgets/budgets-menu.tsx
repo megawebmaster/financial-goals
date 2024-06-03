@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { Link } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
-import { ChevronDownIcon, PlusIcon, ShieldIcon } from 'lucide-react';
+import { ChevronDownIcon, HeartIcon, PlusIcon, ShieldIcon } from 'lucide-react';
 
 import type { BudgetUser } from '@prisma/client';
 import {
@@ -48,6 +48,13 @@ export function BudgetsMenu({ budgets, children }: BudgetsMenuProps) {
                     className="cursor-pointer"
                   >
                     <Link to={`/budgets/${budget.budgetId}`}>
+                      {budget.isDefault ? (
+                        <HeartIcon className="mr-2 size-4" />
+                      ) : (
+                        <div className="mr-2 size-4" />
+                      )}
+                      {!budget.isOwner &&
+                        t('component.budgets-menu.shared-budget')}{' '}
                       {budget.name}
                     </Link>
                   </DropdownMenuItem>

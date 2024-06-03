@@ -94,6 +94,7 @@
   "component.budget-share-form.username-placeholder": "eg. spouse@example.com",
   "component.budget-share-form.submit": "Share the budget",
   "component.budget-share-form.cancel": "Cancel, go back to budget",
+  "component.budgets-menu.shared-budget": "Shared:",
   "component.budgets-menu.invitations": "Invitations",
   "component.budgets-menu.create": "Create new budget",
   "component.confirmation-form.title": "Are you absolutely sure?",

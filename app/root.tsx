@@ -58,7 +58,7 @@ export default function App() {
         notify.info(toast.message);
         break;
     }
-  }, [toast?.type, toast?.message]);
+  }, [toast]);
 
   z.setErrorMap(makeZodI18nMap({ t, handlePath: { ns: ['zod'] } }));
 
@@ -73,7 +73,7 @@ export default function App() {
       </head>
       <body>
         <Outlet />
-        <Toaster />
+        <Toaster position="top-right" />
         <ScrollRestoration />
         <Scripts />
       </body>
