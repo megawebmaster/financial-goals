@@ -10,6 +10,6 @@ export class LoginForm {
   }
 
   submit() {
-    return this.page.getByRole('button', { name: 'Sign in!' }).click();
+    return this.page.getByRole('button', { name: 'Login' }).click();
   }
 }

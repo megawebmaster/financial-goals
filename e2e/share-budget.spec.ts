@@ -10,7 +10,7 @@ test('share budget', async ({ savings: page, account2 }) => {
 
   await budgetPage.share();
   const shareForm = new BudgetShareForm(page);
-  await shareForm.username.fill(account2.username);
+  await shareForm.email.fill(account2.username);
   await shareForm.submit();
 
   await expect(page.getByText('First budget')).toBeVisible();

@@ -9,9 +9,7 @@ export class InvitationsPage {
     await this.getInvitation(budgetName)
       .getByRole('link', { name: 'Accept' })
       .click();
-    await expect(
-      this.page.getByText('Accept the budget invitation'),
-    ).toBeVisible();
+    await expect(this.page.getByText('Accept the invitation')).toBeVisible();
   }
 
   async decline(budgetName: string) {
@@ -19,7 +17,7 @@ export class InvitationsPage {
       .getByRole('button', { name: 'Decline' })
       .click();
 
-    await expect(this.page.getByText('Your invitations:')).toBeVisible();
+    await expect(this.page.getByText('List of your invitations')).toBeVisible();
     await expect(this.page.getByText(budgetName)).not.toBeAttached();
   }
 

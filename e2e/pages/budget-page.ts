@@ -6,16 +6,8 @@ export class BudgetPage {
   public readonly freeSavings: Locator;
   public readonly goals: Locator;
 
-  private readonly addGoalLink: Locator;
-  private readonly addSavingsLink: Locator;
-  private readonly shareLink: Locator;
-
   constructor(private readonly page: Page) {
-    this.addGoalLink = page.getByRole('link', { name: 'Create goal' });
-    this.addSavingsLink = page.getByRole('link', { name: 'Add savings' });
     this.goals = page.getByRole('listitem');
-
-    this.shareLink = page.getByRole('link', { name: 'Share' });
     this.currentSavings = page.locator('p', {
       has: page.getByText('Current savings'),
     });
@@ -25,16 +17,16 @@ export class BudgetPage {
   }
 
   async addGoal() {
-    await this.addGoalLink.click();
+    await this.page.getByRole('link', { name: 'Create new goal' }).click();
     await expect(
       this.page.getByRole('heading', { name: 'Add a goal' }),
     ).toBeVisible();
   }
 
   async addSavings() {
-    await this.addSavingsLink.click();
+    await this.page.getByRole('link', { name: 'Add savings' }).click();
     await expect(
-      this.page.getByRole('heading', { name: 'Add savings' }),
+      this.page.getByRole('heading', { name: 'Saved money' }),
     ).toBeVisible();
   }
 
@@ -46,17 +38,19 @@ export class BudgetPage {
   }
 
   moveGoalUp(name: string) {
+    // TODO: Fix moving up/down
     return this.getGoal(name).getByRole('button', { name: 'Move up' }).click();
   }
 
   moveGoalDown(name: string) {
+    // TODO: Fix moving up/down
     return this.getGoal(name)
       .getByRole('button', { name: 'Move down' })
       .click();
   }
 
   async share() {
-    await this.shareLink.click();
+    await this.page.getByRole('link', { name: 'Share' }).click();
     await expect(
       this.page.getByRole('heading', { name: 'Share the budget with family' }),
     ).toBeVisible();

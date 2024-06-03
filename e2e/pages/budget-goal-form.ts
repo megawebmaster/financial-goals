@@ -11,11 +11,11 @@ export class BudgetGoalForm {
 
   submit() {
     return this.page
-      .getByRole('button', { name: /Create goal!|Update goal!/ })
+      .getByRole('button', { name: /Create goal|Save changes/ })
       .click();
   }
 
   deleteGoal() {
-    return this.page.getByRole('button', { name: 'Delete goal' }).click();
+    return this.page.getByRole('button', { name: 'Delete this goal' }).click();
   }
 }

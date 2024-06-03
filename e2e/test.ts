@@ -41,8 +41,12 @@ const createAccount = async (
   await signUpPage.getByLabel('Your name').fill(username);
   await signUpPage.getByLabel('Email').fill(email);
   await signUpPage.getByLabel('Password').fill(password);
-  await signUpPage.getByRole('button', { name: 'Create account!' }).click();
-  await expect(signUpPage.getByText(`Logged in as: ${username}`)).toBeVisible();
+  await signUpPage.getByRole('button', { name: 'Create an account' }).click();
+
+  const userMenu = signUpPage.getByText('Toggle user menu');
+  await expect(userMenu).toBeVisible();
+  await userMenu.click();
+  await expect(signUpPage.getByText(username)).toBeVisible();
   await signUpPage.close();
 
   return { username, email, password };
@@ -59,20 +63,31 @@ const deleteAccount = async (
   await form.login.fill(account.email);
   await form.password.fill(account.password);
   await form.submit();
+
+  const userMenu = deleteAccountPage.getByText('Toggle user menu');
+  await expect(userMenu).toBeVisible();
+  await userMenu.click();
+  await deleteAccountPage.getByRole('menuitem', { name: 'Settings' }).click();
   await deleteAccountPage
-    .getByRole('button', { name: 'Delete account' })
+    .getByRole('button', { name: 'Delete my account' })
+    .click();
+  await deleteAccountPage
+    .getByRole('button', { name: 'Yes, delete my account' })
     .click();
   await expect(deleteAccountPage.getByText('Sign up')).toBeVisible();
 };
 
 const login = async (page: Page, account: FixtureAccount) => {
   const form = new LoginForm(page);
-  await form.login.fill(account.username);
+  await form.login.fill(account.email);
   await form.password.fill(account.password);
   await form.submit();
-  await expect(
-    page.getByText(`Logged in as: ${account.username}`),
-  ).toBeVisible();
+
+  const userMenu = page.getByText('Toggle user menu');
+  await expect(userMenu).toBeVisible();
+  await userMenu.click();
+  await expect(page.getByText(account.username)).toBeVisible();
+  await page.getByRole('document').click();
 };
 
 export const test = base.extend<Fixtures, WorkerFixtures>({
@@ -104,6 +119,7 @@ export const test = base.extend<Fixtures, WorkerFixtures>({
 
     await budgetsPage.createBudget();
     await budgetForm.name.fill('First budget');
+    await budgetForm.isDefault.click();
     await budgetForm.submit();
 
     await expect(page.getByText('First budget')).toBeVisible();
@@ -155,7 +171,7 @@ export const test = base.extend<Fixtures, WorkerFixtures>({
     const budgetPage = new BudgetPage(page);
     await budgetPage.share();
     const shareForm = new BudgetShareForm(page);
-    await shareForm.username.fill(account2.username);
+    await shareForm.email.fill(account2.email);
     await shareForm.submit();
     await expect(page.getByText('First budget')).toBeVisible();
 
