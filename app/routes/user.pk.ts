@@ -9,7 +9,7 @@ import i18next from '~/i18n.server';
 export const action = authenticatedAction(async ({ request }, userId) => {
   try {
     const data = await request.formData();
-    const email = data.get('username') as string;
+    const email = data.get('email') as string;
 
     return {
       email,

@@ -1,4 +1,3 @@
-import type { FormEvent } from 'react';
 import type { LoaderFunctionArgs, MetaFunction } from '@remix-run/node';
 import { useOutletContext, useSubmit } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
@@ -12,8 +11,8 @@ import { toast } from 'sonner';
 import invariant from 'tiny-invariant';
 
 import type { BudgetsLayoutContext } from '~/helpers/budgets';
+import { authenticatedAction } from '~/helpers/auth';
 import { encrypt, unlockKey } from '~/services/encryption.client';
-import { BudgetShareForm } from '~/components/budget-share-form';
 import { exportKey, importKey } from '~/services/encryption';
 import {
   BudgetAlreadySharedError,
@@ -21,7 +20,10 @@ import {
 } from '~/services/budget-invitations.server';
 import { mailer } from '~/services/mail.server';
 import { getUser } from '~/services/user.server';
-import { authenticatedAction } from '~/helpers/auth';
+import type { BudgetShareFormValues } from '~/components/budget-share-form';
+import { BudgetShareForm } from '~/components/budget-share-form';
+import { PageTitle } from '~/components/ui/page-title';
+import { PageContent } from '~/components/ui/page-content';
 import ShareBudgetEmail from '~/emails/share-budget-email';
 import i18next from '~/i18n.server';
 
@@ -49,14 +51,11 @@ export const action = authenticatedAction(
       invariant(!isNaN(budgetId), 'Budget ID must be a number');
 
       const data = await request.formData();
-      const username = data.get('username');
+      const email = data.get('email');
       const invitationData = data.get('data');
 
-      invariant(username, 'Name of the user is required');
-      invariant(
-        typeof username === 'string',
-        'Name of the user must be a text',
-      );
+      invariant(email, 'Email of the user is required');
+      invariant(typeof email === 'string', 'Email of the user must be a text');
       invariant(invitationData, 'Invitation data is required');
       invariant(
         typeof invitationData === 'string',
@@ -66,7 +65,7 @@ export const action = authenticatedAction(
       const invitation = await shareBudget(
         userId,
         budgetId,
-        username,
+        email,
         invitationData,
       );
 
@@ -76,13 +75,13 @@ export const action = authenticatedAction(
         'email',
       );
       await mailer.sendMail({
-        to: username,
+        to: email,
         subject: emailT('share-budget.subject'),
         html: render(
           <ShareBudgetEmail
             authorName={author.username}
             expiration={invitation.expiresAt}
-            recipientName={username}
+            recipientName={email}
             token={invitation.id}
             t={emailT}
           />,
@@ -92,7 +91,7 @@ export const action = authenticatedAction(
       const t = await i18next.getFixedT(await i18next.getLocale(request));
 
       return redirectWithSuccess(`/budgets/${budgetId}`, {
-        message: t('budget.share.created', { username }),
+        message: t('budget.share.created', { email }),
       });
     } catch (e) {
       if (e instanceof BudgetAlreadySharedError) {
@@ -121,18 +120,16 @@ export default function () {
   const { budget, user } = useOutletContext<BudgetsLayoutContext>();
   const submit = useSubmit();
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    const formData = new FormData(event.target as HTMLFormElement);
+  const handleSubmit = async (values: BudgetShareFormValues) => {
+    const formData = new FormData();
+    formData.set('email', values.email);
     const response = await fetch('/user/pk', {
       method: 'POST',
       body: formData,
     });
-    const username = formData.get('username') as string;
 
     if (!response.ok) {
-      toast.error(t('budget.share.user-not-found', { username }));
+      toast.error(t('budget.share.user-not-found', { email: values.email }));
       return;
     }
 
@@ -147,7 +144,7 @@ export default function () {
 
     submit(
       {
-        username,
+        email: values.email,
         data: await encrypt(data, publicKey),
       },
       { method: 'post' },
@@ -156,10 +153,13 @@ export default function () {
 
   return (
     <>
-      <a href={`/budgets/${budget.budgetId}`}>{t('budget.share.back')}</a>
-      <h2>{t('budget.share.page.title', { name: budget.name })}</h2>
-      <p>{t('budget.share.page.description')}</p>
-      <BudgetShareForm onSubmit={handleSubmit} />
+      <PageTitle
+        back={`/budgets/${budget.budgetId}`}
+        title={t('budget.share.page.title', { name: budget.name })}
+      />
+      <PageContent>
+        <BudgetShareForm budgetId={budget.budgetId} onSubmit={handleSubmit} />
+      </PageContent>
     </>
   );
 }
