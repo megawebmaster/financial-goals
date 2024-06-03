@@ -213,6 +213,7 @@ export default function () {
                     key={goal.id}
                     budgetId={budget.budgetId}
                     goal={goal}
+                    goalsCount={goals.length}
                     onPriorityChange={changePriority}
                   >
                     <GoalEstimate

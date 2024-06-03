@@ -13,6 +13,7 @@ type BudgetGoalProps = {
   budgetId: number;
   children?: ReactNode;
   goal: ClientBudgetGoal;
+  goalsCount: number;
   onPriorityChange: (event: FormEvent<HTMLFormElement>) => void;
 };
 
@@ -20,6 +21,7 @@ export function BudgetGoal({
   budgetId,
   children,
   goal,
+  goalsCount,
   onPriorityChange,
 }: BudgetGoalProps) {
   const { t } = useTranslation();
@@ -62,6 +64,7 @@ export function BudgetGoal({
               </Link>
             </Button>
             <ChangePriorityButton
+              disabled={goal.priority === 1}
               goalId={goal.id}
               priority={goal.priority - 1}
               onPriorityChange={onPriorityChange}
@@ -70,6 +73,7 @@ export function BudgetGoal({
               <ArrowUpIcon />
             </ChangePriorityButton>{' '}
             <ChangePriorityButton
+              disabled={goal.priority === goalsCount}
               goalId={goal.id}
               priority={goal.priority + 1}
               onPriorityChange={onPriorityChange}
