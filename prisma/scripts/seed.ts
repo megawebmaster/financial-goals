@@ -4,7 +4,10 @@ import { prisma } from '~/services/db.server';
 import { seedUsers } from '../seeds/users';
 
 async function seed() {
-  await seedUsers();
+  if (!process.env.CI) {
+    // Seed default app
+    await seedUsers();
+  }
 }
 
 seed()
