@@ -34,7 +34,7 @@ export function buildFixtureLoader(
     }
 
     invariant(params.test, 'Test name is required!');
-    invariant(fixtureMap[params.test], 'Unknown test name!');
+    invariant(fixtureMap[params.test], `Unknown test name: ${params.test}!`);
 
     await fixtureMap[params.test](params['*']?.split('/') || []);
 
@@ -128,11 +128,17 @@ export async function seedSavings(
 
   const processGoals = buildGoalsFiller(currentSavings);
   const updatedGoals = processGoals(
-    goals.map((goal) => ({
-      ...goal,
-      requiredAmount: parseFloat(goal.requiredAmount),
-      currentAmount: parseFloat(goal.currentAmount),
-    })),
+    await Promise.all(
+      goals.map(async (goal) => ({
+        ...goal,
+        requiredAmount: parseFloat(
+          await decrypt(goal.requiredAmount, encryptionKey),
+        ),
+        currentAmount: parseFloat(
+          await decrypt(goal.currentAmount, encryptionKey),
+        ),
+      })),
+    ),
   );
   const freeSavings = currentSavings - getGoalsCurrentAmount(updatedGoals);
 
