@@ -3,6 +3,7 @@ import { deleteUser } from '~/services/user.server';
 import { prisma } from '~/services/db.server';
 
 export async function seedCreateBudgetTest() {
+  await cleanupCreateBudgetTest();
   await seedUser('create-budget');
 }
 

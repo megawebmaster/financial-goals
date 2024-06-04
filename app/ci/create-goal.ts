@@ -3,8 +3,9 @@ import { deleteUser } from '~/services/user.server';
 import { prisma } from '~/services/db.server';
 
 export async function seedCreateGoalTest() {
+  await cleanupCreateGoalTest();
   const user = await seedUser('create-goal');
-  await seedBudget(user, { name: 'Test budget 1' });
+  await seedBudget(user, { name: 'First budget' });
 }
 
 export async function cleanupCreateGoalTest() {

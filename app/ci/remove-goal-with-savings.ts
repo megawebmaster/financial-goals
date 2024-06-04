@@ -2,9 +2,9 @@ import { seedBudget, seedGoal, seedSavings, seedUser } from '~/ci/helpers';
 import { deleteUser } from '~/services/user.server';
 import { prisma } from '~/services/db.server';
 
-export async function seedEditGoalTest() {
-  await cleanupEditGoalTest();
-  const user = await seedUser('edit-goal');
+export async function seedRemoveGoalWithSavingsTest() {
+  await cleanupRemoveGoalWithSavingsTest();
+  const user = await seedUser('remove-goal-with-savings');
   const [budget, encryptionKey] = await seedBudget(user, {
     name: 'First budget',
   });
@@ -27,9 +27,9 @@ export async function seedEditGoalTest() {
   ]);
 }
 
-export async function cleanupEditGoalTest() {
+export async function cleanupRemoveGoalWithSavingsTest() {
   const user = await prisma.user.findFirst({
-    where: { username: 'edit-goal' },
+    where: { username: 'remove-goal-with-savings' },
   });
 
   if (user) {
