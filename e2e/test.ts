@@ -17,6 +17,10 @@ type FixtureAccount = {
 };
 
 type Fixtures = {
+  withFixture: (
+    testName: string,
+    example: () => Promise<void>,
+  ) => Promise<void>;
   account: FixtureAccount;
   account2: FixtureAccount;
   loggedIn: Page;
@@ -91,6 +95,14 @@ const login = async (page: Page, account: FixtureAccount) => {
 };
 
 export const test = base.extend<Fixtures, WorkerFixtures>({
+  withFixture: async ({ page }, use) => {
+    await use(async (testName: string, example: () => Promise<void>) => {
+      await page.goto(`/fixtures/setup/${testName}`);
+      await example();
+      await page.goto(`/fixtures/cleanup/${testName}`);
+    });
+  },
+
   account: async ({ browser, baseURL }, use) => {
     const { workerIndex, parallelIndex } = test.info();
     const username = `test-user-${workerIndex}-${parallelIndex}`;
