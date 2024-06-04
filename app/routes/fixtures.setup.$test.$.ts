@@ -6,6 +6,8 @@ import { seedEditGoalTest } from '~/ci/edit-goal';
 import { seedRemoveGoalTest } from '~/ci/remove-goal';
 import { seedRemoveGoalWithSavingsTest } from '~/ci/remove-goal-with-savings';
 import { seedShareBudgetTest } from '~/ci/share-budget';
+import { seedSortGoalsTest } from '~/ci/sort-goals';
+import { seedSortGoalsWithSavingsTest } from '~/ci/sort-goals-with-savings';
 
 export const loader = buildFixtureLoader({
   'create-budget': seedCreateBudgetTest,
@@ -15,4 +17,6 @@ export const loader = buildFixtureLoader({
   'remove-goal': seedRemoveGoalTest,
   'remove-goal-with-savings': seedRemoveGoalWithSavingsTest,
   'share-budget': seedShareBudgetTest,
+  'sort-goals': seedSortGoalsTest,
+  'sort-goals-with-savings': seedSortGoalsWithSavingsTest,
 });
