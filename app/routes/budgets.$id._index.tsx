@@ -171,7 +171,9 @@ export default function () {
         <Card>
           <CardHeader>
             <CardTitle className="flex gap-2 text-2xl">
-              <span className="flex-1">{t('budget.view.goals')}</span>
+              <span id="all-goals" className="flex-1">
+                {t('budget.view.goals')}
+              </span>
               <Button asChild variant="outline">
                 <Link to={`/budgets/${budget.budgetId}/goals/new`}>
                   <PlusIcon className="mr-2 size-4" />
@@ -181,7 +183,7 @@ export default function () {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <Table>
+            <Table aria-labelledby="all-goals">
               <TableHeader>
                 <TableRow>
                   <TableHead>{t('budget.view.goals.table.name')}</TableHead>
@@ -225,7 +227,7 @@ export default function () {
               </TableBody>
               <TableFooter>
                 <TableRow>
-                  <TableCell>Total</TableCell>
+                  <TableCell>{t('budget.view.goals.table.total')}</TableCell>
                   <TableCell>
                     {t('budget.view.goals.table.total-value', {
                       value: getRequiredAmount(goals),

@@ -42,12 +42,12 @@ export default function () {
       <PageContent>
         <Card>
           <CardHeader>
-            <CardTitle className="flex gap-2 text-2xl">
+            <CardTitle className="flex gap-2 text-2xl" id="invitations-list">
               {t('budget-invitations.table.title')}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <Table>
+            <Table aria-labelledby="invitations-list">
               <TableHeader>
                 <TableRow>
                   <TableHead>

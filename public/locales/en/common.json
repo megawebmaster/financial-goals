@@ -43,6 +43,7 @@
   "budget.view.goals.table.current-amount": "Already saved",
   "budget.view.goals.table.completion": "Goal completion",
   "budget.view.goals.table.estimated-completion": "Will be completed on",
+  "budget.view.goals.table.total": "Total",
   "budget.view.goals.table.total-value": "{{ value, currency }}",
   "budget.view.savings.add": "Add savings",
   "budget.deleted": "Budget deleted successfully!",

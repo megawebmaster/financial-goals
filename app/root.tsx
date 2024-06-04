@@ -73,7 +73,7 @@ export default function App() {
       </head>
       <body>
         <Outlet />
-        <Toaster position="top-right" />
+        <Toaster />
         <ScrollRestoration />
         <Scripts />
       </body>
