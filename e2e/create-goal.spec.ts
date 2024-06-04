@@ -1,16 +1,22 @@
 import { expect, test } from './test';
+import { LoginForm } from './pages/login-form';
 import { BudgetPage } from './pages/budget-page';
 import { BudgetGoalForm } from './pages/budget-goal-form';
 
-test('create goal', async ({ budget: page }) => {
-  const budgetPage = new BudgetPage(page);
-  await expect(page.getByText('No goals yet!')).toBeVisible();
+test('create goal', async ({ page, withFixture }) => {
+  await withFixture('create-goal', async () => {
+    const form = new LoginForm(page);
+    await form.loginAs('create-goal');
 
-  await budgetPage.addGoal();
-  const goalForm = new BudgetGoalForm(page);
-  await goalForm.name.fill('First goal');
-  await goalForm.amount.fill('1000');
-  await goalForm.submit();
+    const budgetPage = new BudgetPage(page);
+    await expect(page.getByText('No goals yet!')).toBeVisible();
 
-  await expect(budgetPage.goals.getByText('First goal')).toBeVisible();
+    await budgetPage.addGoal();
+    const goalForm = new BudgetGoalForm(page);
+    await goalForm.name.fill('First goal');
+    await goalForm.amount.fill('1000');
+    await goalForm.submit();
+
+    await expect(budgetPage.goals.getByText('First goal')).toBeVisible();
+  });
 });
