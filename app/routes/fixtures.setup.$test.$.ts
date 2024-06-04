@@ -5,6 +5,7 @@ import { seedCreateSavingsTest } from '~/ci/create-savings';
 import { seedEditGoalTest } from '~/ci/edit-goal';
 import { seedRemoveGoalTest } from '~/ci/remove-goal';
 import { seedRemoveGoalWithSavingsTest } from '~/ci/remove-goal-with-savings';
+import { seedShareBudgetTest } from '~/ci/share-budget';
 
 export const loader = buildFixtureLoader({
   'create-budget': seedCreateBudgetTest,
@@ -13,4 +14,5 @@ export const loader = buildFixtureLoader({
   'edit-goal': seedEditGoalTest,
   'remove-goal': seedRemoveGoalTest,
   'remove-goal-with-savings': seedRemoveGoalWithSavingsTest,
+  'share-budget': seedShareBudgetTest,
 });

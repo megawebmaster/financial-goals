@@ -1,6 +1,4 @@
-import { seedBudget, seedUser } from '~/ci/helpers';
-import { deleteUser } from '~/services/user.server';
-import { prisma } from '~/services/db.server';
+import { removeUserIfNeeded, seedBudget, seedUser } from '~/ci/helpers';
 
 export async function seedCreateGoalTest() {
   await cleanupCreateGoalTest();
@@ -9,11 +7,5 @@ export async function seedCreateGoalTest() {
 }
 
 export async function cleanupCreateGoalTest() {
-  const user = await prisma.user.findFirst({
-    where: { username: 'create-goal' },
-  });
-
-  if (user) {
-    await deleteUser(user.id);
-  }
+  await removeUserIfNeeded('create-goal');
 }

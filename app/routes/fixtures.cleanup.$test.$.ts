@@ -5,6 +5,7 @@ import { cleanupCreateSavingsTest } from '~/ci/create-savings';
 import { cleanupEditGoalTest } from '~/ci/edit-goal';
 import { cleanupRemoveGoalTest } from '~/ci/remove-goal';
 import { cleanupRemoveGoalWithSavingsTest } from '~/ci/remove-goal-with-savings';
+import { cleanupShareBudgetTest } from '~/ci/share-budget';
 
 export const loader = buildFixtureLoader({
   'create-budget': cleanupCreateBudgetTest,
@@ -13,4 +14,5 @@ export const loader = buildFixtureLoader({
   'edit-goal': cleanupEditGoalTest,
   'remove-goal': cleanupRemoveGoalTest,
   'remove-goal-with-savings': cleanupRemoveGoalWithSavingsTest,
+  'share-budget': cleanupShareBudgetTest,
 });

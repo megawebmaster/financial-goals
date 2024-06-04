@@ -10,7 +10,7 @@ import type {
   User,
 } from '@prisma/client';
 import { prisma } from '~/services/db.server';
-import { createUser } from '~/services/user.server';
+import { createUser, deleteUser } from '~/services/user.server';
 import {
   decrypt,
   encrypt,
@@ -50,6 +50,16 @@ export async function seedUser(username: string): Promise<User> {
     `${username}@example.com`,
     FIXTURE_USER_PASSWORD,
   );
+}
+
+export async function removeUserIfNeeded(username: string) {
+  const user = await prisma.user.findFirst({
+    where: { username },
+  });
+
+  if (user) {
+    await deleteUser(user.id);
+  }
 }
 
 export async function seedBudget(

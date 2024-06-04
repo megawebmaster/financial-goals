@@ -6,9 +6,9 @@ import {
   seedUser,
 } from '~/ci/helpers';
 
-export async function seedRemoveGoalWithSavingsTest() {
-  await cleanupRemoveGoalWithSavingsTest();
-  const user = await seedUser('remove-goal-with-savings');
+export async function seedShareBudgetTest(params: string[]) {
+  await cleanupShareBudgetTest(params);
+  const user = await seedUser(`share-budget-${params[0]}`);
   const [budget, encryptionKey] = await seedBudget(user, {
     name: 'First budget',
   });
@@ -29,8 +29,10 @@ export async function seedRemoveGoalWithSavingsTest() {
     goal2,
     goal3,
   ]);
+  await seedUser(`share-budget-receiver-${params[0]}`);
 }
 
-export async function cleanupRemoveGoalWithSavingsTest() {
-  await removeUserIfNeeded('remove-goal-with-savings');
+export async function cleanupShareBudgetTest(params: string[]) {
+  await removeUserIfNeeded(`share-budget-${params[0]}`);
+  await removeUserIfNeeded(`share-budget-receiver-${params[0]}`);
 }

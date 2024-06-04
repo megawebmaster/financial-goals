@@ -1,6 +1,4 @@
-import { seedBudget, seedUser } from '~/ci/helpers';
-import { deleteUser } from '~/services/user.server';
-import { prisma } from '~/services/db.server';
+import { removeUserIfNeeded, seedBudget, seedUser } from '~/ci/helpers';
 
 export async function seedCreateSavingsTest(params: string[]) {
   await cleanupCreateSavingsTest(params);
@@ -9,11 +7,5 @@ export async function seedCreateSavingsTest(params: string[]) {
 }
 
 export async function cleanupCreateSavingsTest(params: string[]) {
-  const user = await prisma.user.findFirst({
-    where: { username: `create-savings-${params[0]}` },
-  });
-
-  if (user) {
-    await deleteUser(user.id);
-  }
+  await removeUserIfNeeded(`create-savings-${params[0]}`);
 }
