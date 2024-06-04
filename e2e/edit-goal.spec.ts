@@ -5,7 +5,7 @@ import { BudgetGoalForm } from './pages/budget-goal-form';
 test('edit goal and recalculate current savings', async ({ savings: page }) => {
   const budgetPage = new BudgetPage(page);
 
-  await budgetPage.editGoal('First goal');
+  await budgetPage.goToEditGoal('First goal');
   const goalForm = new BudgetGoalForm(page);
   await goalForm.name.fill('New goal');
   await goalForm.amount.fill('2000');

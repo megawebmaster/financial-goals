@@ -48,7 +48,7 @@ export async function seedBudget(user: User): Promise<[BudgetUser, CryptoKey]> {
 }
 
 export function buildFixtureLoader(
-  fixtureMap: Record<string, () => Promise<void>>,
+  fixtureMap: Record<string, (params: string[]) => Promise<void>>,
 ) {
   return async function loader({ params }: LoaderFunctionArgs) {
     if (!process.env.CI) {
@@ -58,7 +58,7 @@ export function buildFixtureLoader(
     invariant(params.test, 'Test name is required!');
     invariant(fixtureMap[params.test], 'Unknown test name!');
 
-    await fixtureMap[params.test]();
+    await fixtureMap[params.test](params['*']?.split('/') || []);
 
     return new Response(null, { status: 201 });
   };

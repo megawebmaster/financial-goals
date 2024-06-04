@@ -1,5 +1,6 @@
 import type { Locator, Page } from 'playwright/test';
 import { expect } from '../test';
+import { BudgetGoalForm } from './budget-goal-form';
 
 export class BudgetPage {
   public readonly currentSavings: Locator;
@@ -16,14 +17,23 @@ export class BudgetPage {
     });
   }
 
-  async addGoal() {
+  async goToNewGoal() {
     await this.page.getByRole('link', { name: 'Create new goal' }).click();
     await expect(
       this.page.getByRole('heading', { name: 'Add a goal' }),
     ).toBeVisible();
   }
 
-  async editGoal(name: string) {
+  async addGoal(goalName: string, requiredAmount: string) {
+    await this.goToNewGoal();
+    const goalForm = new BudgetGoalForm(this.page);
+    await goalForm.name.fill(goalName);
+    await goalForm.amount.fill(requiredAmount);
+    await goalForm.submit();
+    await expect(this.goals.getByText('First goal')).toBeVisible();
+  }
+
+  async goToEditGoal(name: string) {
     await this.getGoal(name).getByRole('link', { name: 'Edit' }).click();
     await expect(
       this.page.getByRole('heading', { name: 'Update goal' }),

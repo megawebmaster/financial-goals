@@ -5,7 +5,7 @@ import { BudgetGoalForm } from './pages/budget-goal-form';
 test('remove goal', async ({ goals: page }) => {
   const budgetPage = new BudgetPage(page);
 
-  await budgetPage.editGoal('First goal');
+  await budgetPage.goToEditGoal('First goal');
   const goalForm = new BudgetGoalForm(page);
   await goalForm.deleteGoal();
 
@@ -17,7 +17,7 @@ test('remove goal', async ({ goals: page }) => {
 test('remove goal and return savings', async ({ savings: page }) => {
   const budgetPage = new BudgetPage(page);
 
-  await budgetPage.editGoal('First goal');
+  await budgetPage.goToEditGoal('First goal');
   const goalForm = new BudgetGoalForm(page);
   await goalForm.deleteGoal();
 

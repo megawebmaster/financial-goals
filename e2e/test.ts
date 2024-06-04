@@ -144,7 +144,7 @@ export const test = base.extend<Fixtures, WorkerFixtures>({
     const goalForm = new BudgetGoalForm(page);
 
     // Add first goal
-    await budgetPage.addGoal();
+    await budgetPage.goToNewGoal();
     await goalForm.name.fill('First goal');
     await goalForm.amount.fill('1000');
     await goalForm.submit();
@@ -153,7 +153,7 @@ export const test = base.extend<Fixtures, WorkerFixtures>({
     ).toBeVisible();
 
     // Add second goal
-    await budgetPage.addGoal();
+    await budgetPage.goToNewGoal();
     await goalForm.name.fill('Second goal');
     await goalForm.amount.fill('500');
     await goalForm.submit();
@@ -162,7 +162,7 @@ export const test = base.extend<Fixtures, WorkerFixtures>({
     ).toBeVisible();
 
     // Add third goal
-    await budgetPage.addGoal();
+    await budgetPage.goToNewGoal();
     await goalForm.name.fill('Third goal');
     await goalForm.amount.fill('750');
     await goalForm.submit();
