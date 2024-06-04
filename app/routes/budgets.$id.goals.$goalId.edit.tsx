@@ -17,11 +17,11 @@ import type { BudgetsLayoutContext } from '~/helpers/budgets';
 import { updateBudgetGoal } from '~/services/budget-goals.server';
 import { encrypt, unlockKey } from '~/services/encryption.client';
 import {
-  buildGoalsFiller,
   encryptBudgetGoal,
   removeGoal,
   updateGoal,
 } from '~/services/budget-goals.client';
+import { buildGoalsFiller } from '~/services/budget-goals';
 import type { BudgetGoalFormValues } from '~/components/budget-goal-form';
 import { BudgetGoalForm } from '~/components/budget-goal-form';
 import { PageTitle } from '~/components/ui/page-title';

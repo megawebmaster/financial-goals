@@ -4,7 +4,7 @@ import { prisma } from '~/services/db.server';
 
 export async function seedCreateGoalTest() {
   const user = await seedUser('create-goal');
-  await seedBudget(user);
+  await seedBudget(user, { name: 'Test budget 1' });
 }
 
 export async function cleanupCreateGoalTest() {

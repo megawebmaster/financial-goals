@@ -9,12 +9,11 @@ import type { BudgetsLayoutContext } from '~/helpers/budgets';
 import { unlockKey } from '~/services/encryption.client';
 import {
   buildAmountToSaveCalculator,
-  buildGoalsFiller,
-  buildGoalsSorting,
   encryptBudgetGoal,
   getCurrentGoal,
   getRequiredAmount,
 } from '~/services/budget-goals.client';
+import { buildGoalsFiller, buildGoalsSorting } from '~/services/budget-goals';
 import { getAverageSavings } from '~/services/budget-savings-entries.client';
 import { BudgetGoal } from '~/components/budget-goal';
 import { GoalEstimate } from '~/components/budget-goal/goal-estimate';

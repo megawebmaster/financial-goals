@@ -2,9 +2,11 @@ import { buildFixtureLoader } from '~/ci/helpers';
 import { cleanupCreateBudgetTest } from '~/ci/create-budget';
 import { cleanupCreateGoalTest } from '~/ci/create-goal';
 import { cleanupCreateSavingsTest } from '~/ci/create-savings';
+import { cleanupEditGoalTest } from '~/ci/edit-goal';
 
 export const loader = buildFixtureLoader({
   'create-budget': cleanupCreateBudgetTest,
   'create-goal': cleanupCreateGoalTest,
   'create-savings': cleanupCreateSavingsTest,
+  'edit-goal': cleanupEditGoalTest,
 });

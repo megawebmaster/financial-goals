@@ -7,15 +7,13 @@ import invariant from 'tiny-invariant';
 import { INDEX_ROUTE } from '~/routes';
 import type { BudgetsLayoutContext } from '~/helpers/budgets';
 import { authenticatedAction, authenticatedLoader } from '~/helpers/auth';
-import { getGoalsSum } from '~/helpers/budget-goals';
+import { getGoalsCurrentAmount } from '~/helpers/budget-goals';
 import { getBudget } from '~/services/budgets.server';
 import { encrypt, unlockKey } from '~/services/encryption.client';
 import { getBudgetGoals } from '~/services/budget-goals.server';
 import { createSavingsEntry } from '~/services/budget-savings-entries.server';
-import {
-  buildGoalsFiller,
-  encryptBudgetGoal,
-} from '~/services/budget-goals.client';
+import { encryptBudgetGoal } from '~/services/budget-goals.client';
+import { buildGoalsFiller } from '~/services/budget-goals';
 import type { BudgetSavingsFormValues } from '~/components/budget-savings-entry-form';
 import { BudgetSavingsEntryForm } from '~/components/budget-savings-entry-form';
 import { PageTitle } from '~/components/ui/page-title';
@@ -102,8 +100,6 @@ export const action = authenticatedAction(
     }
   },
 );
-
-const getGoalsCurrentAmount = getGoalsSum('currentAmount');
 
 export default function () {
   const { t } = useTranslation();

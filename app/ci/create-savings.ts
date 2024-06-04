@@ -4,7 +4,7 @@ import { prisma } from '~/services/db.server';
 
 export async function seedCreateSavingsTest(params: string[]) {
   const user = await seedUser(`create-savings-${params[0]}`);
-  await seedBudget(user);
+  await seedBudget(user, { name: 'Test budget 1' });
 }
 
 export async function cleanupCreateSavingsTest(params: string[]) {
