@@ -28,7 +28,11 @@ const loginFormSchema = z.object({
   password: z.string().min(4),
 });
 
-export function LoginForm() {
+type LoginFormProps = {
+  referer?: string;
+};
+
+export function LoginForm({ referer = '' }: LoginFormProps) {
   const { t } = useTranslation();
   const submit = useSubmit();
 
@@ -42,7 +46,7 @@ export function LoginForm() {
 
   const handleSubmit = async (values: z.infer<typeof loginFormSchema>) => {
     await storeKeyMaterial(values.password);
-    submit(values, { method: 'post', action: '/login' });
+    submit({ ...values, referer }, { method: 'post', action: '/login' });
   };
 
   return (
