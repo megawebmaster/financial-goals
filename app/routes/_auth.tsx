@@ -14,6 +14,7 @@ import { PageMainNav } from '~/components/ui/page-main-nav';
 import { PageNavLink } from '~/components/ui/page-nav-link';
 import { PageUserNav } from '~/components/ui/page-user-nav';
 import { PageBody } from '~/components/ui/page-body';
+import { PageContent } from '~/components/ui/page-content';
 import { Skeleton } from '~/components/ui/skeleton';
 import { BudgetsMenu } from '~/components/budgets-menu';
 import { BudgetsList } from '~/components/budgets-list';
@@ -62,7 +63,7 @@ export default function () {
           </PageMainNav>
           <PageUserNav>
             <BudgetsList.Pending>
-              <Skeleton className="h-6 mx-2" />
+              <Skeleton className="h-6 w-48 mx-2" />
             </BudgetsList.Pending>
             <BudgetsList.Fulfilled>
               {(budgets) => (
@@ -74,7 +75,11 @@ export default function () {
         </PageHeader>
         <PageBody>
           <BudgetsList.Pending>
-            <Skeleton className="h-6 mx-2" />
+            <PageContent>
+              <Skeleton className="h-10 mx-2" />
+              <Skeleton className="h-24 mx-2" />
+              <Skeleton className="h-32 mx-2" />
+            </PageContent>
           </BudgetsList.Pending>
           <BudgetsList.Fulfilled>
             {(budgets) => (
