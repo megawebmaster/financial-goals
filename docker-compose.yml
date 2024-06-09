@@ -1,4 +1,14 @@
 services:
+  db:
+    image: postgres:alpine
+    environment:
+      POSTGRES_USER: goals
+      POSTGRES_PASSWORD: example
+      POSTGRES_DB: goals
+    ports:
+      - "5432:5432"
+    volumes:
+      - db:/var/lib/postgresql/data
   mailer:
     image: axllent/mailpit
     ports:
@@ -7,3 +17,5 @@ services:
     environment:
       MP_SMTP_AUTH_ACCEPT_ANY: 1
       MP_SMTP_AUTH_ALLOW_INSECURE: 1
+volumes:
+  db: ~
