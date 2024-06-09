@@ -1,7 +1,7 @@
 import { Outlet, useLoaderData, useOutletContext } from '@remix-run/react';
-import type { User } from '@prisma/client';
 import { redirectWithError } from 'remix-toast';
 
+import type { AuthenticatedLayoutContext } from '~/helpers/budgets';
 import type { BudgetInvitationsLayoutContext } from '~/helpers/budget-invitations';
 import { authenticatedLoader } from '~/helpers/auth';
 import { getInvitations } from '~/services/budget-invitations.server';
@@ -26,7 +26,7 @@ export const loader = authenticatedLoader(async ({ request }, userId) => {
 
 export default function () {
   const data = useLoaderData<typeof loader>();
-  const currentUser = useOutletContext<User>();
+  const { user: currentUser } = useOutletContext<AuthenticatedLayoutContext>();
 
   return (
     <BudgetInvitationsList

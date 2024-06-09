@@ -60,7 +60,7 @@ export function BudgetGoal({
             <Button asChild variant="outline">
               <Link to={`/budgets/${budgetId}/goals/${goal.id}/edit`}>
                 <EditIcon className="mr-2 size-4" />
-                <span>{t('budget.view.goals.edit')}</span>
+                <span>{t('component.budget-goal.edit')}</span>
               </Link>
             </Button>
             <ChangePriorityButton
@@ -68,7 +68,7 @@ export function BudgetGoal({
               goalId={goal.id}
               priority={goal.priority - 1}
               onPriorityChange={onPriorityChange}
-              title={t('budget.view.goals.move-up')}
+              title={t('component.budget-goal.move-up')}
             >
               <ArrowUpIcon />
             </ChangePriorityButton>{' '}
@@ -77,7 +77,7 @@ export function BudgetGoal({
               goalId={goal.id}
               priority={goal.priority + 1}
               onPriorityChange={onPriorityChange}
-              title={t('budget.view.goals.move-down')}
+              title={t('component.budget-goal.move-down')}
             >
               <ArrowDownIcon />
             </ChangePriorityButton>

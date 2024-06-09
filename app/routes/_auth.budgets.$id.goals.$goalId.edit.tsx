@@ -78,7 +78,7 @@ export const action = authenticatedAction(
 
       const t = await i18next.getFixedT(await i18next.getLocale(request));
 
-      return redirectWithSuccess(`/budgets/${budgetId}`, {
+      return redirectWithSuccess(`/budgets/${budgetId}/goals`, {
         message: t('goal.edit.changes-saved'),
       });
     } catch (e) {
@@ -108,7 +108,7 @@ export default function () {
 
   if (!goal) {
     toast.warning(t('goal.edit.not-found'));
-    navigate(`/budgets/${budget.budgetId}`);
+    navigate(`/budgets/${budget.budgetId}/goals`);
     return null;
   }
 

@@ -1,7 +1,7 @@
-import type { ReactNode } from 'react';
 import { Link } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
 import { ChevronDownIcon, HeartIcon, PlusIcon, ShieldIcon } from 'lucide-react';
+import { propEq } from 'ramda';
 
 import type { BudgetUser } from '@prisma/client';
 import {
@@ -15,17 +15,18 @@ import { Button } from '~/components/ui/button';
 
 type BudgetsMenuProps = {
   budgets: BudgetUser[];
-  children: ReactNode;
+  selectedBudgetId: number;
 };
 
-export function BudgetsMenu({ budgets, children }: BudgetsMenuProps) {
+export function BudgetsMenu({ budgets, selectedBudgetId }: BudgetsMenuProps) {
   const { t } = useTranslation();
+  const currentBudget = budgets.find(propEq(selectedBudgetId, 'budgetId'));
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="link" className="font-normal md:text-base">
-          {children}
+          {currentBudget?.name || t('component.budgets-menu.not-found')}
           <ChevronDownIcon className="ml-2 size-4" />
         </Button>
       </DropdownMenuTrigger>

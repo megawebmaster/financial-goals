@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { Link } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
-import { EditIcon } from 'lucide-react';
+import { ListIcon } from 'lucide-react';
 
 import type { ClientBudgetGoal } from '~/helpers/budget-goals';
 import { getGoalPercentage } from '~/helpers/budget-goals';
@@ -29,12 +29,12 @@ export function CurrentBudgetGoal({
       <CardHeader>
         <CardTitle className="flex gap-2 text-2xl">
           <span className="flex-1">
-            {t('budget.view.current-goal', { name: goal.name })}
+            {t('component.current-goal.title', { name: goal.name })}
           </span>
           <Button asChild variant="outline">
-            <Link to={`/budgets/${budgetId}/goals/${goal.id}/edit`}>
-              <EditIcon className="mr-2 size-4" />
-              <span>{t('budget.view.goals.edit')}</span>
+            <Link to={`/budgets/${budgetId}/goals`}>
+              <ListIcon className="mr-2 size-4" />
+              <span>{t('component.current-goal.all-goals')}</span>
             </Link>
           </Button>
         </CardTitle>
@@ -42,8 +42,8 @@ export function CurrentBudgetGoal({
       <CardContent>
         {/* TODO: Improve the current goal part - it is very important */}
         <p className="flex gap-1">
-          <strong>{t('budget.view.goals.required-amount')}:</strong>
-          {t('budget.view.goals.required-amount-value', {
+          <strong>{t('component.current-goal.required-amount')}:</strong>
+          {t('component.current-goal.required-amount-value', {
             value: goal.requiredAmount,
             formatParams: {
               value: FORMAT_CURRENCY,
@@ -51,8 +51,8 @@ export function CurrentBudgetGoal({
           })}
         </p>
         <p className="flex gap-1">
-          <strong>{t('budget.view.goals.current-amount')}:</strong>
-          {t('budget.view.goals.current-amount-value', {
+          <strong>{t('component.current-goal.current-amount')}:</strong>
+          {t('component.current-goal.current-amount-value', {
             value: goal.currentAmount,
             percent: getGoalPercentage(goal),
             formatParams: {

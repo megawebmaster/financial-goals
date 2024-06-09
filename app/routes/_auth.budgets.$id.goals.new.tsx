@@ -61,7 +61,7 @@ export const action = authenticatedAction(
       });
       const t = await i18next.getFixedT(await i18next.getLocale(request));
 
-      return redirectWithSuccess(`/budgets/${budgetId}`, {
+      return redirectWithSuccess(`/budgets/${budgetId}/goals`, {
         message: t('goal.new.created'),
       });
     } catch (e) {

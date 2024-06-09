@@ -1,35 +1,39 @@
 import type { ClientLoaderFunctionArgs } from '@remix-run/react';
-import { Outlet, useLoaderData } from '@remix-run/react';
+import { Outlet, useLoaderData, useParams } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
 
 import { INDEX_ROUTE } from '~/routes';
+import type { AuthenticatedLayoutContext } from '~/helpers/budgets';
+import { authenticatedLoader } from '~/helpers/auth';
 import { authenticator } from '~/services/auth.server';
 import { getUser } from '~/services/user.server';
-import { getBudgets } from '~/services/budgets.server';
+import { getBudgets, getDefaultBudget } from '~/services/budgets.server';
 import { buildWrappingKey } from '~/services/encryption.client';
-import { authenticatedLoader } from '~/helpers/auth';
 import { PageHeader } from '~/components/ui/page-header';
 import { PageMainNav } from '~/components/ui/page-main-nav';
+import { PageNavLink } from '~/components/ui/page-nav-link';
 import { PageUserNav } from '~/components/ui/page-user-nav';
 import { UserMenu } from '~/components/ui/user-menu';
 import { PageBody } from '~/components/ui/page-body';
 import { BudgetsMenu } from '~/components/budgets/budgets-menu';
 import { BudgetsList } from '~/components/budgets-list';
 import { Skeleton } from '~/components/ui/skeleton';
-import type { AuthenticatedLayoutContext } from '~/helpers/budgets';
 
-export const loader = authenticatedLoader(async ({ request }, userId) => {
-  try {
-    return {
-      user: await getUser(userId),
-      budgets: await getBudgets(userId),
-    };
-  } catch (e) {
-    return await authenticator.logout(request, {
-      redirectTo: INDEX_ROUTE,
-    });
-  }
-});
+export const loader = authenticatedLoader(
+  async ({ request, params }, userId) => {
+    try {
+      return {
+        user: await getUser(userId),
+        budgets: await getBudgets(userId),
+        defaultBudget: await getDefaultBudget(userId),
+      };
+    } catch (e) {
+      return await authenticator.logout(request, {
+        redirectTo: INDEX_ROUTE,
+      });
+    }
+  },
+);
 
 export async function clientLoader({ serverLoader }: ClientLoaderFunctionArgs) {
   const data = await serverLoader<typeof loader>();
@@ -39,24 +43,32 @@ export async function clientLoader({ serverLoader }: ClientLoaderFunctionArgs) {
 }
 
 export default function () {
-  const { budgets, user } = useLoaderData<typeof loader>();
+  const { budgets, defaultBudget, user } = useLoaderData<typeof loader>();
   const { t } = useTranslation();
+  const params = useParams();
+  const budgetId = parseInt(params.id || '0', 10) || defaultBudget?.budgetId;
 
   return (
     <BudgetsList budgets={budgets}>
       <div className="flex min-h-screen w-full flex-col">
         <PageHeader>
           <PageMainNav>
+            <PageNavLink to={`/budgets/${budgetId}`}>
+              {t('nav.dashboard')}
+            </PageNavLink>
+            <PageNavLink to={`/budgets/${budgetId}/goals`}>
+              {t('nav.goals')}
+            </PageNavLink>
+          </PageMainNav>
+          <PageUserNav>
             <BudgetsList.Pending>
               <Skeleton className="h-6 mx-2" />
             </BudgetsList.Pending>
             <BudgetsList.Fulfilled>
               {(budgets) => (
-                <BudgetsMenu budgets={budgets}>{t('nav.budgets')}</BudgetsMenu>
+                <BudgetsMenu budgets={budgets} selectedBudgetId={budgetId} />
               )}
             </BudgetsList.Fulfilled>
-          </PageMainNav>
-          <PageUserNav>
             <UserMenu user={user} />
           </PageUserNav>
         </PageHeader>
