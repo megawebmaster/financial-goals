@@ -1,4 +1,15 @@
 services:
+  app:
+    build: .
+    environment:
+      - PORT=3000
+      - DATABASE_URL=postgres://goals:example@db:5432/goals
+      - MAIL_URL=smtp://mailer:1025
+      - MAIL_FROM=no-reply@example.com
+      - MAIL_FROM_TITLE="Financial Goals"
+      - SESSION_SECRET=example-session
+    ports:
+      - "3000:3000"
   db:
     image: postgres:alpine
     environment:
