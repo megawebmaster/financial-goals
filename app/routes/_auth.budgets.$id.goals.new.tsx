@@ -85,14 +85,17 @@ export default function () {
 
   const handleSubmit = async (values: BudgetGoalFormValues) => {
     const encryptionKey = await unlockKey(budget.key);
-    const currentAmount = getCurrentAmount(budget.freeSavings, values.amount);
+    const currentAmount = getCurrentAmount(
+      budget.freeSavings,
+      values.goalAmount,
+    );
     const freeSavings = budget.freeSavings - currentAmount;
 
     submit(
       {
-        name: await encrypt(values.name, encryptionKey),
+        name: await encrypt(values.goalName, encryptionKey),
         requiredAmount: await encrypt(
-          values.amount.toString(10),
+          values.goalAmount.toString(10),
           encryptionKey,
         ),
         currentAmount: await encrypt(currentAmount.toString(10), encryptionKey),

@@ -1,5 +1,6 @@
 {
-  "new-account.subject": "Your new Financial Goals account",
+  "app.name": "Financial Goals",
+  "new-account.subject": "Your new $t(app.name) account",
   "new-account.header": "Hello {{ name }}!",
   "new-account.description": "Your new account has been created!",
   "share-budget.subject": "New budget invitation",
@@ -7,5 +8,5 @@
   "share-budget.description": "{{ name }} just shared a budget with you. If you are not interested in joining you can ignore this email",
   "share-budget.accept": "Accept the invitation",
   "share-budget.expiration": "The invitation will expire on {{- expiration, dateTime }}",
-  "signature": "Financial Goals app"
+  "signature": "$t(app.name) app"
 }

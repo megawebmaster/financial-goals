@@ -1,0 +1,21 @@
+{
+  "login.required": "Musisz się najpierw zalogować!",
+  "signup.failed": "Nie udało się utworzyć Twojego konta.",
+  "user.deletion-failed": "Nie udało się usunąć Twojego konta.",
+  "user.not-found": "Użytkownik nie istnieje!",
+  "user.invalid-login": "E-mail i/lub hasło są nieprawidłowe.",
+  "user.exists": "Użytkownik o takim adresie e-mail już istnieje!",
+  "budget.not-found": "Nie znaleziono budżetu!",
+  "budget.new.creation-failed": "Nie udało się utworzyć nowego budżetu. Spróbuj ponownie.",
+  "budget.edit.updating-failed": "Nie udało się zaktualizować budżetu. Spróbuj ponownie.",
+  "budget.deletion-failed": "Nie udało się usunąć budżetu. Spróbuj ponownie.",
+  "budget-invitations.not-found": "Nie znaleziono zaproszenia!",
+  "budget-invitations.accepting-failed": "Nie udało się zaakceptować zaproszenia. Spróbuj ponownie.",
+  "budget-invitations.decline-failed": "Nie udało się odrzucić zaproszenia. Spróbuj ponownie.",
+  "budget.share.failed": "Nie udało się udostępnić budżetu. Spróbuj ponownie.",
+  "goal.new.creation-failed": "Nie udało się utworzyć nowego celu. Spróbuj ponownie.",
+  "goal.edit.updating-failed": "Nie udało się zaktualizować celu. Spróbuj ponownie.",
+  "goal.deletion-failed": "Nie udało się usunąć celu. Spróbuj ponownie.",
+  "goal.priority.change-failed": "Nie udało się przesunąć celu. Spróbuj ponownie.",
+  "savings.new.creation-failed": "Nie udało się zapisać nowych oszczędności. Spróbuj ponownie."
+}

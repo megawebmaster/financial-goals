@@ -75,7 +75,7 @@ export default function () {
 
     submit(
       {
-        name: await encrypt(values.name, encryptionKey),
+        name: await encrypt(values.budgetName, encryptionKey),
         isDefault: values.isDefault,
       },
       { method: 'patch' },

@@ -118,7 +118,7 @@ export default function () {
 
     submit(
       {
-        name: await encrypt(values.name, budgetEncryptionKey),
+        name: await encrypt(values.budgetName, budgetEncryptionKey),
         isDefault: values.isDefault,
         key: await lockKey(budgetEncryptionKey),
       },

@@ -103,7 +103,7 @@ export default function () {
   const handleSubmit = async (values: BudgetSavingsFormValues) => {
     const encryptionKey = await unlockKey(budget.key);
 
-    const currentSavings = budget.currentSavings + values.amount;
+    const currentSavings = budget.currentSavings + values.savingsAmount;
     const processGoals = buildGoalsFiller(currentSavings);
     const updatedGoals = processGoals(goals);
     const freeSavings = currentSavings - getGoalsCurrentAmount(updatedGoals);
@@ -111,8 +111,11 @@ export default function () {
     submit(
       {
         entryData: JSON.stringify({
-          date: values.date,
-          amount: await encrypt(values.amount.toString(10), encryptionKey),
+          date: values.savingsDate,
+          amount: await encrypt(
+            values.savingsAmount.toString(10),
+            encryptionKey,
+          ),
         }),
         budgetData: JSON.stringify({
           currentSavings: await encrypt(

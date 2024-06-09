@@ -24,7 +24,7 @@ export function GoalEstimate({ averageSavings, amountToSave }: EstimateProps) {
     return <CheckIcon className="text-green-500" />;
   }
 
-  return t('goals.estimation', {
+  return t('component.goals-estimate', {
     date,
     formatParams: {
       date: MONTH_FORMAT,

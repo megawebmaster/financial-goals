@@ -115,7 +115,10 @@ export default function () {
   const handleSubmit = async (values: BudgetGoalFormValues) => {
     const encryptionKey = await unlockKey(budget.key);
     const processGoals = pipe(
-      updateGoal(goal.id, { name: values.name, requiredAmount: values.amount }),
+      updateGoal(goal.id, {
+        name: values.goalName,
+        requiredAmount: values.goalAmount,
+      }),
       buildGoalsFiller(budget.currentSavings),
     );
 

@@ -33,8 +33,8 @@ import { CalendarIcon } from 'lucide-react';
 import { Calendar } from '~/components/ui/calendar';
 
 const savingsFormSchema = z.object({
-  date: z.date().max(new Date()),
-  amount: z.coerce.number().min(0),
+  savingsDate: z.date().max(new Date()),
+  savingsAmount: z.coerce.number().min(0),
 });
 
 export type BudgetSavingsFormValues = z.infer<typeof savingsFormSchema>;
@@ -62,8 +62,8 @@ export const BudgetSavingsEntryForm = ({
   const form = useForm<BudgetSavingsFormValues>({
     resolver: zodResolver(savingsFormSchema),
     defaultValues: {
-      date: entry ? new Date(entry.date) : undefined,
-      amount: entry?.amount,
+      savingsDate: entry ? new Date(entry.date) : undefined,
+      savingsAmount: entry?.amount,
     },
   });
 
@@ -81,7 +81,7 @@ export const BudgetSavingsEntryForm = ({
         <CardContent className={className}>
           <form className="grid gap-4" onSubmit={form.handleSubmit(onSubmit)}>
             <FormField
-              name="date"
+              name="savingsDate"
               render={({ field }) => (
                 <FormItem className="grid gap-2">
                   <FormLabel>{t('component.savings-form.date')}</FormLabel>
@@ -121,7 +121,7 @@ export const BudgetSavingsEntryForm = ({
               )}
             />
             <FormField
-              name="amount"
+              name="savingsAmount"
               render={({ field }) => (
                 <FormItem className="grid gap-2">
                   <FormLabel>{t('component.savings-form.amount')}</FormLabel>

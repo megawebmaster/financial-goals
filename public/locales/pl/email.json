@@ -1,5 +1,12 @@
 {
-  "new-account.header": "Witaj {{name}}!",
+  "app.name": "Financial Goals",
+  "new-account.subject": "Twoje nowe konto $t(app.name)",
+  "new-account.header": "Cześć {{ name }}!",
   "new-account.description": "Twoje konto zostało utworzone!",
-  "signature": "Financial Goals"
+  "share-budget.subject": "Zaproszenie do budżetu",
+  "share-budget.header": "Cześć {{ name }}!",
+  "share-budget.description": "{{ name }} właśnie udostępnił(a) Ci budżet. Jeżeli nie chcesz przyjmować zaproszenia - możesz zignorować tę wiadomość.",
+  "share-budget.accept": "Zaakceptuj zaproszenie",
+  "share-budget.expiration": "Zaproszenie wygaśnie w dniu {{- expiration, dateTime }}",
+  "signature": "Aplikacja Financial Goals"
 }

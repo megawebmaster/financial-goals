@@ -35,16 +35,19 @@ export function BudgetsMenu({ budgets, selectedBudgetId }: BudgetsMenuProps) {
           <DropdownMenuItem
             key={budget.budgetId}
             asChild
-            className="cursor-pointer"
+            className="cursor-pointer flex gap-2"
           >
             <Link to={`/budgets/${budget.budgetId}`}>
               {budget.isDefault ? (
-                <HeartIcon className="mr-2 size-4" />
+                <HeartIcon className="size-4" />
               ) : (
-                <div className="mr-2 size-4" />
+                <div className="size-4" />
               )}
-              {!budget.isOwner && t('component.budgets-menu.shared-budget')}{' '}
-              {budget.name}
+              <span className="flex-1">
+                {!budget.isOwner && t('component.budgets-menu.shared-budget')}{' '}
+                {budget.name}
+              </span>
+              <div className="size-4" />
             </Link>
           </DropdownMenuItem>
         ))}

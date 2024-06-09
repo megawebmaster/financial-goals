@@ -26,7 +26,7 @@ import { Switch } from '~/components/ui/switch';
 import type { ReactNode } from 'react';
 
 const budgetFormSchema = z.object({
-  name: z.string().min(1).max(64),
+  budgetName: z.string().min(1).max(64),
   isDefault: z.coerce.boolean(),
 });
 
@@ -52,7 +52,7 @@ export const BudgetForm = ({
   const form = useForm<BudgetFormValues>({
     resolver: zodResolver(budgetFormSchema),
     defaultValues: {
-      name: budget?.name || '',
+      budgetName: budget?.name || '',
       isDefault: budget?.isDefault,
     },
   });
@@ -71,7 +71,7 @@ export const BudgetForm = ({
         <CardContent className={className}>
           <form className="grid gap-4" onSubmit={form.handleSubmit(onSubmit)}>
             <FormField
-              name="name"
+              name="budgetName"
               render={({ field }) => (
                 <FormItem className="grid gap-2">
                   <FormLabel>{t('component.budget-form.name')}</FormLabel>
@@ -103,7 +103,6 @@ export const BudgetForm = ({
                       onCheckedChange={field.onChange}
                     />
                   </FormControl>
-                  <FormMessage />
                 </FormItem>
               )}
             />

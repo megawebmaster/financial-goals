@@ -1,7 +1,7 @@
 {
   "login.required": "You need to log in first!",
   "signup.failed": "Couldn't create new account.",
-  "user.deletion-failed": "Couldn't delete your account. Do you have some existing budgets?",
+  "user.deletion-failed": "Couldn't delete your account.",
   "user.not-found": "User doesn't exist!",
   "user.invalid-login": "Email and/or password is not valid.",
   "user.exists": "User already exists!",

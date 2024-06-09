@@ -24,8 +24,8 @@ import { Input } from '~/components/ui/input';
 import { Button } from '~/components/ui/button';
 
 const goalFormSchema = z.object({
-  name: z.string().min(1).max(64),
-  amount: z.coerce.number().min(0),
+  goalName: z.string().min(1).max(64),
+  goalAmount: z.coerce.number().min(0),
 });
 
 export type BudgetGoalFormValues = z.infer<typeof goalFormSchema>;
@@ -53,8 +53,8 @@ export const BudgetGoalForm = ({
   const form = useForm<BudgetGoalFormValues>({
     resolver: zodResolver(goalFormSchema),
     defaultValues: {
-      name: goal?.name || '',
-      amount: goal?.requiredAmount,
+      goalName: goal?.name || '',
+      goalAmount: goal?.requiredAmount,
     },
   });
 
@@ -72,7 +72,7 @@ export const BudgetGoalForm = ({
         <CardContent className={className}>
           <form className="grid gap-4" onSubmit={form.handleSubmit(onSubmit)}>
             <FormField
-              name="name"
+              name="goalName"
               render={({ field }) => (
                 <FormItem className="grid gap-2">
                   <FormLabel>{t('component.goal-form.name')}</FormLabel>
@@ -87,7 +87,7 @@ export const BudgetGoalForm = ({
               )}
             />
             <FormField
-              name="amount"
+              name="goalAmount"
               render={({ field }) => (
                 <FormItem className="grid gap-2">
                   <FormLabel>
