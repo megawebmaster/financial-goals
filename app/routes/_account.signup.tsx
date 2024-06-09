@@ -20,9 +20,6 @@ import {
 } from '~/services/encryption';
 import { mailer } from '~/services/mail.server';
 import { LOGIN_ROUTE } from '~/routes';
-import { PageHeader } from '~/components/ui/page-header';
-import { PageMainNav } from '~/components/ui/page-main-nav';
-import { PageBody } from '~/components/ui/page-body';
 import { SignupForm } from '~/components/signup-form';
 import NewAccountEmail from '~/emails/new-account-email';
 import i18next from '~/i18n.server';
@@ -108,14 +105,5 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 
 export default function () {
-  return (
-    <div className="flex min-h-screen w-full flex-col">
-      <PageHeader>
-        <PageMainNav />
-      </PageHeader>
-      <PageBody className="items-start justify-start py-8 md:py-12 lg:py-24">
-        <SignupForm />
-      </PageBody>
-    </div>
-  );
+  return <SignupForm />;
 }

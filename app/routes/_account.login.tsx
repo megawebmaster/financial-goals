@@ -7,9 +7,6 @@ import { INDEX_ROUTE, LOGIN_ROUTE } from '~/routes';
 import { referrerCookie } from '~/helpers/auth';
 import { authenticator } from '~/services/auth.server';
 import { sessionStorage } from '~/services/session.server';
-import { PageHeader } from '~/components/ui/page-header';
-import { PageMainNav } from '~/components/ui/page-main-nav';
-import { PageBody } from '~/components/ui/page-body';
 import { LoginForm } from '~/components/login-form';
 import i18next from '~/i18n.server';
 
@@ -70,14 +67,5 @@ export async function action({ request }: ActionFunctionArgs) {
 export default function () {
   const { referer } = useLoaderData<typeof loader>();
 
-  return (
-    <div className="flex min-h-screen w-full flex-col">
-      <PageHeader>
-        <PageMainNav />
-      </PageHeader>
-      <PageBody className="items-start justify-start py-8 md:py-12 lg:py-24">
-        <LoginForm referer={referer} />
-      </PageBody>
-    </div>
-  );
+  return <LoginForm referer={referer} />;
 }
