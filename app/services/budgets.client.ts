@@ -1,19 +1,9 @@
-import type { BudgetUser } from '@prisma/client';
-
 import { decrypt } from '~/services/encryption.client';
 import type { ClientBudget } from '~/helpers/budgets';
-import type { Budget } from '~/services/budgets.server';
+import type { ServerBudget } from '~/services/budgets.server';
 
 export const decryptBudget = async (
-  budget: BudgetUser,
-  key: CryptoKey,
-): Promise<BudgetUser> => ({
-  ...budget,
-  name: await decrypt(budget.name, key),
-});
-
-export const decryptBudgetWithSavings = async (
-  budget: Budget,
+  budget: ServerBudget,
   key: CryptoKey,
 ): Promise<ClientBudget> => {
   const currentSavings = await decrypt(budget.budget.currentSavings, key);

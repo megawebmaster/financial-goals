@@ -1,32 +1,25 @@
-import type {
-  Budget as BaseBudget,
-  BudgetInvitation,
-  BudgetUser,
-} from '@prisma/client';
-import { addDays } from 'date-fns';
+import type { Budget as BaseBudget, BudgetUser } from '@prisma/client';
 import { omit } from 'ramda';
 
-import type { ThenArg } from '~/helpers/types';
+import type { ArrayElement, ThenArg } from '~/helpers/types';
 import { prisma } from '~/services/db.server';
 
-export const getBudgets = (userId: number): Promise<BudgetUser[]> =>
-  prisma.budgetUser.findMany({ where: { userId } });
-
-const fetchBudget = (userId: number, budgetId: number) =>
-  prisma.budgetUser.findFirstOrThrow({
+const fetchBudgets = (userId: number) =>
+  prisma.budgetUser.findMany({
     include: {
       budget: true,
     },
     where: {
-      budgetId,
       userId,
     },
   });
 
-export type Budget = ThenArg<ReturnType<typeof fetchBudget>>;
+export type ServerBudget = ArrayElement<
+  ThenArg<ReturnType<typeof fetchBudgets>>
+>;
 
-export const getBudget = (userId: number, budgetId: number): Promise<Budget> =>
-  fetchBudget(userId, budgetId);
+export const getBudgets = (userId: number): Promise<ServerBudget[]> =>
+  fetchBudgets(userId);
 
 export const getDefaultBudget = (userId: number): Promise<BudgetUser | null> =>
   prisma.budgetUser.findFirst({
@@ -115,23 +108,4 @@ export const deleteBudget = (userId: number, budgetId: number): Promise<void> =>
     if (usersCount === 0) {
       await tx.budget.delete({ where: { id: budgetId } });
     }
-  });
-
-export const shareBudget = (
-  userId: number,
-  budgetId: number,
-  username: string,
-  data: string,
-): Promise<BudgetInvitation> =>
-  prisma.$transaction(async (tx) => {
-    await fetchBudget(userId, budgetId);
-    const user = await tx.user.findFirstOrThrow({ where: { username } });
-    return tx.budgetInvitation.create({
-      data: {
-        budgetId,
-        data,
-        userId: user.id,
-        expiresAt: addDays(new Date(), 3),
-      },
-    });
   });

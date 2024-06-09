@@ -1,13 +1,15 @@
 import type { PromiseFn } from 'react-async';
 import { createInstance } from 'react-async';
-import type { BudgetUser } from '@prisma/client';
+
+import type { ClientBudget } from '~/helpers/budgets';
+import type { ServerBudget } from '~/services/budgets.server';
 import { unlockKey } from '~/services/encryption.client';
 import { decryptBudget } from '~/services/budgets.client';
 
-const promiseFn: PromiseFn<BudgetUser[]> = ({ budgets }) =>
+const promiseFn: PromiseFn<ClientBudget[]> = ({ budgets }) =>
   Promise.all(
     budgets.map(
-      async (budget: BudgetUser) =>
+      async (budget: ServerBudget) =>
         await decryptBudget(budget, await unlockKey(budget.key)),
     ),
   );

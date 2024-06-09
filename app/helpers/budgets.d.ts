@@ -9,6 +9,11 @@ export type ClientBudget = BudgetUser & {
   freeSavings: number;
 };
 
+export type AuthenticatedLayoutContext = {
+  budgets: ClientBudget[];
+  user: User;
+};
+
 export type BudgetsLayoutContext = {
   budget: ClientBudget;
   goals: ClientBudgetGoal[];

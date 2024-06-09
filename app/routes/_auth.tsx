@@ -14,6 +14,9 @@ import { PageUserNav } from '~/components/ui/page-user-nav';
 import { UserMenu } from '~/components/ui/user-menu';
 import { PageBody } from '~/components/ui/page-body';
 import { BudgetsMenu } from '~/components/budgets/budgets-menu';
+import { BudgetsList } from '~/components/budgets-list';
+import { Skeleton } from '~/components/ui/skeleton';
+import type { AuthenticatedLayoutContext } from '~/helpers/budgets';
 
 export const loader = authenticatedLoader(async ({ request }, userId) => {
   try {
@@ -40,18 +43,36 @@ export default function () {
   const { t } = useTranslation();
 
   return (
-    <div className="flex min-h-screen w-full flex-col">
-      <PageHeader>
-        <PageMainNav>
-          <BudgetsMenu budgets={budgets}>{t('nav.budgets')}</BudgetsMenu>
-        </PageMainNav>
-        <PageUserNav>
-          <UserMenu user={user} />
-        </PageUserNav>
-      </PageHeader>
-      <PageBody>
-        <Outlet context={user} />
-      </PageBody>
-    </div>
+    <BudgetsList budgets={budgets}>
+      <div className="flex min-h-screen w-full flex-col">
+        <PageHeader>
+          <PageMainNav>
+            <BudgetsList.Pending>
+              <Skeleton className="h-6 mx-2" />
+            </BudgetsList.Pending>
+            <BudgetsList.Fulfilled>
+              {(budgets) => (
+                <BudgetsMenu budgets={budgets}>{t('nav.budgets')}</BudgetsMenu>
+              )}
+            </BudgetsList.Fulfilled>
+          </PageMainNav>
+          <PageUserNav>
+            <UserMenu user={user} />
+          </PageUserNav>
+        </PageHeader>
+        <PageBody>
+          <BudgetsList.Pending>
+            <Skeleton className="h-6 mx-2" />
+          </BudgetsList.Pending>
+          <BudgetsList.Fulfilled>
+            {(budgets) => (
+              <Outlet
+                context={{ budgets, user } as AuthenticatedLayoutContext}
+              />
+            )}
+          </BudgetsList.Fulfilled>
+        </PageBody>
+      </div>
+    </BudgetsList>
   );
 }

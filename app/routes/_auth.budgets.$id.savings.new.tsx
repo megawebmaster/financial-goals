@@ -8,9 +8,7 @@ import { INDEX_ROUTE } from '~/routes';
 import type { BudgetsLayoutContext } from '~/helpers/budgets';
 import { authenticatedAction, authenticatedLoader } from '~/helpers/auth';
 import { getGoalsCurrentAmount } from '~/helpers/budget-goals';
-import { getBudget } from '~/services/budgets.server';
 import { encrypt, unlockKey } from '~/services/encryption.client';
-import { getBudgetGoals } from '~/services/budget-goals.server';
 import { createSavingsEntry } from '~/services/budget-savings-entries.server';
 import { encryptBudgetGoal } from '~/services/budget-goals.client';
 import { buildGoalsFiller } from '~/services/budget-goals';
@@ -26,33 +24,29 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => [
   },
 ];
 
-export const loader = authenticatedLoader(
-  async ({ params, request }, userId) => {
-    try {
-      invariant(params.id, 'Budget ID is required');
-      invariant(typeof params.id === 'string');
+export const loader = authenticatedLoader(async ({ params, request }) => {
+  try {
+    invariant(params.id, 'Budget ID is required');
+    invariant(typeof params.id === 'string');
 
-      const budgetId = parseInt(params.id, 10);
-      invariant(!isNaN(budgetId), 'Budget ID must be a number');
+    const budgetId = parseInt(params.id, 10);
+    invariant(!isNaN(budgetId), 'Budget ID must be a number');
 
-      const t = await i18next.getFixedT(await i18next.getLocale(request));
+    const t = await i18next.getFixedT(await i18next.getLocale(request));
 
-      return {
-        budget: await getBudget(userId, budgetId),
-        goals: await getBudgetGoals(userId, budgetId),
-        title: t('savings.new.title'),
-      };
-    } catch (e) {
-      const t = await i18next.getFixedT(await i18next.getLocale(request), [
-        'errors',
-      ]);
+    return {
+      title: t('savings.new.title'),
+    };
+  } catch (e) {
+    const t = await i18next.getFixedT(await i18next.getLocale(request), [
+      'errors',
+    ]);
 
-      return redirectWithError(INDEX_ROUTE, {
-        message: t('budget.not-found'),
-      });
-    }
-  },
-);
+    return redirectWithError(INDEX_ROUTE, {
+      message: t('budget.not-found'),
+    });
+  }
+});
 
 export const action = authenticatedAction(
   async ({ params, request }, userId) => {

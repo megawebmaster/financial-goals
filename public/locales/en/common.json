@@ -7,6 +7,7 @@
   "register.form.password": "Password",
   "register.form.submit": "Create account!",
   "nav.budgets": "Budgets",
+  "budget.not-found": "Budget not found!",
   "budget.edit.title": "Update a budget | $t(app.name)",
   "budget.edit.back": "Go back",
   "budget.edit.page.title": "Update \"{{ name }}\" budget",

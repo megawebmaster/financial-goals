@@ -12,8 +12,6 @@ import {
   DropdownMenuTrigger,
 } from '~/components/ui/dropdown-menu';
 import { Button } from '~/components/ui/button';
-import { BudgetsList } from '~/components/budgets-list';
-import { Skeleton } from '~/components/ui/skeleton';
 
 type BudgetsMenuProps = {
   budgets: BudgetUser[];
@@ -32,38 +30,24 @@ export function BudgetsMenu({ budgets, children }: BudgetsMenuProps) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <BudgetsList budgets={budgets}>
-          <BudgetsList.Pending>
-            <Skeleton className="h-6 mx-2" />
-            <Skeleton className="h-6 mx-2" />
-            <Skeleton className="h-6 mx-2" />
-          </BudgetsList.Pending>
-          <BudgetsList.Fulfilled>
-            {(budgets) => (
-              <>
-                {budgets.map((budget) => (
-                  <DropdownMenuItem
-                    key={budget.budgetId}
-                    asChild
-                    className="cursor-pointer"
-                  >
-                    <Link to={`/budgets/${budget.budgetId}`}>
-                      {budget.isDefault ? (
-                        <HeartIcon className="mr-2 size-4" />
-                      ) : (
-                        <div className="mr-2 size-4" />
-                      )}
-                      {!budget.isOwner &&
-                        t('component.budgets-menu.shared-budget')}{' '}
-                      {budget.name}
-                    </Link>
-                  </DropdownMenuItem>
-                ))}
-                {budgets.length > 0 && <DropdownMenuSeparator />}
-              </>
-            )}
-          </BudgetsList.Fulfilled>
-        </BudgetsList>
+        {budgets.map((budget) => (
+          <DropdownMenuItem
+            key={budget.budgetId}
+            asChild
+            className="cursor-pointer"
+          >
+            <Link to={`/budgets/${budget.budgetId}`}>
+              {budget.isDefault ? (
+                <HeartIcon className="mr-2 size-4" />
+              ) : (
+                <div className="mr-2 size-4" />
+              )}
+              {!budget.isOwner && t('component.budgets-menu.shared-budget')}{' '}
+              {budget.name}
+            </Link>
+          </DropdownMenuItem>
+        ))}
+        {budgets.length > 0 && <DropdownMenuSeparator />}
         <DropdownMenuItem asChild className="cursor-pointer">
           <Link to="/budgets/invitations">
             <ShieldIcon className="mr-2 size-4" />
