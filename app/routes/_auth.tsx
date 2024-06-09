@@ -13,11 +13,11 @@ import { PageHeader } from '~/components/ui/page-header';
 import { PageMainNav } from '~/components/ui/page-main-nav';
 import { PageNavLink } from '~/components/ui/page-nav-link';
 import { PageUserNav } from '~/components/ui/page-user-nav';
-import { UserMenu } from '~/components/ui/user-menu';
 import { PageBody } from '~/components/ui/page-body';
-import { BudgetsMenu } from '~/components/budgets/budgets-menu';
-import { BudgetsList } from '~/components/budgets-list';
 import { Skeleton } from '~/components/ui/skeleton';
+import { BudgetsMenu } from '~/components/budgets-menu';
+import { BudgetsList } from '~/components/budgets-list';
+import { UserMenu } from '~/components/user-menu';
 
 export const loader = authenticatedLoader(
   async ({ request, params }, userId) => {

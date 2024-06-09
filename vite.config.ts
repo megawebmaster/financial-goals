@@ -2,6 +2,7 @@ import { vitePlugin as remix } from '@remix-run/dev';
 import { defineConfig } from 'vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import Unfonts from 'unplugin-fonts/vite';
+import svgr from 'vite-plugin-svgr';
 
 export default defineConfig({
   plugins: [
@@ -23,6 +24,7 @@ export default defineConfig({
         ],
       },
     }),
+    svgr(),
   ],
   server: {
     port: parseInt(process.env.PORT || '5173', 10),

@@ -1,3 +1,5 @@
+/// <reference types="vite-plugin-svgr/client" />
+
 export type ThenArg<T> = T extends Promise<infer U> ? U : T;
 
 export type PickFieldsOfType<T extends object, FieldT> = {
