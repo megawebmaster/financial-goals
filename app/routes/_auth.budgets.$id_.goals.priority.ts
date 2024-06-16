@@ -22,7 +22,7 @@ export const action = authenticatedAction(
 
       await updateBudgetGoalsPriority(userId, budgetId, JSON.parse(goals));
 
-      return redirect(`/budgets/${budgetId}`);
+      return redirect(`/budgets/${budgetId}/goals`);
     } catch (e) {
       console.error('Changing goal priority failed', e);
       const t = await i18next.getFixedT(
@@ -30,7 +30,7 @@ export const action = authenticatedAction(
         'error',
       );
 
-      return redirectWithError(`/budgets/${params.id}`, {
+      return redirectWithError(`/budgets/${params.id}/goals`, {
         message: t('goal.priority.change-failed'),
       });
     }

@@ -108,7 +108,7 @@ export default function () {
   return (
     <>
       <PageTitle
-        back={`/budgets/${budget.budgetId}`}
+        back={`/budgets/${budget.budgetId}/goals`}
         title={t('goal.new.page.title', { budget: budget.name })}
       />
       <PageContent>
