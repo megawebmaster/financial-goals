@@ -11,6 +11,7 @@ import { Button } from '~/components/ui/button';
 import { BudgetStatus } from '~/components/budgets/budget-status';
 import { CurrentBudgetGoal } from '~/components/budgets/current-budget-goal';
 import { GoalEstimatedCompletion } from '~/components/budgets/goal-estimated-completion';
+import { GoalsSavingsChart } from '~/components/budgets/goals-savings-chart';
 import i18next from '~/i18n.server';
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => [
@@ -75,6 +76,7 @@ export default function () {
             />
           </CurrentBudgetGoal>
         )}
+        <GoalsSavingsChart goals={goals} savings={savings} />
       </PageContent>
     </>
   );

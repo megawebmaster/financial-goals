@@ -50,12 +50,11 @@ async function seedUser(username: string, email: string) {
       status: 'active',
       currentAmount: encryptedZero,
       requiredAmount: await encrypt('1000', encryptionKey),
-      createdAt: subMonths(new Date(), 2),
     },
   );
   await prisma.budgetGoal.update({
     where: { id: goal1.id },
-    data: { createdAt: subMonths(new Date(), 2).toISOString() },
+    data: { createdAt: subMonths(new Date(), 4).toISOString() },
   });
 
   const goal2 = await createBudgetGoal(
@@ -67,7 +66,6 @@ async function seedUser(username: string, email: string) {
       status: 'active',
       currentAmount: encryptedZero,
       requiredAmount: await encrypt('500', encryptionKey),
-      createdAt: subMonths(new Date(), 1),
     },
   );
   await prisma.budgetGoal.update({
@@ -195,7 +193,7 @@ async function seedUser(username: string, email: string) {
     },
     {
       amount: await encrypt('300', encryptionKey),
-      createdAt: subMonths(new Date(), 0),
+      createdAt: new Date(),
     },
     [
       {
