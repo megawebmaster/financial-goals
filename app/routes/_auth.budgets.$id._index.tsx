@@ -4,17 +4,13 @@ import { DollarSignIcon, EditIcon, ShareIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import type { BudgetsLayoutContext } from '~/helpers/budgets';
-import {
-  buildAmountToSaveCalculator,
-  getCurrentGoal,
-} from '~/services/budget-goals.client';
-import { getAverageSavings } from '~/services/budget-savings-entries.client';
-import { GoalEstimate } from '~/components/budget-goal/goal-estimate';
+import { getCurrentGoal } from '~/services/budget-goals.client';
 import { PageTitle } from '~/components/ui/page-title';
 import { PageContent } from '~/components/ui/page-content';
-import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
 import { Button } from '~/components/ui/button';
+import { BudgetStatus } from '~/components/budgets/budget-status';
 import { CurrentBudgetGoal } from '~/components/budgets/current-budget-goal';
+import { GoalEstimatedCompletion } from '~/components/budgets/goal-estimated-completion';
 import i18next from '~/i18n.server';
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => [
@@ -34,12 +30,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 export default function () {
   const { t } = useTranslation();
   const { budget, goals, savings } = useOutletContext<BudgetsLayoutContext>();
-
-  const averageSavings = getAverageSavings(savings);
-  const amountToSaveCalculator = buildAmountToSaveCalculator(goals);
   const currentGoal = getCurrentGoal(goals);
-  // TODO: Properly ask about currency of the budget
-  const FORMAT_CURRENCY = { currency: 'PLN', locale: 'pl-PL' };
 
   return (
     <>
@@ -74,50 +65,14 @@ export default function () {
         </Button>
       </PageTitle>
       <PageContent>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl">
-              {t('budget.view.status')}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p>
-              <strong>{t('budget.view.current-savings')}:</strong>{' '}
-              {t('budget.view.savings-value', {
-                average: averageSavings,
-                value: budget.currentSavings,
-                formatParams: {
-                  average: FORMAT_CURRENCY,
-                  value: FORMAT_CURRENCY,
-                },
-              })}
-            </p>
-            {budget.freeSavings > 0 && (
-              <p>
-                <strong>{t('budget.view.free-savings')}:</strong>{' '}
-                {t('budget.view.free-savings-value', {
-                  value: budget.freeSavings,
-                  formatParams: {
-                    value: FORMAT_CURRENCY,
-                  },
-                })}
-              </p>
-            )}
-          </CardContent>
-        </Card>
+        <BudgetStatus budget={budget} savings={savings} />
         {currentGoal && (
           <CurrentBudgetGoal budgetId={budget.budgetId} goal={currentGoal}>
-            {averageSavings > 0 && (
-              <p className="flex gap-1">
-                <strong>
-                  {t('budget.view.current-goal.estimated-completion')}:
-                </strong>
-                <GoalEstimate
-                  averageSavings={averageSavings}
-                  amountToSave={amountToSaveCalculator(currentGoal.id)}
-                />
-              </p>
-            )}
+            <GoalEstimatedCompletion
+              currentGoal={currentGoal}
+              goals={goals}
+              savings={savings}
+            />
           </CurrentBudgetGoal>
         )}
       </PageContent>
