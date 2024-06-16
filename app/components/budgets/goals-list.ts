@@ -2,9 +2,10 @@ import type { PromiseFn } from 'react-async';
 import { createInstance } from 'react-async';
 import type { BudgetGoal } from '@prisma/client';
 
+import type { ClientBudgetGoal } from '~/helpers/budget-goals';
+import { areListsEqual } from '~/helpers/lists';
 import { unlockKey } from '~/services/encryption.client';
 import { decryptBudgetGoal } from '~/services/budget-goals.client';
-import type { ClientBudgetGoal } from '~/helpers/budget-goals';
 
 const promiseFn: PromiseFn<ClientBudgetGoal[]> = async ({
   encryptionKey,
@@ -20,7 +21,7 @@ const promiseFn: PromiseFn<ClientBudgetGoal[]> = async ({
 export const GoalsList = createInstance(
   {
     promiseFn,
-    watchFn: (prev, cur) => prev.goals !== cur.goals,
+    watchFn: (prev, cur) => !areListsEqual(prev.goals, cur.goals),
   },
   'GoalsList',
 );

@@ -3,6 +3,7 @@ import { createInstance } from 'react-async';
 import type { BudgetSavingsEntry } from '@prisma/client';
 
 import type { ClientBudgetSavingsEntry } from '~/helpers/budget-goals';
+import { areListsEqual } from '~/helpers/lists';
 import { unlockKey } from '~/services/encryption.client';
 import { decryptBudgetSavingsEntry } from '~/services/budget-savings-entries.client';
 
@@ -23,7 +24,7 @@ const promiseFn: PromiseFn<ClientBudgetSavingsEntry[]> = async ({
 export const SavingsList = createInstance(
   {
     promiseFn,
-    watchFn: (prev, cur) => prev.savings !== cur.savings,
+    watchFn: (prev, cur) => !areListsEqual(prev.savings, cur.savings),
   },
   'SavingsList',
 );
