@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { Loader2 } from 'lucide-react';
 
 import type { ClientBudgetGoal } from '~/helpers/budget-goals';
 import {
@@ -22,6 +23,7 @@ import {
 } from '~/components/ui/card';
 import { Input } from '~/components/ui/input';
 import { Button } from '~/components/ui/button';
+import { useNavigationDelay } from '~/hooks/useNavigationDelay';
 
 const goalFormSchema = z.object({
   goalName: z.string().min(1).max(64),
@@ -46,6 +48,7 @@ export const BudgetGoalForm = ({
   status,
 }: BudgetGoalFormProps) => {
   const { t } = useTranslation();
+  const loading = useNavigationDelay();
 
   // TODO: Properly ask about currency of the budget
   const FORMAT_CURRENCY = { currency: 'PLN', locale: 'pl-PL' };
@@ -112,7 +115,8 @@ export const BudgetGoalForm = ({
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full">
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading && <Loader2 className="mr-2 size-4 animate-spin" />}
               {t(`component.goal-form.${status}.submit`)}
             </Button>
           </form>

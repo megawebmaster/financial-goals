@@ -3,6 +3,7 @@ import { Link, useSubmit } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+import { Loader2 } from 'lucide-react';
 
 import { Button } from '~/components/ui/button';
 import { storeKeyMaterial } from '~/services/encryption.client';
@@ -22,6 +23,7 @@ import {
   CardHeader,
   CardTitle,
 } from '~/components/ui/card';
+import { useNavigationDelay } from '~/hooks/useNavigationDelay';
 
 const loginFormSchema = z.object({
   email: z.string().min(4).max(64),
@@ -35,6 +37,7 @@ type LoginFormProps = {
 export function LoginForm({ referer = '' }: LoginFormProps) {
   const { t } = useTranslation();
   const submit = useSubmit();
+  const loading = useNavigationDelay();
 
   const form = useForm<z.infer<typeof loginFormSchema>>({
     resolver: zodResolver(loginFormSchema),
@@ -101,7 +104,8 @@ export function LoginForm({ referer = '' }: LoginFormProps) {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full">
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading && <Loader2 className="mr-2 size-4 animate-spin" />}
               {t('component.login-form.submit')}
             </Button>
           </form>

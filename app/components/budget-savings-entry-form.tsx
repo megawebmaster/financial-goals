@@ -3,8 +3,20 @@ import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { format } from 'date-fns';
+import { CalendarIcon, Loader2 } from 'lucide-react';
 
 import type { ClientBudgetSavingsEntry } from '~/helpers/budget-goals';
+import { cn } from '~/lib/utils';
+import { Button } from '~/components/ui/button';
+import { Calendar } from '~/components/ui/calendar';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '~/components/ui/card';
 import {
   Form,
   FormControl,
@@ -13,24 +25,13 @@ import {
   FormLabel,
   FormMessage,
 } from '~/components/ui/form';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '~/components/ui/card';
 import { Input } from '~/components/ui/input';
-import { Button } from '~/components/ui/button';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '~/components/ui/popover';
-import { cn } from '~/lib/utils';
-import { format } from 'date-fns';
-import { CalendarIcon } from 'lucide-react';
-import { Calendar } from '~/components/ui/calendar';
+import { useNavigationDelay } from '~/hooks/useNavigationDelay';
 
 const savingsFormSchema = z.object({
   savingsDate: z.date().max(new Date()),
@@ -55,6 +56,7 @@ export const BudgetSavingsEntryForm = ({
   status,
 }: BudgetSavingsEntryFormProps) => {
   const { t } = useTranslation();
+  const loading = useNavigationDelay();
 
   // TODO: Properly ask about currency of the budget
   const FORMAT_CURRENCY = { currency: 'PLN', locale: 'pl-PL' };
@@ -144,7 +146,8 @@ export const BudgetSavingsEntryForm = ({
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full">
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading && <Loader2 className="mr-2 size-4 animate-spin" />}
               {t(`component.savings-form.${status}.submit`)}
             </Button>
           </form>

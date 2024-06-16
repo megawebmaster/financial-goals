@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Loader2 } from 'lucide-react';
 
 import type { BudgetFormValues } from '~/components/budget-form';
 import {
@@ -23,6 +24,7 @@ import {
 import { Input } from '~/components/ui/input';
 import { Switch } from '~/components/ui/switch';
 import { Button } from '~/components/ui/button';
+import { useNavigationDelay } from '~/hooks/useNavigationDelay';
 
 const budgetAcceptFormSchema = z.object({
   budgetName: z.string().min(1).max(64),
@@ -41,6 +43,7 @@ export const BudgetAcceptForm = ({
   onSubmit,
 }: BudgetAcceptFormProps) => {
   const { t } = useTranslation();
+  const loading = useNavigationDelay();
 
   const form = useForm<BudgetFormValues>({
     resolver: zodResolver(budgetAcceptFormSchema),
@@ -100,7 +103,8 @@ export const BudgetAcceptForm = ({
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full">
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading && <Loader2 className="mr-2 size-4 animate-spin" />}
               {t('component.budget-accept-form.submit')}
             </Button>
           </form>

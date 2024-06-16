@@ -1,8 +1,10 @@
+import type { ReactNode } from 'react';
 import type { BudgetUser } from '@prisma/client';
 import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { Loader2 } from 'lucide-react';
 
 import {
   Card,
@@ -23,7 +25,7 @@ import {
 import { Input } from '~/components/ui/input';
 import { Button } from '~/components/ui/button';
 import { Switch } from '~/components/ui/switch';
-import type { ReactNode } from 'react';
+import { useNavigationDelay } from '~/hooks/useNavigationDelay';
 
 const budgetFormSchema = z.object({
   budgetName: z.string().min(1).max(64),
@@ -48,6 +50,7 @@ export const BudgetForm = ({
   status,
 }: BudgetFormProps) => {
   const { t } = useTranslation();
+  const loading = useNavigationDelay();
 
   const form = useForm<BudgetFormValues>({
     resolver: zodResolver(budgetFormSchema),
@@ -106,7 +109,8 @@ export const BudgetForm = ({
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full">
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading && <Loader2 className="mr-2 size-4 animate-spin" />}
               {t(`component.budget-form.${status}.submit`)}
             </Button>
           </form>
