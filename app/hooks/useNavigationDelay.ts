@@ -6,9 +6,12 @@ type NavigationDelay = {
   minDuration?: number;
 };
 
+export const DEFAULT_DELAY = 200;
+export const DEFAULT_MIN_DURATION = 500;
+
 export const useNavigationDelay = ({
-  delay = 200,
-  minDuration = 500,
+  delay = DEFAULT_DELAY,
+  minDuration = DEFAULT_MIN_DURATION,
 }: NavigationDelay = {}) => {
   const navigation = useNavigation();
   return useSpinDelay(navigation.state !== 'idle', {

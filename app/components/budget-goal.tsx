@@ -1,4 +1,4 @@
-import type { FormEvent, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { Link } from '@remix-run/react';
 import { ArrowDownIcon, ArrowUpIcon, EditIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -14,7 +14,6 @@ type BudgetGoalProps = {
   children?: ReactNode;
   goal: ClientBudgetGoal;
   goalsCount: number;
-  onPriorityChange: (event: FormEvent<HTMLFormElement>) => void;
 };
 
 export function BudgetGoal({
@@ -22,7 +21,6 @@ export function BudgetGoal({
   children,
   goal,
   goalsCount,
-  onPriorityChange,
 }: BudgetGoalProps) {
   const { t } = useTranslation();
 
@@ -67,7 +65,6 @@ export function BudgetGoal({
               disabled={goal.priority === 1}
               goalId={goal.id}
               priority={goal.priority - 1}
-              onPriorityChange={onPriorityChange}
               title={t('component.budget-goal.move-up')}
             >
               <ArrowUpIcon />
@@ -76,7 +73,6 @@ export function BudgetGoal({
               disabled={goal.priority === goalsCount}
               goalId={goal.id}
               priority={goal.priority + 1}
-              onPriorityChange={onPriorityChange}
               title={t('component.budget-goal.move-down')}
             >
               <ArrowDownIcon />

@@ -95,12 +95,12 @@ export const updateBudgetGoal = (
           where: {
             id: goal.id,
           },
-          data: getUpdateableGoalFields(goal),
+          data: getUpdatableGoalFields(goal),
         }),
       ),
     );
 
-    return await tx.budgetGoal.findUniqueOrThrow({ where: { id: goalId } });
+    return tx.budgetGoal.findUniqueOrThrow({ where: { id: goalId } });
   });
 
 export const deleteBudgetGoal = async (
@@ -140,14 +140,14 @@ export const deleteBudgetGoal = async (
           where: {
             id: goal.id,
           },
-          data: getUpdateableGoalFields(goal),
+          data: getUpdatableGoalFields(goal),
         }),
       ),
     );
   });
 };
 
-const getUpdateableGoalFields = pick<(keyof BudgetGoal)[]>([
+const getUpdatableGoalFields = pick<(keyof BudgetGoal)[]>([
   'name',
   'requiredAmount',
   'currentAmount',
@@ -177,7 +177,7 @@ export const updateBudgetGoalsPriority = async (
           where: {
             id: goal.id,
           },
-          data: getUpdateableGoalFields(goal),
+          data: getUpdatableGoalFields(goal),
         }),
       ),
     );

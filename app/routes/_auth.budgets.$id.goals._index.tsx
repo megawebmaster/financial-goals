@@ -1,18 +1,13 @@
-import type { FormEvent } from 'react';
 import type { LoaderFunctionArgs, MetaFunction } from '@remix-run/node';
-import { Link, useOutletContext, useSubmit } from '@remix-run/react';
+import { Link, useOutletContext } from '@remix-run/react';
 import { PlusIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { pipe } from 'ramda';
 
 import type { BudgetsLayoutContext } from '~/helpers/budgets';
-import { unlockKey } from '~/services/encryption.client';
 import {
   buildAmountToSaveCalculator,
-  encryptBudgetGoal,
   getRequiredAmount,
 } from '~/services/budget-goals.client';
-import { buildGoalsFiller, buildGoalsSorting } from '~/services/budget-goals';
 import { getAverageSavings } from '~/services/budget-savings-entries.client';
 import { BudgetGoal } from '~/components/budget-goal';
 import { GoalEstimate } from '~/components/budget-goal/goal-estimate';
@@ -48,37 +43,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
 export default function () {
   const { t } = useTranslation();
   const { budget, goals, savings } = useOutletContext<BudgetsLayoutContext>();
-  const submit = useSubmit();
-
-  const changePriority = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const encryptionKey = await unlockKey(budget.key);
-    const formData = new FormData(event.target as HTMLFormElement);
-    const amount = goals.reduce(
-      (result, goal) => result + goal.currentAmount,
-      0,
-    );
-
-    const goalId = parseInt(formData.get('goalId') as string);
-    const priority = parseInt(formData.get('priority') as string);
-
-    const processGoals = pipe(
-      buildGoalsSorting(goalId, priority),
-      buildGoalsFiller(amount),
-    );
-
-    const updatedGoals = await Promise.all(
-      processGoals(goals).map((item) => encryptBudgetGoal(item, encryptionKey)),
-    );
-
-    submit(
-      { goals: JSON.stringify(updatedGoals) },
-      {
-        action: `/budgets/${budget.budgetId}/goals/priority`,
-        method: 'post',
-      },
-    );
-  };
 
   const averageSavings = getAverageSavings(savings);
   const amountToSaveCalculator = buildAmountToSaveCalculator(goals);
@@ -134,7 +98,6 @@ export default function () {
                     budgetId={budget.budgetId}
                     goal={goal}
                     goalsCount={goals.length}
-                    onPriorityChange={changePriority}
                   >
                     <GoalEstimate
                       averageSavings={averageSavings}
