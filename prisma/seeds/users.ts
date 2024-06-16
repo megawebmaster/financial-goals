@@ -1,3 +1,5 @@
+import { subMonths } from 'date-fns';
+
 import { createUser } from '~/services/user.server';
 import {
   encrypt,
@@ -9,7 +11,7 @@ import {
 import { createBudget } from '~/services/budgets.server';
 import { createBudgetGoal } from '~/services/budget-goals.server';
 import { createSavingsEntry } from '~/services/budget-savings-entries.server';
-import { subMonths } from 'date-fns';
+import { prisma } from '~/services/db.server';
 
 export async function seedUsers() {
   await seedUser('Test 1', 'test@example.com');
@@ -48,8 +50,13 @@ async function seedUser(username: string, email: string) {
       status: 'active',
       currentAmount: encryptedZero,
       requiredAmount: await encrypt('1000', encryptionKey),
+      createdAt: subMonths(new Date(), 2),
     },
   );
+  await prisma.budgetGoal.update({
+    where: { id: goal1.id },
+    data: { createdAt: subMonths(new Date(), 2).toISOString() },
+  });
 
   const goal2 = await createBudgetGoal(
     user.id,
@@ -60,8 +67,13 @@ async function seedUser(username: string, email: string) {
       status: 'active',
       currentAmount: encryptedZero,
       requiredAmount: await encrypt('500', encryptionKey),
+      createdAt: subMonths(new Date(), 1),
     },
   );
+  await prisma.budgetGoal.update({
+    where: { id: goal2.id },
+    data: { createdAt: subMonths(new Date(), 1).toISOString() },
+  });
 
   const goal3 = await createBudgetGoal(
     user.id,
@@ -74,6 +86,10 @@ async function seedUser(username: string, email: string) {
       requiredAmount: await encrypt('250', encryptionKey),
     },
   );
+  await prisma.budgetGoal.update({
+    where: { id: goal3.id },
+    data: { createdAt: subMonths(new Date(), 1).toISOString() },
+  });
 
   await createBudgetGoal(user.id, budget.budgetId, encryptedZero, {
     name: await encrypt('Goal 4', encryptionKey),
@@ -91,7 +107,7 @@ async function seedUser(username: string, email: string) {
     },
     {
       amount: await encrypt('300', encryptionKey),
-      date: subMonths(new Date(), 4),
+      createdAt: subMonths(new Date(), 4),
     },
     [
       {
@@ -110,7 +126,7 @@ async function seedUser(username: string, email: string) {
     },
     {
       amount: await encrypt('200', encryptionKey),
-      date: subMonths(new Date(), 3),
+      createdAt: subMonths(new Date(), 3),
     },
     [
       {
@@ -129,7 +145,7 @@ async function seedUser(username: string, email: string) {
     },
     {
       amount: await encrypt('300', encryptionKey),
-      date: subMonths(new Date(), 2),
+      createdAt: subMonths(new Date(), 2),
     },
     [
       {
@@ -156,7 +172,7 @@ async function seedUser(username: string, email: string) {
     },
     {
       amount: await encrypt('600', encryptionKey),
-      date: subMonths(new Date(), 1),
+      createdAt: subMonths(new Date(), 1),
     },
     [
       {
@@ -179,7 +195,7 @@ async function seedUser(username: string, email: string) {
     },
     {
       amount: await encrypt('300', encryptionKey),
-      date: subMonths(new Date(), 0),
+      createdAt: subMonths(new Date(), 0),
     },
     [
       {

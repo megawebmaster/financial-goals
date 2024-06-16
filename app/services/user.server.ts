@@ -58,6 +58,8 @@ export const createUser = async (
       salt,
       publicKey: await exportKey(pki.publicKey),
       privateKey: await lockKey(wrappingKey, pki.privateKey),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     },
   });
 };

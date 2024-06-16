@@ -14,6 +14,8 @@ export const decryptBudgetGoal = async (
   return {
     ...goal,
     name: await decrypt(goal.name, key),
+    createdAt: new Date(goal.createdAt),
+    updatedAt: new Date(goal.updatedAt),
     requiredAmount: parseFloat(requiredAmount),
     currentAmount: parseFloat(currentAmount),
   };

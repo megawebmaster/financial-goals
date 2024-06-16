@@ -31,11 +31,20 @@ export const getDefaultBudget = (userId: number): Promise<BudgetUser | null> =>
 
 export const createBudget = (
   userId: number,
-  budgetData: Omit<BaseBudget, 'id'>,
-  budgetUserdata: Omit<BudgetUser, 'budgetId' | 'userId' | 'isOwner'>,
+  budgetData: Omit<BaseBudget, 'id' | 'createdAt' | 'updatedAt'>,
+  budgetUserdata: Omit<
+    BudgetUser,
+    'budgetId' | 'userId' | 'isOwner' | 'createdAt' | 'updatedAt'
+  >,
 ): Promise<BudgetUser> =>
   prisma.$transaction(async (tx) => {
-    const budget = await tx.budget.create({ data: budgetData });
+    const budget = await tx.budget.create({
+      data: {
+        ...budgetData,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+    });
 
     if (budgetUserdata.isDefault) {
       await tx.budgetUser.updateMany({
@@ -50,6 +59,8 @@ export const createBudget = (
         budgetId: budget.id,
         userId,
         isOwner: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       },
     });
   });
@@ -57,18 +68,29 @@ export const createBudget = (
 export const updateBudget = (
   userId: number,
   budgetId: number,
-  data: Partial<Omit<BudgetUser, 'budgetId' | 'userId' | 'key' | 'isOwner'>>,
+  data: Partial<
+    Omit<
+      BudgetUser,
+      'budgetId' | 'userId' | 'key' | 'isOwner' | 'createdAt' | 'updatedAt'
+    >
+  >,
 ): Promise<BudgetUser> =>
   prisma.$transaction(async (tx) => {
     if (data.isDefault) {
       const result = await tx.budgetUser.updateMany({
         where: { isDefault: true, userId },
-        data: { isDefault: false },
+        data: {
+          isDefault: false,
+          updatedAt: new Date().toISOString(),
+        },
       });
 
       if (result.count > 0) {
         return tx.budgetUser.update({
-          data,
+          data: {
+            ...data,
+            updatedAt: new Date().toISOString(),
+          },
           where: {
             budgetId_userId: {
               budgetId,
@@ -80,7 +102,10 @@ export const updateBudget = (
     }
 
     return tx.budgetUser.update({
-      data: omit(['isDefault'], data),
+      data: {
+        ...omit(['isDefault'], data),
+        updatedAt: new Date().toISOString(),
+      },
       where: {
         budgetId_userId: {
           budgetId,

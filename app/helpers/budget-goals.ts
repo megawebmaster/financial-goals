@@ -13,7 +13,7 @@ export type ClientBudgetGoal = Omit<
 };
 
 export type ClientBudgetSavingsEntry = Omit<BudgetSavingsEntry, 'amount'> & {
-  date: Date;
+  createdAt: Date;
   amount: number;
 };
 

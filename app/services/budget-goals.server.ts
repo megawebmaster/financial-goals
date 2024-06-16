@@ -19,28 +19,14 @@ export const getBudgetGoals = (userId: number, budgetId: number) =>
     },
   });
 
-export const getBudgetGoal = (
-  userId: number,
-  budgetId: number,
-  goalId: number,
-) =>
-  prisma.budgetGoal.findFirstOrThrow({
-    where: {
-      id: goalId,
-      budget: {
-        id: budgetId,
-        users: {
-          some: { userId },
-        },
-      },
-    },
-  });
-
 export const createBudgetGoal = async (
   userId: number,
   budgetId: number,
   freeSavings: string,
-  data: Omit<BudgetGoal, 'budgetId' | 'id' | 'priority'>,
+  data: Omit<
+    BudgetGoal,
+    'budgetId' | 'id' | 'priority' | 'createdAt' | 'updatedAt'
+  >,
 ): Promise<BudgetGoal> =>
   await prisma.$transaction(async (tx) => {
     // TODO: Does this ensure budget exists and user has access to it?
@@ -66,6 +52,8 @@ export const createBudgetGoal = async (
         ...data,
         budgetId,
         priority,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       },
     });
   });
@@ -95,7 +83,10 @@ export const updateBudgetGoal = (
           where: {
             id: goal.id,
           },
-          data: getUpdatableGoalFields(goal),
+          data: {
+            ...getUpdatableGoalFields(goal),
+            updatedAt: new Date().toISOString(),
+          },
         }),
       ),
     );
@@ -140,7 +131,10 @@ export const deleteBudgetGoal = async (
           where: {
             id: goal.id,
           },
-          data: getUpdatableGoalFields(goal),
+          data: {
+            ...getUpdatableGoalFields(goal),
+            updatedAt: new Date().toISOString(),
+          },
         }),
       ),
     );
@@ -177,7 +171,10 @@ export const updateBudgetGoalsPriority = async (
           where: {
             id: goal.id,
           },
-          data: getUpdatableGoalFields(goal),
+          data: {
+            ...getUpdatableGoalFields(goal),
+            updatedAt: new Date().toISOString(),
+          },
         }),
       ),
     );

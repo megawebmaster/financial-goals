@@ -11,7 +11,8 @@ export const decryptBudgetSavingsEntry = async (
 ): Promise<ClientBudgetSavingsEntry> => {
   return {
     ...entry,
-    date: new Date(entry.date),
+    createdAt: new Date(entry.createdAt),
+    updatedAt: new Date(entry.updatedAt),
     amount: parseFloat(await decrypt(entry.amount, key)),
   };
 };
@@ -21,7 +22,9 @@ const sumSavings = pipe(
   sum,
 );
 const countSavingsMonths = pipe(
-  map((entry: ClientBudgetSavingsEntry) => lightFormat(entry.date, 'yyyy-MM')),
+  map((entry: ClientBudgetSavingsEntry) =>
+    lightFormat(entry.createdAt, 'yyyy-MM'),
+  ),
   uniq,
   length,
 );

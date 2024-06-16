@@ -14,5 +14,7 @@ export const decryptBudget = async (
     name: await decrypt(budget.name, key),
     currentSavings: parseFloat(currentSavings),
     freeSavings: parseFloat(freeSavings),
+    createdAt: new Date(budget.createdAt),
+    updatedAt: new Date(budget.updatedAt),
   };
 };

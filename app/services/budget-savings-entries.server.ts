@@ -7,7 +7,7 @@ export const getBudgetSavings = (budgetId: number) =>
   prisma.budgetSavingsEntry.findMany({
     where: {
       budgetId,
-      date: {
+      createdAt: {
         gte: startOfMonth(subMonths(new Date(), 12)),
       },
     },
@@ -16,9 +16,9 @@ export const getBudgetSavings = (budgetId: number) =>
 export const createSavingsEntry = async (
   userId: number,
   budgetId: number,
-  budgetData: Omit<Budget, 'id'>,
-  entryData: Omit<BudgetSavingsEntry, 'id' | 'userId' | 'budgetId'>,
-  goals: Pick<BudgetGoal, 'id' | 'currentAmount'>[],
+  budgetData: Partial<Omit<Budget, 'id'>>,
+  entryData: Partial<Omit<BudgetSavingsEntry, 'id' | 'userId' | 'budgetId'>>,
+  goals: Partial<Pick<BudgetGoal, 'id' | 'currentAmount'>>[],
 ): Promise<BudgetSavingsEntry> =>
   await prisma.$transaction(async (tx) => {
     // TODO: Does this update ensure the budget exists?
@@ -37,6 +37,12 @@ export const createSavingsEntry = async (
         ...entryData,
         userId,
         budgetId,
+        createdAt: (entryData.createdAt || new Date()).toISOString(),
+        updatedAt: (
+          entryData.updatedAt ||
+          entryData.createdAt ||
+          new Date()
+        ).toISOString(),
       },
     });
 
@@ -48,6 +54,7 @@ export const createSavingsEntry = async (
           },
           data: {
             currentAmount: goal.currentAmount,
+            updatedAt: new Date().toISOString(),
           },
         }),
       ),

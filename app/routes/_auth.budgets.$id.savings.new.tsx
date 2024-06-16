@@ -111,7 +111,7 @@ export default function () {
     submit(
       {
         entryData: JSON.stringify({
-          date: values.savingsDate,
+          createdAt: values.savingsDate,
           amount: await encrypt(
             values.savingsAmount.toString(10),
             encryptionKey,

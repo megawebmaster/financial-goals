@@ -151,7 +151,8 @@ export async function seedSavings(
     },
     {
       amount: await encrypt(amount, encryptionKey),
-      date: data.date || subMonths(new Date(), 1),
+      createdAt: data.createdAt || subMonths(new Date(), 1),
+      updatedAt: data.updatedAt,
     },
     await Promise.all(
       updatedGoals.map(async (goal) => ({

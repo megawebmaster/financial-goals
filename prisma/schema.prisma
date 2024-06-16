@@ -21,17 +21,21 @@ model User {
   budgets     BudgetUser[]         @relation("AccessibleBudgets")
   savings     BudgetSavingsEntry[] @relation("UserSavingEntries")
   invitations BudgetInvitation[]   @relation("BudgetInvitations")
+  createdAt   DateTime
+  updatedAt   DateTime
 }
 
 model BudgetUser {
   budgetId  Int
-  budget    Budget  @relation("BudgetUsers", fields: [budgetId], references: [id], onDelete: Restrict)
+  budget    Budget   @relation("BudgetUsers", fields: [budgetId], references: [id], onDelete: Restrict)
   userId    Int
-  user      User    @relation("AccessibleBudgets", fields: [userId], references: [id], onDelete: Cascade)
+  user      User     @relation("AccessibleBudgets", fields: [userId], references: [id], onDelete: Cascade)
   name      String
   key       String
-  isOwner   Boolean @default(false)
-  isDefault Boolean @default(false)
+  isOwner   Boolean  @default(false)
+  isDefault Boolean  @default(false)
+  createdAt DateTime
+  updatedAt DateTime
 
   @@id([budgetId, userId])
   @@unique([userId, name])
@@ -57,25 +61,30 @@ model Budget {
   invitations    BudgetInvitation[]   @relation("BudgetInvitations")
   currentSavings String
   freeSavings    String
+  createdAt      DateTime
+  updatedAt      DateTime
 }
 
 model BudgetSavingsEntry {
-  id       Int      @id @default(autoincrement())
-  budgetId Int
-  budget   Budget   @relation("BudgetSavingsEntries", fields: [budgetId], references: [id], onDelete: Cascade)
-  userId   Int?
-  user     User?    @relation("UserSavingEntries", fields: [userId], references: [id], onDelete: SetNull)
-  date     DateTime
-  amount   String
+  id        Int      @id @default(autoincrement())
+  budgetId  Int
+  budget    Budget   @relation("BudgetSavingsEntries", fields: [budgetId], references: [id], onDelete: Cascade)
+  userId    Int?
+  user      User?    @relation("UserSavingEntries", fields: [userId], references: [id], onDelete: SetNull)
+  amount    String
+  createdAt DateTime
+  updatedAt DateTime
 }
 
 model BudgetGoal {
-  id             Int    @id @default(autoincrement())
+  id             Int      @id @default(autoincrement())
   budgetId       Int
-  budget         Budget @relation("BudgetGoals", fields: [budgetId], references: [id], onDelete: Cascade)
+  budget         Budget   @relation("BudgetGoals", fields: [budgetId], references: [id], onDelete: Cascade)
   name           String
   requiredAmount String
   currentAmount  String
   priority       Int
-  status         String @default("active")
+  status         String   @default("active")
+  createdAt      DateTime
+  updatedAt      DateTime
 }
