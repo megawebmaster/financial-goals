@@ -29,10 +29,14 @@ export const useBudgetInvitations = (
     [user.privateKey],
   );
 
-  const { data, loading } = useDecryptedList(invitations, decryptFn);
+  const { data, decrypting, loading } = useDecryptedList(
+    invitations,
+    decryptFn,
+  );
 
   return {
     invitations: data,
+    decryptingInvitations: decrypting,
     loadingInvitations: loading,
   };
 };

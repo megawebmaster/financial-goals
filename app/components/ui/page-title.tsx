@@ -19,7 +19,7 @@ export function PageTitle({
   title,
 }: PageTitleProps) {
   return (
-    <div className={cn('mx-auto flex w-full max-w-6xl gap-2', className)}>
+    <div className={cn('flex gap-2', className)}>
       {back && (
         <Button
           asChild

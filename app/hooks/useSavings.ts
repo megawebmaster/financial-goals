@@ -32,10 +32,11 @@ export const useSavings = (
 ) => {
   const decryptFn = useMemo(() => decryptSavings(budget?.key), [budget?.key]);
 
-  const { data, loading } = useDecryptedList(savings, decryptFn);
+  const { data, decrypting, loading } = useDecryptedList(savings, decryptFn);
 
   return {
     savings: data,
+    decryptingSavings: decrypting,
     loadingSavings: loading,
   };
 };

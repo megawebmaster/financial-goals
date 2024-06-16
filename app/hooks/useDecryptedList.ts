@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { equals, type KeyValuePair, reduce, reduced, zip } from 'ramda';
+import { useSpinDelay } from 'spin-delay';
 
 const listsComparator = reduce(
   (_, [previous, current]: KeyValuePair<object, object>) => {
@@ -37,6 +38,11 @@ export const useDecryptedList = <T extends object, R extends object>(
   const [decrypting, setDecrypting] = useState(true);
   const [data, setData] = useState<R[]>();
 
+  const isDecrypting = useSpinDelay(decrypting, {
+    delay: 100,
+    minDuration: 300,
+  });
+
   useEffect(() => {
     if (decrypting || !areListsEqual(items, currentItems.current)) {
       setDecrypting(true);
@@ -53,7 +59,7 @@ export const useDecryptedList = <T extends object, R extends object>(
 
   return {
     data,
-    decrypting,
-    loading: !data && decrypting,
+    decrypting: isDecrypting,
+    loading: !data && isDecrypting,
   };
 };

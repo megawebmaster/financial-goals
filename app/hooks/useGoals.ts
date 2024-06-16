@@ -27,10 +27,11 @@ export const useGoals = (
 ) => {
   const decryptFn = useMemo(() => decryptGoals(budget?.key), [budget?.key]);
 
-  const { data, loading } = useDecryptedList(goals, decryptFn);
+  const { data, decrypting, loading } = useDecryptedList(goals, decryptFn);
 
   return {
     goals: data,
+    decryptingGoals: decrypting,
     loadingGoals: loading,
   };
 };

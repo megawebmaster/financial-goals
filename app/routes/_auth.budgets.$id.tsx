@@ -62,8 +62,11 @@ export default function () {
   const data = useLoaderData<typeof loader>();
   const navigate = useNavigate();
   const budget = useBudget();
-  const { goals, loadingGoals } = useGoals(budget, data.goals);
-  const { savings, loadingSavings } = useSavings(budget, data.savings);
+  const { goals, decryptingGoals, loadingGoals } = useGoals(budget, data.goals);
+  const { savings, decryptingSavings, loadingSavings } = useSavings(
+    budget,
+    data.savings,
+  );
 
   if (!budget) {
     toast.warning(t('budget.not-found'));
@@ -71,14 +74,16 @@ export default function () {
     return null;
   }
 
-  if ((!goals && loadingGoals) || (!savings && loadingSavings)) {
+  if (loadingGoals || loadingSavings) {
     return <DataLoading />;
   }
 
   return (
     <>
-      {(loadingGoals || loadingSavings) && (
-        <Loader2 className="mr-2 size-4 animate-spin" />
+      {(decryptingGoals || decryptingSavings) && (
+        <div className="absolute top-0 w-full mx-8 h-10 flex justify-end items-center">
+          <Loader2 className="size-6 animate-spin" />
+        </div>
       )}
       <Outlet
         context={
