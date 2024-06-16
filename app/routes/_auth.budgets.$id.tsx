@@ -5,24 +5,25 @@ import {
   useOutletContext,
   useParams,
 } from '@remix-run/react';
-import { redirectWithError } from 'remix-toast';
 import invariant from 'tiny-invariant';
+import { redirectWithError } from 'remix-toast';
+import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
+import { Loader2 } from 'lucide-react';
+import { propEq } from 'ramda';
 
 import { INDEX_ROUTE } from '~/routes';
+import { DataLoading } from '~/components/data-loading';
 import type {
   AuthenticatedLayoutContext,
   BudgetsLayoutContext,
 } from '~/helpers/budgets';
 import { authenticatedLoader } from '~/helpers/auth';
+import { useGoals } from '~/hooks/useGoals';
+import { useSavings } from '~/hooks/useSavings';
 import { getBudgetGoals } from '~/services/budget-goals.server';
 import { getBudgetSavings } from '~/services/budget-savings-entries.server';
-import { GoalsList } from '~/components/budgets/goals-list';
-import { SavingsList } from '~/components/budgets/savings-list';
-import { DecryptingMessage } from '~/components/decrypting-message';
 import i18next from '~/i18n.server';
-import { propEq } from 'ramda';
-import { toast } from 'sonner';
-import { useTranslation } from 'react-i18next';
 
 export const loader = authenticatedLoader(
   async ({ params, request }, userId) => {
@@ -48,13 +49,21 @@ export const loader = authenticatedLoader(
   },
 );
 
-export default function () {
-  const { goals, savings } = useLoaderData<typeof loader>();
+const useBudget = () => {
   const { id } = useParams();
-  const { budgets, user } = useOutletContext<AuthenticatedLayoutContext>();
+  const { budgets } = useOutletContext<AuthenticatedLayoutContext>();
+
+  return budgets.find(propEq(parseInt(id || ''), 'budgetId'));
+};
+
+export default function () {
+  const { user } = useOutletContext<AuthenticatedLayoutContext>();
   const { t } = useTranslation();
+  const data = useLoaderData<typeof loader>();
   const navigate = useNavigate();
-  const budget = budgets.find(propEq(parseInt(id || ''), 'budgetId'));
+  const budget = useBudget();
+  const { goals, loadingGoals } = useGoals(budget, data.goals);
+  const { savings, loadingSavings } = useSavings(budget, data.savings);
 
   if (!budget) {
     toast.warning(t('budget.not-found'));
@@ -62,36 +71,25 @@ export default function () {
     return null;
   }
 
+  if ((!goals && loadingGoals) || (!savings && loadingSavings)) {
+    return <DataLoading />;
+  }
+
   return (
-    <GoalsList encryptionKey={budget.key} goals={goals}>
-      <SavingsList encryptionKey={budget.key} savings={savings}>
-        <GoalsList.Pending>
-          <DecryptingMessage />
-        </GoalsList.Pending>
-        <GoalsList.Fulfilled>
-          {(goals) => (
-            <>
-              <SavingsList.Pending>
-                <DecryptingMessage />
-              </SavingsList.Pending>
-              <SavingsList.Fulfilled>
-                {(savings) => (
-                  <Outlet
-                    context={
-                      {
-                        budget,
-                        goals,
-                        savings,
-                        user,
-                      } as BudgetsLayoutContext
-                    }
-                  />
-                )}
-              </SavingsList.Fulfilled>
-            </>
-          )}
-        </GoalsList.Fulfilled>
-      </SavingsList>
-    </GoalsList>
+    <>
+      {(loadingGoals || loadingSavings) && (
+        <Loader2 className="mr-2 size-4 animate-spin" />
+      )}
+      <Outlet
+        context={
+          {
+            budget,
+            goals,
+            savings,
+            user,
+          } as BudgetsLayoutContext
+        }
+      />
+    </>
   );
 }

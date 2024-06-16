@@ -3,22 +3,22 @@ import { Outlet, useLoaderData, useParams } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
 
 import { INDEX_ROUTE } from '~/routes';
-import type { AuthenticatedLayoutContext } from '~/helpers/budgets';
-import { authenticatedLoader } from '~/helpers/auth';
-import { authenticator } from '~/services/auth.server';
-import { getUser } from '~/services/user.server';
-import { getBudgets, getDefaultBudget } from '~/services/budgets.server';
-import { buildWrappingKey } from '~/services/encryption.client';
 import { PageHeader } from '~/components/ui/page-header';
 import { PageMainNav } from '~/components/ui/page-main-nav';
 import { PageNavLink } from '~/components/ui/page-nav-link';
 import { PageUserNav } from '~/components/ui/page-user-nav';
 import { PageBody } from '~/components/ui/page-body';
-import { PageContent } from '~/components/ui/page-content';
 import { Skeleton } from '~/components/ui/skeleton';
 import { BudgetsMenu } from '~/components/budgets-menu';
-import { BudgetsList } from '~/components/budgets-list';
 import { UserMenu } from '~/components/user-menu';
+import { DataLoading } from '~/components/data-loading';
+import type { AuthenticatedLayoutContext } from '~/helpers/budgets';
+import { authenticatedLoader } from '~/helpers/auth';
+import { useBudgets } from '~/hooks/useBudgets';
+import { authenticator } from '~/services/auth.server';
+import { getUser } from '~/services/user.server';
+import { getBudgets, getDefaultBudget } from '~/services/budgets.server';
+import { buildWrappingKey } from '~/services/encryption.client';
 
 export const loader = authenticatedLoader(
   async ({ request, params }, userId) => {
@@ -44,52 +44,47 @@ export async function clientLoader({ serverLoader }: ClientLoaderFunctionArgs) {
 }
 
 export default function () {
-  const { budgets, defaultBudget, user } = useLoaderData<typeof loader>();
   const { t } = useTranslation();
+  const data = useLoaderData<typeof loader>();
   const params = useParams();
-  const budgetId = parseInt(params.id || '0', 10) || defaultBudget?.budgetId;
+  const budgetId =
+    parseInt(params.id || '0', 10) || data.defaultBudget?.budgetId;
+  const { budgets, decryptingBudgets } = useBudgets(data.budgets);
 
   return (
-    <BudgetsList budgets={budgets}>
-      <div className="flex min-h-screen w-full flex-col">
-        <PageHeader>
-          <PageMainNav>
-            <PageNavLink to={`/budgets/${budgetId}`}>
-              {t('nav.dashboard')}
-            </PageNavLink>
-            <PageNavLink to={`/budgets/${budgetId}/goals`}>
-              {t('nav.goals')}
-            </PageNavLink>
-          </PageMainNav>
-          <PageUserNav>
-            <BudgetsList.Pending>
-              <Skeleton className="h-6 w-48 mx-2" />
-            </BudgetsList.Pending>
-            <BudgetsList.Fulfilled>
-              {(budgets) => (
-                <BudgetsMenu budgets={budgets} selectedBudgetId={budgetId} />
-              )}
-            </BudgetsList.Fulfilled>
-            <UserMenu user={user} />
-          </PageUserNav>
-        </PageHeader>
-        <PageBody>
-          <BudgetsList.Pending>
-            <PageContent>
-              <Skeleton className="h-10 mx-2" />
-              <Skeleton className="h-24 mx-2" />
-              <Skeleton className="h-32 mx-2" />
-            </PageContent>
-          </BudgetsList.Pending>
-          <BudgetsList.Fulfilled>
-            {(budgets) => (
-              <Outlet
-                context={{ budgets, user } as AuthenticatedLayoutContext}
-              />
-            )}
-          </BudgetsList.Fulfilled>
-        </PageBody>
-      </div>
-    </BudgetsList>
+    <div className="flex min-h-screen w-full flex-col">
+      <PageHeader>
+        <PageMainNav>
+          <PageNavLink to={`/budgets/${budgetId}`}>
+            {t('nav.dashboard')}
+          </PageNavLink>
+          <PageNavLink to={`/budgets/${budgetId}/goals`}>
+            {t('nav.goals')}
+          </PageNavLink>
+        </PageMainNav>
+        <PageUserNav>
+          {!budgets || decryptingBudgets ? (
+            <Skeleton className="h-6 w-48 mx-2" />
+          ) : (
+            <BudgetsMenu budgets={budgets} selectedBudgetId={budgetId} />
+          )}
+          <UserMenu user={data.user} />
+        </PageUserNav>
+      </PageHeader>
+      <PageBody>
+        {decryptingBudgets ? (
+          <DataLoading />
+        ) : (
+          <Outlet
+            context={
+              {
+                budgets,
+                user: data.user,
+              } as AuthenticatedLayoutContext
+            }
+          />
+        )}
+      </PageBody>
+    </div>
   );
 }
