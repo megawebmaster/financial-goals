@@ -6,7 +6,7 @@ import { RemixServer } from '@remix-run/react';
 import { renderToPipeableStream } from 'react-dom/server';
 import type { i18n as i18nType } from 'i18next';
 import { I18nextProvider } from 'react-i18next';
-import isbotModule from 'isbot';
+import { isbot } from 'isbot';
 
 import i18next, { initializeI18n } from '~/i18n.server';
 
@@ -45,11 +45,7 @@ function isBotRequest(userAgent: string | null) {
     return false;
   }
 
-  if ('isbot' in isbotModule && typeof isbotModule.isbot === 'function') {
-    return isbotModule.isbot(userAgent);
-  }
-
-  return false;
+  return isbot(userAgent);
 }
 
 function handleBotRequest(
