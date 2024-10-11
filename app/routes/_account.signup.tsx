@@ -82,7 +82,7 @@ export async function action({ request }: ActionFunctionArgs) {
     await mailer.sendMail({
       to: user.email,
       subject: t('new-account.subject'),
-      html: render(<NewAccountEmail name={user.username} t={t} />),
+      html: await render(<NewAccountEmail name={user.username} t={t} />),
     });
   } catch (e) {
     console.error('Unable to create new user', e);

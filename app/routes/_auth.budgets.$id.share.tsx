@@ -77,7 +77,7 @@ export const action = authenticatedAction(
       await mailer.sendMail({
         to: email,
         subject: emailT('share-budget.subject'),
-        html: render(
+        html: await render(
           <ShareBudgetEmail
             authorName={author.username}
             expiration={invitation.expiresAt}
