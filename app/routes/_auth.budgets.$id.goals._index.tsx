@@ -42,12 +42,13 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 export default function () {
   const { t } = useTranslation();
-  const { budget, goals, savings } = useOutletContext<BudgetsLayoutContext>();
+  const { budget, goals, savings, user } =
+    useOutletContext<BudgetsLayoutContext>();
 
   const averageSavings = getAverageSavings(savings);
   const amountToSaveCalculator = buildAmountToSaveCalculator(goals);
   // TODO: Properly ask about currency of the budget
-  const FORMAT_CURRENCY = { currency: 'PLN', locale: 'pl-PL' };
+  const FORMAT_CURRENCY = { currency: 'PLN', locale: user.preferredLocale };
 
   return (
     <>

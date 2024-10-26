@@ -22,21 +22,19 @@ import { getBudgets, getDefaultBudget } from '~/services/budgets.server';
 import { buildWrappingKey } from '~/services/encryption.client';
 import { useUser } from '~/hooks/useUser';
 
-export const loader = authenticatedLoader(
-  async ({ request, params }, userId) => {
-    try {
-      return {
-        user: await getUser(userId),
-        budgets: await getBudgets(userId),
-        defaultBudget: await getDefaultBudget(userId),
-      };
-    } catch (e) {
-      return await authenticator.logout(request, {
-        redirectTo: INDEX_ROUTE,
-      });
-    }
-  },
-);
+export const loader = authenticatedLoader(async ({ request }, userId) => {
+  try {
+    return {
+      user: await getUser(userId),
+      budgets: await getBudgets(userId),
+      defaultBudget: await getDefaultBudget(userId),
+    };
+  } catch (e) {
+    return await authenticator.logout(request, {
+      redirectTo: INDEX_ROUTE,
+    });
+  }
+});
 
 export async function clientLoader({ serverLoader }: ClientLoaderFunctionArgs) {
   const data = await serverLoader<typeof loader>();

@@ -1,8 +1,9 @@
 import type { ReactNode } from 'react';
-import { Link } from '@remix-run/react';
+import { Link, useOutletContext } from '@remix-run/react';
 import { ArrowDownIcon, ArrowUpIcon, EditIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
+import type { AuthenticatedLayoutContext } from '~/helpers/budgets';
 import type { ClientBudgetGoal } from '~/helpers/budget-goals';
 import { getGoalPercentage } from '~/helpers/budget-goals';
 import { ChangePriorityButton } from '~/components/budget-goal/change-priority-button';
@@ -23,9 +24,10 @@ export function BudgetGoal({
   goalsCount,
 }: BudgetGoalProps) {
   const { t } = useTranslation();
+  const { user } = useOutletContext<AuthenticatedLayoutContext>();
 
   // TODO: Properly ask about currency of the budget
-  const FORMAT_CURRENCY = { currency: 'PLN', locale: 'pl-PL' };
+  const FORMAT_CURRENCY = { currency: 'PLN', locale: user.preferredLocale };
 
   return (
     <>

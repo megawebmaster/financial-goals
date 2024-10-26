@@ -1,7 +1,11 @@
 import { useTranslation } from 'react-i18next';
+import { useOutletContext } from '@remix-run/react';
 
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
-import type { ClientBudget } from '~/helpers/budgets';
+import type {
+  AuthenticatedLayoutContext,
+  ClientBudget,
+} from '~/helpers/budgets';
 import type { ClientBudgetSavingsEntry } from '~/helpers/budget-goals';
 import { getAverageSavings } from '~/services/budget-savings-entries.client';
 
@@ -12,10 +16,11 @@ type BudgetStatusProps = {
 
 export function BudgetStatus({ budget, savings }: BudgetStatusProps) {
   const { t } = useTranslation();
+  const { user } = useOutletContext<AuthenticatedLayoutContext>();
   const averageSavings = getAverageSavings(savings);
 
   // TODO: Properly ask about currency of the budget
-  const FORMAT_CURRENCY = { currency: 'PLN', locale: 'pl-PL' };
+  const FORMAT_CURRENCY = { currency: 'PLN', locale: user.preferredLocale };
 
   return (
     <Card>

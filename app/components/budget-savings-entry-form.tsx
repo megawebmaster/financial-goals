@@ -5,7 +5,9 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { format } from 'date-fns';
 import { CalendarIcon, Loader2 } from 'lucide-react';
+import { useOutletContext } from '@remix-run/react';
 
+import type { AuthenticatedLayoutContext } from '~/helpers/budgets';
 import type { ClientBudgetSavingsEntry } from '~/helpers/budget-goals';
 import { cn } from '~/lib/utils';
 import { Button } from '~/components/ui/button';
@@ -56,10 +58,11 @@ export const BudgetSavingsEntryForm = ({
   status,
 }: BudgetSavingsEntryFormProps) => {
   const { t } = useTranslation();
+  const { user } = useOutletContext<AuthenticatedLayoutContext>();
   const loading = useNavigationDelay();
 
   // TODO: Properly ask about currency of the budget
-  const FORMAT_CURRENCY = { currency: 'PLN', locale: 'pl-PL' };
+  const FORMAT_CURRENCY = { currency: 'PLN', locale: user.preferredLocale };
 
   const form = useForm<BudgetSavingsFormValues>({
     resolver: zodResolver(savingsFormSchema),

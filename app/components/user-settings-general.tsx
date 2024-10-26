@@ -1,6 +1,7 @@
 import type { User } from '@prisma/client';
 import { useTranslation } from 'react-i18next';
 import { useSubmit } from '@remix-run/react';
+
 import { encrypt, importKey } from '~/services/encryption';
 import type { UserSettingsGeneralFormValues } from '~/components/user-settings/user-settings-general-form';
 import { UserSettingsGeneralForm } from '~/components/user-settings/user-settings-general-form';
@@ -28,6 +29,8 @@ export const UserSettingsGeneral = ({ user }: UserSettingsProps) => {
       },
       { action: '/user/update', method: 'post' },
     );
+
+    user.preferredLocale = values.preferredLocale;
   };
 
   return (

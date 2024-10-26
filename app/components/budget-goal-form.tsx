@@ -4,7 +4,9 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Loader2 } from 'lucide-react';
+import { useOutletContext } from '@remix-run/react';
 
+import type { AuthenticatedLayoutContext } from '~/helpers/budgets';
 import type { ClientBudgetGoal } from '~/helpers/budget-goals';
 import {
   Form,
@@ -24,6 +26,7 @@ import {
 import { Input } from '~/components/ui/input';
 import { Button } from '~/components/ui/button';
 import { useNavigationDelay } from '~/hooks/useNavigationDelay';
+import { RadioGroup, RadioGroupItem } from '~/components/ui/radio-group';
 
 const goalFormSchema = z.object({
   goalName: z.string().min(1).max(64),
@@ -49,9 +52,10 @@ export const BudgetGoalForm = ({
 }: BudgetGoalFormProps) => {
   const { t } = useTranslation();
   const loading = useNavigationDelay();
+  const { user } = useOutletContext<AuthenticatedLayoutContext>();
 
   // TODO: Properly ask about currency of the budget
-  const FORMAT_CURRENCY = { currency: 'PLN', locale: 'pl-PL' };
+  const FORMAT_CURRENCY = { currency: 'PLN', locale: user.preferredLocale };
 
   const form = useForm<BudgetGoalFormValues>({
     resolver: zodResolver(goalFormSchema),

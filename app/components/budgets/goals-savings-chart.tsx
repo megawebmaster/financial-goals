@@ -22,6 +22,7 @@ import {
   toPairs,
 } from 'ramda';
 import { addMonths, lightFormat, parse, subMonths } from 'date-fns';
+import { useOutletContext } from '@remix-run/react';
 
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
 import { MONTH_FORMAT } from '~/helpers/dates';
@@ -30,6 +31,7 @@ import type {
   ClientBudgetSavingsEntry,
 } from '~/helpers/budget-goals';
 import type { PickFieldsOfType } from '~/helpers/types';
+import type { AuthenticatedLayoutContext } from '~/helpers/budgets';
 
 type GoalsSavingsChartProps = {
   goals: ClientBudgetGoal[];
@@ -121,11 +123,12 @@ const processGoalsSavings = (
 
 export function GoalsSavingsChart({ goals, savings }: GoalsSavingsChartProps) {
   const { t } = useTranslation();
+  const { user } = useOutletContext<AuthenticatedLayoutContext>();
 
   // TODO: Properly ask about currency of the budget
   const FORMAT_CURRENCY = {
     currency: 'PLN',
-    locale: 'pl-PL',
+    locale: user.preferredLocale,
     maximumFractionDigits: 0,
   };
 
