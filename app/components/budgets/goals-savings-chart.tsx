@@ -10,17 +10,18 @@ import {
 import { useTranslation } from 'react-i18next';
 import {
   defaultTo,
+  fromPairs,
   groupBy,
+  head,
+  isEmpty,
   last,
   map,
-  mergeAll,
   pipe,
   prop,
   reduce,
-  sortBy,
   toPairs,
 } from 'ramda';
-import { lightFormat } from 'date-fns';
+import { addMonths, lightFormat, parse, subMonths } from 'date-fns';
 
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
 import { MONTH_FORMAT } from '~/helpers/dates';
@@ -28,6 +29,7 @@ import type {
   ClientBudgetGoal,
   ClientBudgetSavingsEntry,
 } from '~/helpers/budget-goals';
+import type { PickFieldsOfType } from '~/helpers/types';
 
 type GoalsSavingsChartProps = {
   goals: ClientBudgetGoal[];
@@ -40,92 +42,81 @@ type ChartItem = {
   savings?: number;
 };
 
-const groupGoals = pipe(
-  map((goal: ClientBudgetGoal) => ({
-    date: lightFormat(goal.createdAt, 'yyyy-MM'),
-    requiredAmount: goal.requiredAmount,
-  })),
-  groupBy(prop('date')),
-  toPairs,
-  map(([date, goals]) => ({
-    date,
-    goals: pipe(
-      defaultTo([]),
-      reduce(
-        (monthlySum, goal: { requiredAmount: number }) =>
-          monthlySum + goal.requiredAmount,
-        0,
-      ),
-    )(goals),
-  })),
-  sortBy(prop('date')),
-  reduce(
-    (result, entry) => [
-      ...result,
-      {
-        ...entry,
-        goals: (last(result)?.goals || 0) + entry.goals,
-      },
-    ],
-    [] as ChartItem[],
-  ),
-);
+const groupAndSumByDates = <T extends { createdAt: Date }>(
+  property: PickFieldsOfType<T, number>,
+) =>
+  pipe(
+    map((entry: T) => ({
+      date: lightFormat(entry.createdAt, 'yyyy-MM'),
+      value: entry[property],
+    })),
+    groupBy(prop('date')),
+    toPairs,
+    map(
+      ([date, entries]) =>
+        [
+          date,
+          pipe(
+            defaultTo([]),
+            reduce(
+              (monthlySum, entry: { value: number }) =>
+                monthlySum + entry.value,
+              0,
+            ),
+          )(entries),
+        ] as [string, number],
+    ),
+    fromPairs<string, number>,
+  );
 
-const groupSavings = pipe(
-  map((entry: ClientBudgetSavingsEntry) => ({
-    date: lightFormat(entry.createdAt, 'yyyy-MM'),
-    amount: entry.amount,
-  })),
-  groupBy(prop('date')),
-  toPairs,
-  map(([date, entries]) => ({
-    date,
-    savings: pipe(
-      defaultTo([]),
-      reduce(
-        (monthlySum, entry: { amount: number }) => monthlySum + entry.amount,
-        0,
-      ),
-    )(entries),
-  })),
-  sortBy(prop('date')),
-  reduce(
-    (result, entry) => [
-      ...result,
-      {
-        ...entry,
-        savings: (last(result)?.savings || 0) + entry.savings,
-      },
-    ],
-    [] as ChartItem[],
-  ),
-);
-const groupGoalsAndSavings = pipe(
-  sortBy<ChartItem>(prop('date')),
-  groupBy(prop('date')),
-  toPairs,
-  map(([_, entries]) => mergeAll(entries || [])),
-  reduce((result, entry) => {
-    const lastEntry = last(result);
+const groupAndSumGoals = groupAndSumByDates<ClientBudgetGoal>('requiredAmount');
+const groupAndSumSavings =
+  groupAndSumByDates<ClientBudgetSavingsEntry>('amount');
 
-    return [
-      ...result,
-      {
-        ...entry,
-        savings: entry.savings || lastEntry?.savings,
-        goals: entry.goals || lastEntry?.goals,
-      },
-    ];
-  }, [] as ChartItem[]),
-);
+const ensureRisingValues = reduce((result, entry: ChartItem) => {
+  const lastEntry = last(result);
+
+  return [
+    ...result,
+    {
+      ...entry,
+      savings: entry.savings || lastEntry?.savings,
+      goals: entry.goals || lastEntry?.goals,
+    },
+  ];
+}, [] as ChartItem[]);
+
 const processGoalsSavings = (
   goals: ClientBudgetGoal[],
   savings: ClientBudgetSavingsEntry[],
 ): ChartItem[] => {
-  const groupedGoals = groupGoals(goals);
-  const groupedSavings = groupSavings(savings);
+  const result: ChartItem[] = [];
+  const now = new Date();
+  const groupedGoals = groupAndSumGoals(goals);
+  const groupedSavings = groupAndSumSavings(savings);
 
-  return groupGoalsAndSavings(groupedGoals.concat(groupedSavings));
+  if (isEmpty(groupedGoals) && isEmpty(groupedSavings)) {
+    return result;
+  }
+
+  const yearAgoDate = lightFormat(subMonths(now, 12), 'yyyy-MM');
+  const firstGoalDate = head(Object.keys(groupedGoals).sort()) || yearAgoDate;
+  const startDate = firstGoalDate > yearAgoDate ? firstGoalDate : yearAgoDate;
+
+  for (
+    let month = parse(startDate, 'yyyy-MM', now);
+    month <= now;
+    month = addMonths(month, 1)
+  ) {
+    const date = lightFormat(month, 'yyyy-MM');
+    result.push({
+      date,
+      savings: groupedSavings[date] || 0,
+      goals: groupedGoals[date] || 0,
+    });
+  }
+
+  return ensureRisingValues(result);
 };
 
 export function GoalsSavingsChart({ goals, savings }: GoalsSavingsChartProps) {
@@ -150,69 +141,80 @@ export function GoalsSavingsChart({ goals, savings }: GoalsSavingsChartProps) {
         </CardTitle>
       </CardHeader>
       <CardContent className="h-64">
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={data}>
-            <XAxis
-              dataKey="date"
-              padding={{ left: 30, right: 30 }}
-              tickFormatter={(value) =>
-                t('component.goal-savings-chart.x-value', {
-                  value: new Date(value + '-01T00:00:00.000Z'),
-                  formatParams: {
-                    value: MONTH_FORMAT,
-                  },
-                })
-              }
-            />
-            <YAxis
-              padding={{ top: 20 }}
-              tickFormatter={(value) =>
-                t('component.goal-savings-chart.y-value', {
-                  value,
-                  formatParams: {
-                    value: FORMAT_CURRENCY,
-                  },
-                })
-              }
-            />
-            <Tooltip
-              labelFormatter={(value) =>
-                t('component.goal-savings-chart.x-value', {
-                  value: new Date(value + '-01T00:00:00.000Z'),
-                  formatParams: {
-                    value: MONTH_FORMAT,
-                  },
-                })
-              }
-              formatter={(value, name) => [
-                t('component.goal-savings-chart.y-value', {
-                  value,
-                  formatParams: {
-                    value: FORMAT_CURRENCY,
-                  },
-                }),
-                t(`component.goal-savings-chart.${name}`),
-              ]}
-            />
-            <Legend
-              formatter={(value) => t(`component.goal-savings-chart.${value}`)}
-            />
-            <Area
-              type="monotone"
-              dataKey="goals"
-              dot={{ stroke: 'hsl(var(--orange))', strokeWidth: 2 }}
-              stroke="hsl(var(--orange))"
-              fill="hsl(var(--orange-fill))"
-            />
-            <Area
-              type="monotone"
-              dataKey="savings"
-              dot={{ stroke: 'hsl(var(--green))', strokeWidth: 2 }}
-              stroke="hsl(var(--green))"
-              fill="hsl(var(--green-fill))"
-            />
-          </AreaChart>
-        </ResponsiveContainer>
+        {data.length === 0 && (
+          <div className="flex items-center justify-center h-full">
+            <p className="text-gray-600 italic text-sm">
+              No data for the chart
+            </p>
+          </div>
+        )}
+        {data.length > 0 && (
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={data}>
+              <XAxis
+                dataKey="date"
+                padding={{ left: 30, right: 30 }}
+                tickFormatter={(value) =>
+                  t('component.goal-savings-chart.x-value', {
+                    value: new Date(value + '-01T00:00:00.000Z'),
+                    formatParams: {
+                      value: MONTH_FORMAT,
+                    },
+                  })
+                }
+              />
+              <YAxis
+                padding={{ top: 20 }}
+                tickFormatter={(value) =>
+                  t('component.goal-savings-chart.y-value', {
+                    value,
+                    formatParams: {
+                      value: FORMAT_CURRENCY,
+                    },
+                  })
+                }
+              />
+              <Tooltip
+                labelFormatter={(value) =>
+                  t('component.goal-savings-chart.x-value', {
+                    value: new Date(value + '-01T00:00:00.000Z'),
+                    formatParams: {
+                      value: MONTH_FORMAT,
+                    },
+                  })
+                }
+                formatter={(value, name) => [
+                  t('component.goal-savings-chart.y-value', {
+                    value,
+                    formatParams: {
+                      value: FORMAT_CURRENCY,
+                    },
+                  }),
+                  t(`component.goal-savings-chart.${name}`),
+                ]}
+              />
+              <Legend
+                formatter={(value) =>
+                  t(`component.goal-savings-chart.${value}`)
+                }
+              />
+              <Area
+                type="monotone"
+                dataKey="goals"
+                dot={{ stroke: 'hsl(var(--orange))', strokeWidth: 2 }}
+                stroke="hsl(var(--orange))"
+                fill="hsl(var(--orange-fill))"
+              />
+              <Area
+                type="monotone"
+                dataKey="savings"
+                dot={{ stroke: 'hsl(var(--green))', strokeWidth: 2 }}
+                stroke="hsl(var(--green))"
+                fill="hsl(var(--green-fill))"
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        )}
       </CardContent>
     </Card>
   );
