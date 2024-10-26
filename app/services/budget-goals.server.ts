@@ -143,6 +143,7 @@ export const deleteBudgetGoal = async (
 
 const getUpdatableGoalFields = pick<(keyof BudgetGoal)[]>([
   'name',
+  'type',
   'requiredAmount',
   'currentAmount',
   'priority',

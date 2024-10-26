@@ -117,6 +117,7 @@ export default function () {
     const processGoals = pipe(
       updateGoal(goal.id, {
         name: values.goalName,
+        type: values.goalType,
         requiredAmount: values.goalAmount,
       }),
       buildGoalsFiller(budget.currentSavings),

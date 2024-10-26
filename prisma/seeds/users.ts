@@ -49,6 +49,7 @@ async function seedUser(username: string, email: string) {
     encryptedZero,
     {
       name: await encrypt('Goal 1', encryptionKey),
+      type: 'short',
       status: 'active',
       currentAmount: encryptedZero,
       requiredAmount: await encrypt('1000', encryptionKey),
@@ -65,6 +66,7 @@ async function seedUser(username: string, email: string) {
     encryptedZero,
     {
       name: await encrypt('Goal 2', encryptionKey),
+      type: 'short',
       status: 'active',
       currentAmount: encryptedZero,
       requiredAmount: await encrypt('500', encryptionKey),
@@ -81,6 +83,7 @@ async function seedUser(username: string, email: string) {
     encryptedZero,
     {
       name: await encrypt('Goal 3', encryptionKey),
+      type: 'short',
       status: 'active',
       currentAmount: encryptedZero,
       requiredAmount: await encrypt('250', encryptionKey),
@@ -93,6 +96,7 @@ async function seedUser(username: string, email: string) {
 
   await createBudgetGoal(user.id, budget.budgetId, encryptedZero, {
     name: await encrypt('Goal 4', encryptionKey),
+    type: 'long',
     status: 'active',
     currentAmount: encryptedZero,
     requiredAmount: await encrypt('500', encryptionKey),

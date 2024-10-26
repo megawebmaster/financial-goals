@@ -1,4 +1,4 @@
-import { find, map, pipe, propEq, reduce, reduced, reject, sum } from 'ramda';
+import { find, map, propEq, reduce, reduced, reject } from 'ramda';
 import type { BudgetGoal } from '@prisma/client';
 
 import { decrypt, encrypt } from '~/services/encryption.client';
@@ -33,11 +33,6 @@ export const encryptBudgetGoal = async (
 
 export const getCurrentGoal = find(
   (goal: ClientBudgetGoal) => goal.currentAmount !== goal.requiredAmount,
-);
-
-export const getRequiredAmount = pipe(
-  map((goal: ClientBudgetGoal) => goal.requiredAmount),
-  sum,
 );
 
 export const removeGoal = (goalId: number) => reject(propEq(goalId, 'id'));

@@ -40,12 +40,19 @@ export const action = authenticatedAction(
 
       const data = await request.formData();
       const name = data.get('name');
+      const type = data.get('type');
       const requiredAmount = data.get('requiredAmount');
       const currentAmount = data.get('currentAmount');
       const freeSavings = data.get('freeSavings');
 
       invariant(name, 'Name of the goal is required');
       invariant(typeof name === 'string');
+      invariant(type, 'Goal type is required');
+      invariant(typeof type === 'string');
+      invariant(
+        ['short', 'long'].includes(type),
+        'Goals can be "short" or "long" only.',
+      );
       invariant(requiredAmount, 'Goal required amount is required');
       invariant(typeof requiredAmount === 'string');
       invariant(currentAmount, 'Goal required amount is required');
@@ -55,6 +62,7 @@ export const action = authenticatedAction(
 
       await createBudgetGoal(userId, budgetId, freeSavings, {
         name,
+        type,
         requiredAmount,
         currentAmount,
         status: 'active',
@@ -109,6 +117,7 @@ export default function () {
     <>
       <PageTitle
         back={`/budgets/${budget.budgetId}/goals`}
+        className="mb-8"
         title={t('goal.new.page.title', { budget: budget.name })}
       />
       <PageContent>

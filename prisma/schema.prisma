@@ -83,6 +83,7 @@ model BudgetGoal {
   budgetId       Int
   budget         Budget   @relation("BudgetGoals", fields: [budgetId], references: [id], onDelete: Cascade)
   name           String
+  type           String
   requiredAmount String
   currentAmount  String
   priority       Int
