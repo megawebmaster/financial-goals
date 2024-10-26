@@ -2,6 +2,7 @@
   "login.required": "You need to log in first!",
   "signup.failed": "Couldn't create new account.",
   "user.deletion-failed": "Couldn't delete your account.",
+  "user.update-failed": "Couldn't update your data. Please try again.",
   "user.not-found": "User doesn't exist!",
   "user.invalid-login": "Email and/or password is not valid.",
   "user.exists": "User already exists!",

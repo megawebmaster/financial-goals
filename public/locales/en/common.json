@@ -136,6 +136,11 @@
   "component.user-menu.settings": "Settings",
   "component.user-menu.languages": "Language",
   "component.user-menu.logout": "Log out",
+  "component.user-settings-form.locale.label": "Preferred locale",
+  "component.user-settings-form.locale.placeholder": "Select your preferred locale",
+  "component.user-settings-form.search.placeholder": "Find a locale…",
+  "component.user-settings-form.search.empty": "We don't support locale like this, sorry",
+  "component.user-settings-form.submit": "Save changes",
   "goal.deleted": "Goal deleted successfully!",
   "goal.new.title": "Create new goal | $t(app.name)",
   "goal.new.page.title": "Add a goal to \"{{ budget }}\" budget",
@@ -165,9 +170,12 @@
   "savings.new.created": "Added new savings to your budget!",
   "user-settings.title": "Settings | $t(app.name)",
   "user-settings.page.title": "Settings",
+  "user-settings.general.title": "General settings",
+  "user-settings.general.description": "Basic settings for your account. They are applied to all budgets you have access to.",
   "user-settings.delete-account.title": "Delete account",
   "user-settings.delete-account.description": "You can completely delete your account along with all its data here.",
   "user-settings.delete-account.submit": "Delete my account",
   "user-settings.delete-account.confirm": "Yes, delete my account",
-  "user-settings.delete-account.confirm-description": "This action cannot be undone. This will permanently delete your account and remove your data from our servers."
+  "user-settings.delete-account.confirm-description": "This action cannot be undone. This will permanently delete your account and remove your data from our servers.",
+  "user-settings.general.changes-saved": "Your settings has been saved successfully!"
 }

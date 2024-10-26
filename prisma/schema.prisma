@@ -11,18 +11,19 @@ datasource db {
 }
 
 model User {
-  id          Int                  @id @default(autoincrement())
-  username    String
-  email       String               @unique
-  password    String
-  salt        String
-  publicKey   String
-  privateKey  String
-  budgets     BudgetUser[]         @relation("AccessibleBudgets")
-  savings     BudgetSavingsEntry[] @relation("UserSavingEntries")
-  invitations BudgetInvitation[]   @relation("BudgetInvitations")
-  createdAt   DateTime
-  updatedAt   DateTime
+  id              Int                  @id @default(autoincrement())
+  username        String
+  email           String               @unique
+  password        String
+  salt            String
+  publicKey       String
+  privateKey      String
+  budgets         BudgetUser[]         @relation("AccessibleBudgets")
+  savings         BudgetSavingsEntry[] @relation("UserSavingEntries")
+  invitations     BudgetInvitation[]   @relation("BudgetInvitations")
+  preferredLocale String
+  createdAt       DateTime
+  updatedAt       DateTime
 }
 
 model BudgetUser {

@@ -2,6 +2,7 @@ import type { ClientLoaderFunctionArgs } from '@remix-run/react';
 import { Outlet, useLoaderData, useParams } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
 
+import type { AuthenticatedLayoutContext } from '~/helpers/budgets';
 import { INDEX_ROUTE } from '~/routes';
 import { PageHeader } from '~/components/ui/page-header';
 import { PageMainNav } from '~/components/ui/page-main-nav';
@@ -12,13 +13,14 @@ import { Skeleton } from '~/components/ui/skeleton';
 import { BudgetsMenu } from '~/components/budgets-menu';
 import { UserMenu } from '~/components/user-menu';
 import { DataLoading } from '~/components/data-loading';
-import type { AuthenticatedLayoutContext } from '~/helpers/budgets';
+import { DecryptingMessage } from '~/components/decrypting-message';
 import { authenticatedLoader } from '~/helpers/auth';
 import { useBudgets } from '~/hooks/useBudgets';
 import { authenticator } from '~/services/auth.server';
 import { getUser } from '~/services/user.server';
 import { getBudgets, getDefaultBudget } from '~/services/budgets.server';
 import { buildWrappingKey } from '~/services/encryption.client';
+import { useUser } from '~/hooks/useUser';
 
 export const loader = authenticatedLoader(
   async ({ request, params }, userId) => {
@@ -46,10 +48,15 @@ export async function clientLoader({ serverLoader }: ClientLoaderFunctionArgs) {
 export default function () {
   const { t } = useTranslation();
   const data = useLoaderData<typeof loader>();
+  const { user, loadingUser } = useUser(data.user);
   const params = useParams();
   const budgetId =
     parseInt(params.id || '0', 10) || data.defaultBudget?.budgetId;
   const { budgets, decryptingBudgets } = useBudgets(data.budgets);
+
+  if (!user || loadingUser) {
+    return <DecryptingMessage />;
+  }
 
   return (
     <div className="flex min-h-screen w-full flex-col">
@@ -68,7 +75,7 @@ export default function () {
           ) : (
             <BudgetsMenu budgets={budgets} selectedBudgetId={budgetId} />
           )}
-          <UserMenu user={data.user} />
+          <UserMenu user={user} />
         </PageUserNav>
       </PageHeader>
       <PageBody>
@@ -79,7 +86,7 @@ export default function () {
             context={
               {
                 budgets,
-                user: data.user,
+                user,
               } as AuthenticatedLayoutContext
             }
           />

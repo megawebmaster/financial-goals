@@ -3,6 +3,7 @@ import type { User } from '@prisma/client';
 import { prisma } from '~/services/db.server';
 import { generateSalt, hash, safeCompare } from '~/services/helpers.server';
 import {
+  encrypt,
   exportKey,
   generateKeyMaterial,
   generatePKI,
@@ -34,6 +35,7 @@ export const createUser = async (
   username: string,
   email: string,
   password: string,
+  preferredLocale: string,
 ): Promise<User> => {
   const salt = generateSalt();
   const hashed = await hash(password, salt);
@@ -56,6 +58,7 @@ export const createUser = async (
       email,
       password: hashed,
       salt,
+      preferredLocale: await encrypt(preferredLocale, pki.publicKey),
       publicKey: await exportKey(pki.publicKey),
       privateKey: await lockKey(wrappingKey, pki.privateKey),
       createdAt: new Date().toISOString(),
@@ -66,6 +69,17 @@ export const createUser = async (
 
 export const deleteUser = (userId: number) =>
   prisma.user.delete({ where: { id: userId } });
+
+export const updateUser = (
+  userId: number,
+  data: Partial<
+    Omit<User, 'salt' | 'publicKey' | 'privateKey' | 'createdAt' | 'updatedAt'>
+  >,
+) =>
+  prisma.user.update({
+    data,
+    where: { id: userId },
+  });
 
 export const getUserPK = async (email: string): Promise<string> => {
   const user = await prisma.user.findFirstOrThrow({

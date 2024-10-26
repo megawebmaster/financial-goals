@@ -55,6 +55,7 @@ export async function action({ request }: ActionFunctionArgs) {
       data.get('username') as string,
       data.get('email') as string,
       password,
+      (request.headers.get('Accept-Language') || 'en-US').split(',')[0],
     );
 
     const wrappingKey = await generateWrappingKey(

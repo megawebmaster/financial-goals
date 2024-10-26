@@ -1,16 +1,12 @@
 import type { LoaderFunctionArgs, MetaFunction } from '@remix-run/node';
 import { useTranslation } from 'react-i18next';
+import { useOutletContext } from '@remix-run/react';
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '~/components/ui/card';
+import type { AuthenticatedLayoutContext } from '~/helpers/budgets';
 import { PageTitle } from '~/components/ui/page-title';
 import { PageContent } from '~/components/ui/page-content';
-import { ConfirmationForm } from '~/components/ui/confirmation-form';
+import { UserSettingsGeneral } from '~/components/user-settings-general';
+import { UserSettingsDelete } from '~/components/user-settings-delete';
 import i18next from '~/i18n.server';
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => [
@@ -29,33 +25,14 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 export default function () {
   const { t } = useTranslation();
+  const { user } = useOutletContext<AuthenticatedLayoutContext>();
 
   return (
     <>
       <PageTitle title={t('user-settings.page.title')} />
       <PageContent>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl">
-              {t('user-settings.delete-account.title')}
-            </CardTitle>
-            <CardDescription>
-              {t('user-settings.delete-account.description')}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ConfirmationForm
-              action="/user/destroy"
-              confirmation={t('user-settings.delete-account.confirm')}
-              description={t(
-                'user-settings.delete-account.confirm-description',
-              )}
-              method="post"
-            >
-              {t('user-settings.delete-account.submit')}
-            </ConfirmationForm>
-          </CardContent>
-        </Card>
+        <UserSettingsGeneral user={user} />
+        <UserSettingsDelete />
       </PageContent>
     </>
   );

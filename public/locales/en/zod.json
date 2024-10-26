@@ -146,6 +146,7 @@
   "username": "Name",
   "email": "Email",
   "password": "Password",
+  "preferredLocale": "Preferred locale",
   "budgetName": "Budget name",
   "goalName": "Goal name",
   "goalAmount": "Required amount",
