@@ -60,18 +60,26 @@ export default function () {
     <div className="flex min-h-screen w-full flex-col">
       <PageHeader>
         <PageMainNav>
-          <PageNavLink to={`/budgets/${budgetId}`}>
-            {t('nav.dashboard')}
-          </PageNavLink>
-          <PageNavLink to={`/budgets/${budgetId}/goals`}>
-            {t('nav.goals')}
-          </PageNavLink>
+          {budgetId && (
+            <>
+              <PageNavLink to={`/budgets/${budgetId}`}>
+                {t('nav.dashboard')}
+              </PageNavLink>
+              <PageNavLink to={`/budgets/${budgetId}/goals`}>
+                {t('nav.goals')}
+              </PageNavLink>
+            </>
+          )}
         </PageMainNav>
         <PageUserNav>
-          {!budgets || decryptingBudgets ? (
-            <Skeleton className="h-6 w-48 mx-2" />
-          ) : (
-            <BudgetsMenu budgets={budgets} selectedBudgetId={budgetId} />
+          {budgetId && (
+            <>
+              {!budgets || decryptingBudgets ? (
+                <Skeleton className="h-6 w-48 mx-2" />
+              ) : (
+                <BudgetsMenu budgets={budgets} selectedBudgetId={budgetId} />
+              )}
+            </>
           )}
           <UserMenu user={user} />
         </PageUserNav>

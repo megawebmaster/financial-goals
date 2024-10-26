@@ -54,6 +54,7 @@ type BudgetFormProps = {
   budget?: ClientBudget;
   children?: ReactNode;
   className?: string;
+  isFirst?: boolean;
   onSubmit: (values: BudgetFormValues) => void;
   status: 'create' | 'update';
 };
@@ -71,6 +72,7 @@ export const BudgetForm = ({
   budget,
   children,
   className,
+  isFirst = false,
   onSubmit,
   status,
 }: BudgetFormProps) => {
@@ -83,7 +85,7 @@ export const BudgetForm = ({
     defaultValues: {
       budgetName: budget?.name || '',
       budgetCurrency: budget?.currency || '',
-      isDefault: budget?.isDefault,
+      isDefault: budget ? budget.isDefault : isFirst,
     },
   });
 
@@ -197,6 +199,7 @@ export const BudgetForm = ({
                   <FormControl>
                     <Switch
                       checked={field.value}
+                      disabled={isFirst}
                       onCheckedChange={field.onChange}
                     />
                   </FormControl>

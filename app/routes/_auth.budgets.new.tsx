@@ -1,8 +1,9 @@
 import type { LoaderFunctionArgs, MetaFunction } from '@remix-run/node';
-import { useSubmit } from '@remix-run/react';
+import { useOutletContext, useSubmit } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
 import { redirectWithError, redirectWithSuccess } from 'remix-toast';
 import invariant from 'tiny-invariant';
+import { isEmpty } from 'ramda';
 
 import { authenticatedAction } from '~/helpers/auth';
 import {
@@ -11,6 +12,7 @@ import {
   lockKey,
 } from '~/services/encryption.client';
 import { createBudget } from '~/services/budgets.server';
+import type { AuthenticatedLayoutContext } from '~/helpers/budgets';
 import type { BudgetFormValues } from '~/components/budget-form';
 import { BudgetForm } from '~/components/budget-form';
 import { PageTitle } from '~/components/ui/page-title';
@@ -83,6 +85,7 @@ export const action = authenticatedAction(async ({ request }, userId) => {
 
 export default function () {
   const { t } = useTranslation();
+  const { budgets } = useOutletContext<AuthenticatedLayoutContext>();
   const submit = useSubmit();
   const handleSubmit = async (values: BudgetFormValues) => {
     const encryptionKey = await generateEncryptionKey();
@@ -105,7 +108,11 @@ export default function () {
     <>
       <PageTitle title={t('budget.new.page.title')} />
       <PageContent>
-        <BudgetForm onSubmit={handleSubmit} status="create" />
+        <BudgetForm
+          isFirst={isEmpty(budgets)}
+          onSubmit={handleSubmit}
+          status="create"
+        />
       </PageContent>
     </>
   );
