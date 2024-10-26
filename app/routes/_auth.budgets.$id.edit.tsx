@@ -7,7 +7,7 @@ import invariant from 'tiny-invariant';
 import type { BudgetsLayoutContext } from '~/helpers/budgets';
 import { authenticatedAction } from '~/helpers/auth';
 import { encrypt, unlockKey } from '~/services/encryption.client';
-import { updateBudget } from '~/services/budgets.server';
+import { getBudget, updateBudget } from '~/services/budgets.server';
 import { BudgetForm, type BudgetFormValues } from '~/components/budget-form';
 import { PageTitle } from '~/components/ui/page-title';
 import { PageContent } from '~/components/ui/page-content';
@@ -38,15 +38,20 @@ export const action = authenticatedAction(
       const budgetId = parseInt(params.id, 10);
       invariant(!isNaN(budgetId), 'Budget ID must be a number');
 
+      const budget = await getBudget(budgetId, userId);
       const data = await request.formData();
       const name = data.get('name');
-      const currency = data.get('currency');
       const isDefault = data.get('isDefault') === 'true';
+      let currency;
 
       invariant(name, 'Name of the budget is required');
       invariant(typeof name === 'string', 'Name must be a text');
-      invariant(currency, 'Budget currency is required');
-      invariant(typeof currency === 'string', 'Currency must be encrypted');
+
+      if (budget.isOwner) {
+        currency = budget.isOwner ? data.get('currency') : undefined;
+        invariant(currency, 'Budget currency is required');
+        invariant(typeof currency === 'string', 'Currency must be encrypted');
+      }
 
       await updateBudget(userId, budgetId, { currency }, { name, isDefault });
       const t = await i18next.getFixedT(await i18next.getLocale(request));
@@ -79,7 +84,9 @@ export default function () {
     submit(
       {
         name: await encrypt(values.budgetName, encryptionKey),
-        currency: await encrypt(values.budgetCurrency, encryptionKey),
+        currency: budget.isOwner
+          ? await encrypt(values.budgetCurrency, encryptionKey)
+          : null,
         isDefault: values.isDefault,
       },
       { method: 'patch' },

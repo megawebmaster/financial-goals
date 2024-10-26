@@ -18,6 +18,16 @@ export type ServerBudget = ArrayElement<
   ThenArg<ReturnType<typeof fetchBudgets>>
 >;
 
+export const getBudget = (budgetId: number, userId: number) =>
+  prisma.budgetUser.findUniqueOrThrow({
+    where: {
+      budgetId_userId: {
+        budgetId,
+        userId,
+      },
+    },
+  });
+
 export const getBudgets = (userId: number): Promise<ServerBudget[]> =>
   fetchBudgets(userId);
 

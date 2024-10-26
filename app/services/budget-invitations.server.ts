@@ -55,7 +55,10 @@ export const shareBudget = (
 export const acceptInvitation = (
   id: string,
   userId: number,
-  data: Omit<BudgetUser, 'id' | 'userId' | 'budgetId' | 'isOwner'>,
+  data: Omit<
+    BudgetUser,
+    'id' | 'userId' | 'budgetId' | 'isOwner' | 'createdAt' | 'updatedAt'
+  >,
 ) =>
   prisma.$transaction(async (tx) => {
     const invitation = await tx.budgetInvitation.findFirstOrThrow({
@@ -74,6 +77,8 @@ export const acceptInvitation = (
         budgetId: invitation.budgetId,
         isOwner: false,
         userId,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       },
     });
 

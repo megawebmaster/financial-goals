@@ -76,6 +76,7 @@ export const BudgetForm = ({
 }: BudgetFormProps) => {
   const { t } = useTranslation();
   const loading = useNavigationDelay();
+  const isOwner = budget ? budget.isOwner : true;
 
   const form = useForm<BudgetFormValues>({
     resolver: zodResolver(budgetFormSchema),
@@ -120,7 +121,7 @@ export const BudgetForm = ({
                 <FormItem className="grid gap-2">
                   <FormLabel>{t('component.budget-form.currency')}</FormLabel>
                   <Popover>
-                    <PopoverTrigger asChild>
+                    <PopoverTrigger asChild disabled={!isOwner}>
                       <FormControl>
                         <Button
                           variant="outline"
