@@ -6,7 +6,10 @@ import { z } from 'zod';
 import { Loader2 } from 'lucide-react';
 import { useOutletContext } from '@remix-run/react';
 
-import type { AuthenticatedLayoutContext } from '~/helpers/budgets';
+import type {
+  AuthenticatedLayoutContext,
+  ClientBudget,
+} from '~/helpers/budgets';
 import type { ClientBudgetGoal } from '~/helpers/budget-goals';
 import {
   Form,
@@ -36,6 +39,7 @@ const goalFormSchema = z.object({
 export type BudgetGoalFormValues = z.infer<typeof goalFormSchema>;
 
 type BudgetGoalFormProps = {
+  budget: ClientBudget;
   children?: ReactNode;
   className?: string;
   goal?: ClientBudgetGoal;
@@ -44,6 +48,7 @@ type BudgetGoalFormProps = {
 };
 
 export const BudgetGoalForm = ({
+  budget,
   children,
   className,
   goal,
@@ -53,9 +58,10 @@ export const BudgetGoalForm = ({
   const { t } = useTranslation();
   const loading = useNavigationDelay();
   const { user } = useOutletContext<AuthenticatedLayoutContext>();
-
-  // TODO: Properly ask about currency of the budget
-  const FORMAT_CURRENCY = { currency: 'PLN', locale: user.preferredLocale };
+  const FORMAT_CURRENCY = {
+    currency: budget.currency,
+    locale: user.preferredLocale,
+  };
 
   const form = useForm<BudgetGoalFormValues>({
     resolver: zodResolver(goalFormSchema),

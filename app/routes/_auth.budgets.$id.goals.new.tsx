@@ -112,7 +112,11 @@ export default function () {
         title={t('goal.new.page.title', { budget: budget.name })}
       />
       <PageContent>
-        <BudgetGoalForm onSubmit={handleSubmit} status="create" />
+        <BudgetGoalForm
+          budget={budget}
+          onSubmit={handleSubmit}
+          status="create"
+        />
       </PageContent>
     </>
   );

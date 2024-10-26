@@ -176,6 +176,7 @@ export default function () {
       />
       <PageContent>
         <BudgetGoalForm
+          budget={budget}
           className="flex flex-col gap-4"
           goal={goal}
           onSubmit={handleSubmit}

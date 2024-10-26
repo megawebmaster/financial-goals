@@ -3,28 +3,32 @@ import { Link, useOutletContext } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
 import { ListIcon } from 'lucide-react';
 
-import type { AuthenticatedLayoutContext } from '~/helpers/budgets';
+import type {
+  AuthenticatedLayoutContext,
+  ClientBudget,
+} from '~/helpers/budgets';
 import type { ClientBudgetGoal } from '~/helpers/budget-goals';
 import { getGoalPercentage } from '~/helpers/budget-goals';
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
 import { Button } from '~/components/ui/button';
 
 type CurrentBudgetGoalProps = {
-  budgetId: number;
+  budget: ClientBudget;
   children?: ReactNode;
   goal: ClientBudgetGoal;
 };
 
 export function CurrentBudgetGoal({
-  budgetId,
+  budget,
   children,
   goal,
 }: CurrentBudgetGoalProps) {
   const { t } = useTranslation();
   const { user } = useOutletContext<AuthenticatedLayoutContext>();
-
-  // TODO: Properly ask about currency of the budget
-  const FORMAT_CURRENCY = { currency: 'PLN', locale: user.preferredLocale };
+  const FORMAT_CURRENCY = {
+    currency: budget.currency,
+    locale: user.preferredLocale,
+  };
 
   return (
     <Card>
@@ -34,7 +38,7 @@ export function CurrentBudgetGoal({
             {t('component.current-goal.title', { name: goal.name })}
           </span>
           <Button asChild variant="outline">
-            <Link to={`/budgets/${budgetId}/goals`}>
+            <Link to={`/budgets/${budget.budgetId}/goals`}>
               <ListIcon className="mr-2 size-4" />
               <span>{t('component.current-goal.all-goals')}</span>
             </Link>

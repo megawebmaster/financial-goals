@@ -18,9 +18,10 @@ export function BudgetStatus({ budget, savings }: BudgetStatusProps) {
   const { t } = useTranslation();
   const { user } = useOutletContext<AuthenticatedLayoutContext>();
   const averageSavings = getAverageSavings(savings);
-
-  // TODO: Properly ask about currency of the budget
-  const FORMAT_CURRENCY = { currency: 'PLN', locale: user.preferredLocale };
+  const FORMAT_CURRENCY = {
+    currency: budget.currency,
+    locale: user.preferredLocale,
+  };
 
   return (
     <Card>

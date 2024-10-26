@@ -47,8 +47,10 @@ export default function () {
 
   const averageSavings = getAverageSavings(savings);
   const amountToSaveCalculator = buildAmountToSaveCalculator(goals);
-  // TODO: Properly ask about currency of the budget
-  const FORMAT_CURRENCY = { currency: 'PLN', locale: user.preferredLocale };
+  const FORMAT_CURRENCY = {
+    currency: budget.currency,
+    locale: user.preferredLocale,
+  };
 
   return (
     <>
@@ -96,7 +98,7 @@ export default function () {
                 {goals.map((goal) => (
                   <BudgetGoal
                     key={goal.id}
-                    budgetId={budget.budgetId}
+                    budget={budget}
                     goal={goal}
                     goalsCount={goals.length}
                   >

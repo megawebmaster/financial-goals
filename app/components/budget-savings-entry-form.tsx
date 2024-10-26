@@ -7,7 +7,10 @@ import { format } from 'date-fns';
 import { CalendarIcon, Loader2 } from 'lucide-react';
 import { useOutletContext } from '@remix-run/react';
 
-import type { AuthenticatedLayoutContext } from '~/helpers/budgets';
+import type {
+  AuthenticatedLayoutContext,
+  ClientBudget,
+} from '~/helpers/budgets';
 import type { ClientBudgetSavingsEntry } from '~/helpers/budget-goals';
 import { cn } from '~/lib/utils';
 import { Button } from '~/components/ui/button';
@@ -43,6 +46,7 @@ const savingsFormSchema = z.object({
 export type BudgetSavingsFormValues = z.infer<typeof savingsFormSchema>;
 
 type BudgetSavingsEntryFormProps = {
+  budget: ClientBudget;
   children?: ReactNode;
   className?: string;
   entry?: ClientBudgetSavingsEntry;
@@ -51,6 +55,7 @@ type BudgetSavingsEntryFormProps = {
 };
 
 export const BudgetSavingsEntryForm = ({
+  budget,
   children,
   className,
   entry,
@@ -60,9 +65,10 @@ export const BudgetSavingsEntryForm = ({
   const { t } = useTranslation();
   const { user } = useOutletContext<AuthenticatedLayoutContext>();
   const loading = useNavigationDelay();
-
-  // TODO: Properly ask about currency of the budget
-  const FORMAT_CURRENCY = { currency: 'PLN', locale: user.preferredLocale };
+  const FORMAT_CURRENCY = {
+    currency: budget.currency,
+    locale: user.preferredLocale,
+  };
 
   const form = useForm<BudgetSavingsFormValues>({
     resolver: zodResolver(savingsFormSchema),

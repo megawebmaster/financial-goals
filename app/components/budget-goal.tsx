@@ -3,7 +3,10 @@ import { Link, useOutletContext } from '@remix-run/react';
 import { ArrowDownIcon, ArrowUpIcon, EditIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import type { AuthenticatedLayoutContext } from '~/helpers/budgets';
+import type {
+  AuthenticatedLayoutContext,
+  ClientBudget,
+} from '~/helpers/budgets';
 import type { ClientBudgetGoal } from '~/helpers/budget-goals';
 import { getGoalPercentage } from '~/helpers/budget-goals';
 import { ChangePriorityButton } from '~/components/budget-goal/change-priority-button';
@@ -11,23 +14,24 @@ import { Button } from '~/components/ui/button';
 import { TableCell, TableRow } from '~/components/ui/table';
 
 type BudgetGoalProps = {
-  budgetId: number;
+  budget: ClientBudget;
   children?: ReactNode;
   goal: ClientBudgetGoal;
   goalsCount: number;
 };
 
 export function BudgetGoal({
-  budgetId,
+  budget,
   children,
   goal,
   goalsCount,
 }: BudgetGoalProps) {
   const { t } = useTranslation();
   const { user } = useOutletContext<AuthenticatedLayoutContext>();
-
-  // TODO: Properly ask about currency of the budget
-  const FORMAT_CURRENCY = { currency: 'PLN', locale: user.preferredLocale };
+  const FORMAT_CURRENCY = {
+    currency: budget.currency,
+    locale: user.preferredLocale,
+  };
 
   return (
     <>
@@ -58,7 +62,7 @@ export function BudgetGoal({
         <TableCell>
           <div className="flex justify-end gap-1">
             <Button asChild variant="outline">
-              <Link to={`/budgets/${budgetId}/goals/${goal.id}/edit`}>
+              <Link to={`/budgets/${budget.budgetId}/goals/${goal.id}/edit`}>
                 <EditIcon className="mr-2 size-4" />
                 <span>{t('component.budget-goal.edit')}</span>
               </Link>

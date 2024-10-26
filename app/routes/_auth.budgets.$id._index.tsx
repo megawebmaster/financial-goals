@@ -68,7 +68,7 @@ export default function () {
       <PageContent>
         <BudgetStatus budget={budget} savings={savings} />
         {currentGoal && (
-          <CurrentBudgetGoal budgetId={budget.budgetId} goal={currentGoal}>
+          <CurrentBudgetGoal budget={budget} goal={currentGoal}>
             <GoalEstimatedCompletion
               currentGoal={currentGoal}
               goals={goals}
@@ -76,7 +76,7 @@ export default function () {
             />
           </CurrentBudgetGoal>
         )}
-        <GoalsSavingsChart goals={goals} savings={savings} />
+        <GoalsSavingsChart budget={budget} goals={goals} savings={savings} />
       </PageContent>
     </>
   );

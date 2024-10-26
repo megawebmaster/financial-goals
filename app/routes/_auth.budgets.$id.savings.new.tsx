@@ -141,7 +141,11 @@ export default function () {
         title={t('savings.new.page.title', { budget: budget.name })}
       />
       <PageContent>
-        <BudgetSavingsEntryForm onSubmit={handleSubmit} status="create" />
+        <BudgetSavingsEntryForm
+          budget={budget}
+          onSubmit={handleSubmit}
+          status="create"
+        />
       </PageContent>
     </>
   );
