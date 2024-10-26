@@ -68,7 +68,13 @@ export const createBudget = (
 export const updateBudget = (
   userId: number,
   budgetId: number,
-  data: Partial<
+  budgetData: Partial<
+    Omit<
+      BaseBudget,
+      'id' | 'currentSavings' | 'freeSavings' | 'createdAt' | 'updatedAt'
+    >
+  >,
+  budgetUserdata: Partial<
     Omit<
       BudgetUser,
       'budgetId' | 'userId' | 'key' | 'isOwner' | 'createdAt' | 'updatedAt'
@@ -76,7 +82,22 @@ export const updateBudget = (
   >,
 ): Promise<BudgetUser> =>
   prisma.$transaction(async (tx) => {
-    if (data.isDefault) {
+    // Ensure access to the budget
+    await tx.budgetUser.findUniqueOrThrow({
+      where: {
+        budgetId_userId: {
+          budgetId,
+          userId,
+        },
+      },
+    });
+
+    await tx.budget.update({
+      data: budgetData,
+      where: { id: budgetId },
+    });
+
+    if (budgetUserdata.isDefault) {
       const result = await tx.budgetUser.updateMany({
         where: { isDefault: true, userId },
         data: {
@@ -88,7 +109,7 @@ export const updateBudget = (
       if (result.count > 0) {
         return tx.budgetUser.update({
           data: {
-            ...data,
+            ...budgetUserdata,
             updatedAt: new Date().toISOString(),
           },
           where: {
@@ -103,7 +124,7 @@ export const updateBudget = (
 
     return tx.budgetUser.update({
       data: {
-        ...omit(['isDefault'], data),
+        ...omit(['isDefault'], budgetUserdata),
         updatedAt: new Date().toISOString(),
       },
       where: {

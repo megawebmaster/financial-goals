@@ -72,10 +72,12 @@ export async function seedBudget(
   );
   const encryptionKey = await generateEncryptionKey();
   const encryptedZero = await encrypt('0', encryptionKey);
+  const currency = await encrypt('PLN', encryptionKey);
 
   const budget = await createBudget(
     user.id,
     {
+      currency,
       currentSavings: encryptedZero,
       freeSavings: encryptedZero,
     },

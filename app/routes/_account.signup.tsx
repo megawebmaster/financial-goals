@@ -10,14 +10,6 @@ import { redirectWithError } from 'remix-toast';
 
 import { authenticator } from '~/services/auth.server';
 import { createUser, UserExistsError } from '~/services/user.server';
-import { createBudget } from '~/services/budgets.server';
-import {
-  encrypt,
-  generateEncryptionKey,
-  generateKeyMaterial,
-  generateWrappingKey,
-  lockKey,
-} from '~/services/encryption';
 import { mailer } from '~/services/mail.server';
 import { LOGIN_ROUTE } from '~/routes';
 import { SignupForm } from '~/components/signup-form';
@@ -46,8 +38,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 export async function action({ request }: ActionFunctionArgs) {
-  let budget;
-
   try {
     const data = await request.clone().formData();
     const password = data.get('password') as string;
@@ -58,28 +48,7 @@ export async function action({ request }: ActionFunctionArgs) {
       (request.headers.get('Accept-Language') || 'en-US').split(',')[0],
     );
 
-    const wrappingKey = await generateWrappingKey(
-      await generateKeyMaterial(password),
-      user.salt,
-    );
-    const encryptionKey = await generateEncryptionKey();
-    const encryptedZero = await encrypt('0', encryptionKey);
-
-    let t = await i18next.getFixedT(await i18next.getLocale(request), 'common');
-    budget = await createBudget(
-      user.id,
-      {
-        currentSavings: encryptedZero,
-        freeSavings: encryptedZero,
-      },
-      {
-        name: await encrypt(t('budget.new.default-name'), encryptionKey),
-        key: await lockKey(wrappingKey, encryptionKey),
-        isDefault: true,
-      },
-    );
-
-    t = await i18next.getFixedT(await i18next.getLocale(request), 'email');
+    let t = await i18next.getFixedT(await i18next.getLocale(request), 'email');
     await mailer.sendMail({
       to: user.email,
       subject: t('new-account.subject'),
@@ -100,7 +69,7 @@ export async function action({ request }: ActionFunctionArgs) {
   }
 
   return await authenticator.authenticate('user-pass', request, {
-    successRedirect: `/budgets/${budget.budgetId}`,
+    successRedirect: '/budgets/new',
     failureRedirect: LOGIN_ROUTE,
   });
 }

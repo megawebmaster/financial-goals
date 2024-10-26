@@ -148,6 +148,7 @@
   "password": "Password",
   "preferredLocale": "Preferred locale",
   "budgetName": "Budget name",
+  "budgetCurrency": "Currency of the budget",
   "goalName": "Goal name",
   "goalAmount": "Required amount",
   "savingsDate": "Date",

@@ -8,9 +8,11 @@ export const decryptBudget = async (
 ): Promise<ClientBudget> => {
   const currentSavings = await decrypt(budget.budget.currentSavings, key);
   const freeSavings = await decrypt(budget.budget.freeSavings, key);
+  const currency = await decrypt(budget.budget.currency, key);
 
   return {
     ...budget,
+    currency,
     name: await decrypt(budget.name, key),
     currentSavings: parseFloat(currentSavings),
     freeSavings: parseFloat(freeSavings),

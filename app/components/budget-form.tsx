@@ -1,10 +1,9 @@
 import type { ReactNode } from 'react';
-import type { BudgetUser } from '@prisma/client';
 import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Loader2 } from 'lucide-react';
+import { CheckIcon, ChevronsUpDownIcon, Loader2 } from 'lucide-react';
 
 import {
   Card,
@@ -26,21 +25,47 @@ import { Input } from '~/components/ui/input';
 import { Button } from '~/components/ui/button';
 import { Switch } from '~/components/ui/switch';
 import { useNavigationDelay } from '~/hooks/useNavigationDelay';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '~/components/ui/popover';
+import { twJoin } from 'tailwind-merge';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '~/components/ui/command';
+import { propEq } from 'ramda';
+import type { ClientBudget } from '~/helpers/budgets';
 
 const budgetFormSchema = z.object({
   budgetName: z.string().min(1).max(64),
+  budgetCurrency: z.string(),
   isDefault: z.coerce.boolean(),
 });
 
 export type BudgetFormValues = z.infer<typeof budgetFormSchema>;
 
 type BudgetFormProps = {
-  budget?: BudgetUser;
+  budget?: ClientBudget;
   children?: ReactNode;
   className?: string;
   onSubmit: (values: BudgetFormValues) => void;
   status: 'create' | 'update';
 };
+
+type Currency = {
+  currency: string;
+  name: string;
+};
+const CURRENCIES: Currency[] = [
+  { currency: 'PLN', name: 'Polski Złoty' },
+  { currency: 'EUR', name: 'Euro' },
+];
 
 export const BudgetForm = ({
   budget,
@@ -56,6 +81,7 @@ export const BudgetForm = ({
     resolver: zodResolver(budgetFormSchema),
     defaultValues: {
       budgetName: budget?.name || '',
+      budgetCurrency: budget?.currency || '',
       isDefault: budget?.isDefault,
     },
   });
@@ -84,6 +110,73 @@ export const BudgetForm = ({
                       placeholder={t('component.budget-form.name-placeholder')}
                     />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              name="budgetCurrency"
+              render={({ field }) => (
+                <FormItem className="grid gap-2">
+                  <FormLabel>{t('component.budget-form.currency')}</FormLabel>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          className={twJoin(
+                            'justify-between',
+                            !field.value && 'text-muted-foreground',
+                          )}
+                        >
+                          {field.value
+                            ? CURRENCIES.find(propEq(field.value, 'currency'))
+                                ?.name
+                            : t('component.budget-form.currency.placeholder')}
+                          <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="p-0">
+                      <Command>
+                        <CommandInput
+                          placeholder={t(
+                            'component.budget-form.currency.search.placeholder',
+                          )}
+                        />
+                        <CommandList>
+                          <CommandEmpty>
+                            {t('component.budget-form.currency.search.empty')}
+                          </CommandEmpty>
+                          <CommandGroup>
+                            {CURRENCIES.map((currency) => (
+                              <CommandItem
+                                value={currency.name}
+                                key={currency.currency}
+                                onSelect={() => {
+                                  form.setValue(
+                                    'budgetCurrency',
+                                    currency.currency,
+                                  );
+                                }}
+                              >
+                                <CheckIcon
+                                  className={twJoin(
+                                    'mr-2 h-4 w-4',
+                                    currency.currency === field.value
+                                      ? 'opacity-100'
+                                      : 'opacity-0',
+                                  )}
+                                />
+                                {currency.name}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
                   <FormMessage />
                 </FormItem>
               )}

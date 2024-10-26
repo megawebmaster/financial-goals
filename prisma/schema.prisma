@@ -62,6 +62,7 @@ model Budget {
   invitations    BudgetInvitation[]   @relation("BudgetInvitations")
   currentSavings String
   freeSavings    String
+  currency       String
   createdAt      DateTime
   updatedAt      DateTime
 }

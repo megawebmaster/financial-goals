@@ -15,11 +15,11 @@ import { prisma } from '~/services/db.server';
 
 export async function seedUsers() {
   await seedUser('Test 1', 'test@example.com');
-  await createUser('Test 2', 'test2@example.com', 'test');
+  await createUser('Test 2', 'test2@example.com', 'test', 'pl-PL');
 }
 
 async function seedUser(username: string, email: string) {
-  const user = await createUser(username, email, 'test');
+  const user = await createUser(username, email, 'test', 'pl-PL');
 
   const wrappingKey = await generateWrappingKey(
     await generateKeyMaterial('test'),
@@ -27,10 +27,12 @@ async function seedUser(username: string, email: string) {
   );
   const encryptionKey = await generateEncryptionKey();
   const encryptedZero = await encrypt('0', encryptionKey);
+  const currency = await encrypt('PLN', encryptionKey);
 
   const budget = await createBudget(
     user.id,
     {
+      currency,
       currentSavings: encryptedZero,
       freeSavings: encryptedZero,
     },

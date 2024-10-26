@@ -36,22 +36,31 @@ export const action = authenticatedAction(async ({ request }, userId) => {
     const data = await request.formData();
     const name = data.get('name');
     const key = data.get('key');
+    const currency = data.get('currency');
     const currentSavings = data.get('currentSavings');
     const freeSavings = data.get('freeSavings');
     const isDefault = data.get('isDefault') === 'true';
 
     invariant(name, 'Name of the budget is required');
-    invariant(typeof name === 'string', 'Name must be a text');
+    invariant(typeof name === 'string', 'Name must be encrypted');
     invariant(key, 'Budget encryption key is required');
     invariant(typeof key === 'string', 'Encryption key must be a text');
+    invariant(currency, 'Budget currency is required');
+    invariant(typeof currency === 'string', 'Currency must be encrypted');
     invariant(currentSavings, 'Current savings value required');
-    invariant(typeof currentSavings === 'string', 'Current savings a text');
+    invariant(
+      typeof currentSavings === 'string',
+      'Current savings must be encrypted',
+    );
     invariant(freeSavings, 'Free savings value required');
-    invariant(typeof freeSavings === 'string', 'Free savings a text');
+    invariant(
+      typeof freeSavings === 'string',
+      'Free savings must be encrypted',
+    );
 
     const budget = await createBudget(
       userId,
-      { currentSavings, freeSavings },
+      { currency, currentSavings, freeSavings },
       { name, key, isDefault },
     );
     const t = await i18next.getFixedT(await i18next.getLocale(request));
@@ -82,6 +91,7 @@ export default function () {
     submit(
       {
         name: await encrypt(values.budgetName, encryptionKey),
+        currency: await encrypt(values.budgetCurrency, encryptionKey),
         key: await lockKey(encryptionKey),
         isDefault: values.isDefault,
         currentSavings: zeroValue,

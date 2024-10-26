@@ -40,12 +40,15 @@ export const action = authenticatedAction(
 
       const data = await request.formData();
       const name = data.get('name');
+      const currency = data.get('currency');
       const isDefault = data.get('isDefault') === 'true';
 
       invariant(name, 'Name of the budget is required');
       invariant(typeof name === 'string', 'Name must be a text');
+      invariant(currency, 'Budget currency is required');
+      invariant(typeof currency === 'string', 'Currency must be encrypted');
 
-      await updateBudget(userId, budgetId, { name, isDefault });
+      await updateBudget(userId, budgetId, { currency }, { name, isDefault });
       const t = await i18next.getFixedT(await i18next.getLocale(request));
 
       return redirectWithSuccess(`/budgets/${budgetId}`, {
@@ -76,6 +79,7 @@ export default function () {
     submit(
       {
         name: await encrypt(values.budgetName, encryptionKey),
+        currency: await encrypt(values.budgetCurrency, encryptionKey),
         isDefault: values.isDefault,
       },
       { method: 'patch' },
