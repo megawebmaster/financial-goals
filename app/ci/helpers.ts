@@ -49,6 +49,7 @@ export async function seedUser(username: string): Promise<User> {
     username,
     `${username}@example.com`,
     FIXTURE_USER_PASSWORD,
+    'pl-PL',
   );
 }
 
@@ -103,6 +104,7 @@ export async function seedGoal(
     await encrypt('0', encryptionKey),
     {
       name: await encrypt(data.name || 'Goal', encryptionKey),
+      type: 'quick',
       status: data.status || 'active',
       currentAmount: await encrypt(data.currentAmount || '0', encryptionKey),
       requiredAmount: await encrypt(

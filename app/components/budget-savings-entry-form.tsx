@@ -73,7 +73,7 @@ export const BudgetSavingsEntryForm = ({
   const form = useForm<BudgetSavingsFormValues>({
     resolver: zodResolver(savingsFormSchema),
     defaultValues: {
-      savingsDate: entry ? new Date(entry.date) : undefined,
+      savingsDate: entry ? new Date(entry.createdAt) : undefined,
       savingsAmount: entry?.amount,
     },
   });
