@@ -30,7 +30,10 @@ export const getGoalsSum = (
 ) =>
   reduce((result: number, goal: ClientBudgetGoal) => result + goal[field], 0);
 
-export const getGoalsCurrentAmount = getGoalsSum('currentAmount');
+const getRequiredGoalsAmount = getGoalsSum('requiredAmount');
+const getCurrentGoalsAmount = getGoalsSum('currentAmount');
+export const getMissingGoalsAmount = (goals: ClientBudgetGoal[]) =>
+  getRequiredGoalsAmount(goals) - getCurrentGoalsAmount(goals);
 
 export const getGoalPercentage = (goal: ClientBudgetGoal) =>
   Math.round((goal.currentAmount / goal.requiredAmount) * 100);

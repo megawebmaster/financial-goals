@@ -10,18 +10,23 @@ import { buildAmountToSaveCalculator } from '~/services/budget-goals.client';
 
 type GoalEstimatedCompletion = {
   currentGoal: ClientBudgetGoal;
+  baseSavingsAmount?: number;
   goals: ClientBudgetGoal[];
   savings: ClientBudgetSavingsEntry[];
 };
 
 export function GoalEstimatedCompletion({
   currentGoal,
+  baseSavingsAmount = 0,
   goals,
   savings,
 }: GoalEstimatedCompletion) {
   const { t } = useTranslation();
   const averageSavings = getAverageSavings(savings);
-  const amountToSaveCalculator = buildAmountToSaveCalculator(goals);
+  const amountToSaveCalculator = buildAmountToSaveCalculator(
+    baseSavingsAmount,
+    goals,
+  );
 
   if (averageSavings <= 0) {
     return null;

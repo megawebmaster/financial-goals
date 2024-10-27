@@ -2,8 +2,10 @@ import type { LoaderFunctionArgs, MetaFunction } from '@remix-run/node';
 import { Link, useOutletContext } from '@remix-run/react';
 import { DollarSignIcon, EditIcon, ShareIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { filter, propEq } from 'ramda';
 
 import type { BudgetsLayoutContext } from '~/helpers/budgets';
+import { getMissingGoalsAmount } from '~/helpers/budget-goals';
 import { getCurrentGoal } from '~/services/budget-goals.client';
 import { PageTitle } from '~/components/ui/page-title';
 import { PageContent } from '~/components/ui/page-content';
@@ -28,10 +30,15 @@ export async function loader({ request }: LoaderFunctionArgs) {
   };
 }
 
+const getShortTermGoals = filter(propEq('quick', 'type'));
+
 export default function () {
   const { t } = useTranslation();
   const { budget, goals, savings } = useOutletContext<BudgetsLayoutContext>();
-  const currentGoal = getCurrentGoal(goals);
+  const currentQuickGoal = getCurrentGoal('quick', goals);
+  const currentLongGoal = getCurrentGoal('long', goals);
+  const shortGoals = getShortTermGoals(goals);
+  const shortGoalsAmount = getMissingGoalsAmount(shortGoals);
 
   return (
     <>
@@ -67,10 +74,24 @@ export default function () {
       </PageTitle>
       <PageContent>
         <BudgetStatus budget={budget} savings={savings} />
-        {currentGoal && (
-          <CurrentBudgetGoal budget={budget} goal={currentGoal}>
+        {currentQuickGoal && (
+          <CurrentBudgetGoal
+            budget={budget}
+            goal={currentQuickGoal}
+            type="quick"
+          >
             <GoalEstimatedCompletion
-              currentGoal={currentGoal}
+              currentGoal={currentQuickGoal}
+              goals={goals}
+              savings={savings}
+            />
+          </CurrentBudgetGoal>
+        )}
+        {currentLongGoal && (
+          <CurrentBudgetGoal budget={budget} goal={currentLongGoal} type="long">
+            <GoalEstimatedCompletion
+              baseSavingsAmount={shortGoalsAmount}
+              currentGoal={currentLongGoal}
               goals={goals}
               savings={savings}
             />

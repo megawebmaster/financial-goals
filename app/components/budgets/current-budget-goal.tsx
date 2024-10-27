@@ -16,12 +16,14 @@ type CurrentBudgetGoalProps = {
   budget: ClientBudget;
   children?: ReactNode;
   goal: ClientBudgetGoal;
+  type: string;
 };
 
 export function CurrentBudgetGoal({
   budget,
   children,
   goal,
+  type,
 }: CurrentBudgetGoalProps) {
   const { t } = useTranslation();
   const { user } = useOutletContext<AuthenticatedLayoutContext>();
@@ -35,7 +37,7 @@ export function CurrentBudgetGoal({
       <CardHeader>
         <CardTitle className="flex gap-2 text-2xl">
           <span className="flex-1">
-            {t('component.current-goal.title', { name: goal.name })}
+            {t(`component.current-goal.${type}.title`, { name: goal.name })}
           </span>
           <Button asChild variant="outline">
             <Link to={`/budgets/${budget.budgetId}/goals`}>

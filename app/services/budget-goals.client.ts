@@ -44,9 +44,11 @@ export const encryptBudgetGoal = async (
   currentAmount: await encrypt(goal.currentAmount.toString(10), key),
 });
 
-export const getCurrentGoal = find(
-  (goal: ClientBudgetGoal) => goal.currentAmount !== goal.requiredAmount,
-);
+export const getCurrentGoal = (type: string, goals: ClientBudgetGoal[]) =>
+  find(
+    (goal) => goal.type === type && goal.currentAmount !== goal.requiredAmount,
+    goals,
+  );
 
 export const removeGoal = (goalId: number) => reject(propEq(goalId, 'id'));
 export const updateGoal = (

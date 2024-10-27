@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { filter, propEq } from 'ramda';
 
 import type { BudgetsLayoutContext } from '~/helpers/budgets';
-import { getGoalsSum } from '~/helpers/budget-goals';
+import { getMissingGoalsAmount } from '~/helpers/budget-goals';
 import { getAverageSavings } from '~/services/budget-savings-entries.client';
 import { PageTitle } from '~/components/ui/page-title';
 import { PageContent } from '~/components/ui/page-content';
@@ -30,8 +30,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 const getShortTermGoals = filter(propEq('quick', 'type'));
 const getLongTermGoals = filter(propEq('long', 'type'));
-const getRequiredAmount = getGoalsSum('requiredAmount');
-const getCurrentAmount = getGoalsSum('currentAmount');
 
 export default function () {
   const { t } = useTranslation();
@@ -40,8 +38,7 @@ export default function () {
   const averageSavings = getAverageSavings(savings);
   const shortGoals = getShortTermGoals(goals);
   const longGoals = getLongTermGoals(goals);
-  const shortGoalsAmount =
-    getRequiredAmount(shortGoals) - getCurrentAmount(shortGoals);
+  const shortGoalsAmount = getMissingGoalsAmount(shortGoals);
 
   return (
     <>
