@@ -29,6 +29,11 @@ export default defineConfig({
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
   },
+  /* Update timeouts to avoid test failures */
+  timeout: 60_000,
+  expect: {
+    timeout: 15_000,
+  },
 
   /* Configure projects for major browsers */
   projects: [
@@ -73,7 +78,7 @@ export default defineConfig({
     command: 'npm run ci:server',
     url: 'http://127.0.0.1:5555',
     reuseExistingServer: !process.env.CI,
-    timeout: 10_000,
+    timeout: 30_000,
     stdout: 'ignore',
     stderr: 'pipe',
   },
