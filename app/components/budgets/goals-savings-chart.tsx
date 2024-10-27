@@ -9,7 +9,6 @@ import {
 } from 'recharts';
 import { useTranslation } from 'react-i18next';
 import {
-  defaultTo,
   fromPairs,
   groupBy,
   head,
@@ -19,6 +18,7 @@ import {
   pipe,
   prop,
   reduce,
+  sortBy,
   toPairs,
 } from 'ramda';
 import { addMonths, lightFormat, parse, subMonths } from 'date-fns';
@@ -54,7 +54,7 @@ const groupAndSumByDates = <T extends { createdAt: Date }>(
   pipe(
     map((entry: T) => ({
       date: lightFormat(entry.createdAt, 'yyyy-MM'),
-      value: entry[property],
+      value: entry[property] as number,
     })),
     groupBy(prop('date')),
     toPairs,
@@ -62,17 +62,21 @@ const groupAndSumByDates = <T extends { createdAt: Date }>(
       ([date, entries]) =>
         [
           date,
-          pipe(
-            defaultTo([]),
-            reduce(
-              (monthlySum, entry: { value: number }) =>
-                monthlySum + entry.value,
-              0,
-            ),
-          )(entries),
+          reduce(
+            (result, entry: { value: number }) => result + entry.value,
+            0,
+          )(entries || []),
         ] as [string, number],
     ),
-    fromPairs<string, number>,
+    sortBy(prop(0)),
+    reduce(
+      (result, item) => [
+        ...result,
+        [item[0], (last(result)?.[1] || 0) + item[1]] as [string, number],
+      ],
+      [] as [string, number][],
+    ),
+    fromPairs,
   );
 
 const groupAndSumGoals = groupAndSumByDates<ClientBudgetGoal>('requiredAmount');
