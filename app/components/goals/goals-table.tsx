@@ -22,6 +22,7 @@ import { buildAmountToSaveCalculator } from '~/services/budget-goals.client';
 
 type GoalsTableProps = {
   averageSavings: number;
+  baseSavingsAmount?: number;
   budget: ClientBudget;
   goals: ClientBudgetGoal[];
 };
@@ -31,6 +32,7 @@ const getRequiredAmount = getGoalsSum('requiredAmount');
 
 export const GoalsTable = ({
   averageSavings,
+  baseSavingsAmount = 0,
   budget,
   goals,
   ...props
@@ -41,7 +43,10 @@ export const GoalsTable = ({
     currency: budget.currency,
     locale: user.preferredLocale,
   };
-  const calculateAmountToSave = buildAmountToSaveCalculator(goals);
+  const calculateAmountToSave = buildAmountToSaveCalculator(
+    baseSavingsAmount,
+    goals,
+  );
 
   return (
     <Table {...props}>

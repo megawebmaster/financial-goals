@@ -68,7 +68,7 @@ export function BudgetGoal({
           </Button>
           <ChangePriorityButton
             disabled={goal.priority === 1}
-            goalId={goal.id}
+            goal={goal}
             priority={goal.priority - 1}
             title={t('component.budget-goal.move-up')}
           >
@@ -76,7 +76,7 @@ export function BudgetGoal({
           </ChangePriorityButton>{' '}
           <ChangePriorityButton
             disabled={goal.priority === goalsCount}
-            goalId={goal.id}
+            goal={goal}
             priority={goal.priority + 1}
             title={t('component.budget-goal.move-down')}
           >

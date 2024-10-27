@@ -50,8 +50,8 @@ export const action = authenticatedAction(
       invariant(type, 'Goal type is required');
       invariant(typeof type === 'string');
       invariant(
-        ['short', 'long'].includes(type),
-        'Goals can be "short" or "long" only.',
+        ['quick', 'long'].includes(type),
+        'Goals can be "quick" or "long" only.',
       );
       invariant(requiredAmount, 'Goal required amount is required');
       invariant(typeof requiredAmount === 'string');
@@ -102,6 +102,7 @@ export default function () {
     submit(
       {
         name: await encrypt(values.goalName, encryptionKey),
+        type: values.goalType,
         requiredAmount: await encrypt(
           values.goalAmount.toString(10),
           encryptionKey,

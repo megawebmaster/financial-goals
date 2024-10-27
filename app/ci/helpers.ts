@@ -23,7 +23,7 @@ import { createBudget } from '~/services/budgets.server';
 import { createBudgetGoal } from '~/services/budget-goals.server';
 import { createSavingsEntry } from '~/services/budget-savings-entries.server';
 import { getGoalsCurrentAmount } from '~/helpers/budget-goals';
-import { buildGoalsFiller } from '~/services/budget-goals';
+import { buildGoalsCurrentAmountFiller } from '~/services/budget-goals';
 
 export function buildFixtureLoader(
   fixtureMap: Record<string, (params: string[]) => Promise<void>>,
@@ -130,7 +130,7 @@ export async function seedSavings(
     parseFloat(await decrypt(currentBudget.currentSavings, encryptionKey)) +
     parseFloat(amount);
 
-  const processGoals = buildGoalsFiller(currentSavings);
+  const processGoals = buildGoalsCurrentAmountFiller(currentSavings);
   const updatedGoals = processGoals(
     await Promise.all(
       goals.map(async (goal) => ({

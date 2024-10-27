@@ -11,7 +11,7 @@ import { getGoalsCurrentAmount } from '~/helpers/budget-goals';
 import { encrypt, unlockKey } from '~/services/encryption.client';
 import { createSavingsEntry } from '~/services/budget-savings-entries.server';
 import { encryptBudgetGoal } from '~/services/budget-goals.client';
-import { buildGoalsFiller } from '~/services/budget-goals';
+import { buildGoalsCurrentAmountFiller } from '~/services/budget-goals';
 import type { BudgetSavingsFormValues } from '~/components/budget-savings-entry-form';
 import { BudgetSavingsEntryForm } from '~/components/budget-savings-entry-form';
 import { PageTitle } from '~/components/ui/page-title';
@@ -103,8 +103,9 @@ export default function () {
   const handleSubmit = async (values: BudgetSavingsFormValues) => {
     const encryptionKey = await unlockKey(budget.key);
 
+    // TODO: Properly process goals using buildGoalsUpdater
     const currentSavings = budget.currentSavings + values.savingsAmount;
-    const processGoals = buildGoalsFiller(currentSavings);
+    const processGoals = buildGoalsCurrentAmountFiller(currentSavings);
     const updatedGoals = processGoals(goals);
     const freeSavings = currentSavings - getGoalsCurrentAmount(updatedGoals);
 

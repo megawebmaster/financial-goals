@@ -5,23 +5,23 @@ import {
   useParams,
   useSubmit,
 } from '@remix-run/react';
-import { pipe, propEq } from 'ramda';
+import { propEq } from 'ramda';
 import { useTranslation } from 'react-i18next';
 import { redirectWithError, redirectWithSuccess } from 'remix-toast';
 import { toast } from 'sonner';
 import invariant from 'tiny-invariant';
 
 import { authenticatedAction } from '~/helpers/auth';
-import { getGoalsSum } from '~/helpers/budget-goals';
 import type { BudgetsLayoutContext } from '~/helpers/budgets';
 import { updateBudgetGoal } from '~/services/budget-goals.server';
 import { encrypt, unlockKey } from '~/services/encryption.client';
 import {
+  buildGoalsUpdater,
   encryptBudgetGoal,
+  getGoalPriority,
   removeGoal,
   updateGoal,
 } from '~/services/budget-goals.client';
-import { buildGoalsFiller } from '~/services/budget-goals';
 import type { BudgetGoalFormValues } from '~/components/budget-goal-form';
 import { BudgetGoalForm } from '~/components/budget-goal-form';
 import { PageTitle } from '~/components/ui/page-title';
@@ -96,8 +96,6 @@ export const action = authenticatedAction(
   },
 );
 
-const getGoalsCurrentAmount = getGoalsSum('currentAmount');
-
 export default function () {
   const { t } = useTranslation();
   const { budget, goals } = useOutletContext<BudgetsLayoutContext>();
@@ -114,18 +112,15 @@ export default function () {
 
   const handleSubmit = async (values: BudgetGoalFormValues) => {
     const encryptionKey = await unlockKey(budget.key);
-    const processGoals = pipe(
+    const processGoals = buildGoalsUpdater(goals, budget.freeSavings);
+    const { goals: updatedGoals, freeSavings } = processGoals(
       updateGoal(goal.id, {
         name: values.goalName,
         type: values.goalType,
         requiredAmount: values.goalAmount,
+        priority: getGoalPriority(goal, values.goalType, goals),
       }),
-      buildGoalsFiller(budget.currentSavings),
     );
-
-    const updatedGoals = processGoals(goals);
-    const freeSavings =
-      budget.currentSavings - getGoalsCurrentAmount(updatedGoals);
 
     submit(
       {
@@ -143,14 +138,10 @@ export default function () {
   const handleDelete = async () => {
     const encryptionKey = await unlockKey(budget.key);
 
-    const processGoals = pipe(
+    const processGoals = buildGoalsUpdater(goals, budget.freeSavings);
+    const { goals: updatedGoals, freeSavings } = processGoals(
       removeGoal(goal.id),
-      buildGoalsFiller(budget.currentSavings),
     );
-
-    const updatedGoals = processGoals(goals);
-    const freeSavings =
-      budget.currentSavings - getGoalsCurrentAmount(updatedGoals);
 
     submit(
       {

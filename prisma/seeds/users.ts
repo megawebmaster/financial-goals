@@ -14,15 +14,15 @@ import { createSavingsEntry } from '~/services/budget-savings-entries.server';
 import { prisma } from '~/services/db.server';
 
 export async function seedUsers() {
-  await seedUser('Test 1', 'test@example.com');
+  await seedUser('Test 1', 'test@example.com', 'test');
   await createUser('Test 2', 'test2@example.com', 'test', 'pl-PL');
 }
 
-async function seedUser(username: string, email: string) {
-  const user = await createUser(username, email, 'test', 'pl-PL');
+async function seedUser(username: string, email: string, password: string) {
+  const user = await createUser(username, email, password, 'pl-PL');
 
   const wrappingKey = await generateWrappingKey(
-    await generateKeyMaterial('test'),
+    await generateKeyMaterial(password),
     user.salt,
   );
   const encryptionKey = await generateEncryptionKey();
@@ -49,7 +49,7 @@ async function seedUser(username: string, email: string) {
     encryptedZero,
     {
       name: await encrypt('Goal 1', encryptionKey),
-      type: 'short',
+      type: 'quick',
       status: 'active',
       currentAmount: encryptedZero,
       requiredAmount: await encrypt('1000', encryptionKey),
@@ -66,7 +66,7 @@ async function seedUser(username: string, email: string) {
     encryptedZero,
     {
       name: await encrypt('Goal 2', encryptionKey),
-      type: 'short',
+      type: 'quick',
       status: 'active',
       currentAmount: encryptedZero,
       requiredAmount: await encrypt('500', encryptionKey),
@@ -83,7 +83,7 @@ async function seedUser(username: string, email: string) {
     encryptedZero,
     {
       name: await encrypt('Goal 3', encryptionKey),
-      type: 'short',
+      type: 'quick',
       status: 'active',
       currentAmount: encryptedZero,
       requiredAmount: await encrypt('250', encryptionKey),
@@ -95,7 +95,7 @@ async function seedUser(username: string, email: string) {
   });
 
   await createBudgetGoal(user.id, budget.budgetId, encryptedZero, {
-    name: await encrypt('Goal 4', encryptionKey),
+    name: await encrypt('Long goal 1', encryptionKey),
     type: 'long',
     status: 'active',
     currentAmount: encryptedZero,

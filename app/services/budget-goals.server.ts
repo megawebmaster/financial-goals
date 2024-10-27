@@ -43,6 +43,7 @@ export const createBudgetGoal = async (
     const priority =
       (await tx.budgetGoal.count({
         where: {
+          type: data.type,
           budgetId,
         },
       })) + 1;

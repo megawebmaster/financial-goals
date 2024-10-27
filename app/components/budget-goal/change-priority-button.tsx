@@ -1,11 +1,14 @@
 import type { FormEvent, ReactNode } from 'react';
 import { Loader2 } from 'lucide-react';
 import { useOutletContext, useSubmit } from '@remix-run/react';
-import { pipe } from 'ramda';
 
 import type { BudgetsLayoutContext } from '~/helpers/budgets';
-import { buildGoalsFiller, buildGoalsSorting } from '~/services/budget-goals';
-import { encryptBudgetGoal } from '~/services/budget-goals.client';
+import type { ClientBudgetGoal } from '~/helpers/budget-goals';
+import { buildGoalsSorting } from '~/services/budget-goals';
+import {
+  buildGoalsUpdater,
+  encryptBudgetGoal,
+} from '~/services/budget-goals.client';
 import { unlockKey } from '~/services/encryption.client';
 import { Button } from '~/components/ui/button';
 import { useNavigationDelay } from '~/hooks/useNavigationDelay';
@@ -13,7 +16,7 @@ import { useNavigationDelay } from '~/hooks/useNavigationDelay';
 type ChangePriorityButtonProps = {
   children: ReactNode;
   disabled?: boolean;
-  goalId: number;
+  goal: ClientBudgetGoal;
   priority: number;
   title?: string;
 };
@@ -21,7 +24,7 @@ type ChangePriorityButtonProps = {
 export function ChangePriorityButton({
   children,
   disabled = false,
-  goalId,
+  goal,
   priority,
   title,
 }: ChangePriorityButtonProps) {
@@ -32,22 +35,20 @@ export function ChangePriorityButton({
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const encryptionKey = await unlockKey(budget.key);
-    const amount = goals.reduce(
-      (result, goal) => result + goal.currentAmount,
-      0,
-    );
 
-    const processGoals = pipe(
-      buildGoalsSorting(goalId, priority),
-      buildGoalsFiller(amount),
-    );
-
-    const updatedGoals = await Promise.all(
-      processGoals(goals).map((item) => encryptBudgetGoal(item, encryptionKey)),
+    const processGoals = buildGoalsUpdater(goals, budget.freeSavings);
+    const { goals: updatedGoals } = processGoals(
+      buildGoalsSorting(goal.id, priority),
     );
 
     submit(
-      { goals: JSON.stringify(updatedGoals) },
+      {
+        goals: JSON.stringify(
+          await Promise.all(
+            updatedGoals.map((item) => encryptBudgetGoal(item, encryptionKey)),
+          ),
+        ),
+      },
       {
         action: `/budgets/${budget.budgetId}/goals/priority`,
         method: 'post',
