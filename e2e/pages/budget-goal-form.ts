@@ -1,4 +1,5 @@
 import type { Locator, Page } from 'playwright/test';
+import { expect } from '../test';
 
 export class BudgetGoalForm {
   public readonly name: Locator;
@@ -9,9 +10,13 @@ export class BudgetGoalForm {
     this.amount = page.getByLabel('Required amount');
   }
 
+  async selectType(type: string) {
+    return this.page.getByLabel(type).click();
+  }
+
   submit() {
     return this.page
-      .getByRole('button', { name: /Create goal|Save changes/ })
+      .getByRole('button', { name: /Create a goal|Save changes/ })
       .click();
   }
 
@@ -20,5 +25,8 @@ export class BudgetGoalForm {
     await this.page
       .getByRole('button', { name: 'Yes, delete the goal' })
       .click();
+    await expect(
+      this.page.getByRole('heading', { name: 'Are you absolutely sure?' }),
+    ).not.toBeAttached();
   }
 }

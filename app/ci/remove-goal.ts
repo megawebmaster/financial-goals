@@ -21,6 +21,7 @@ export async function seedRemoveGoalTest() {
   });
   await seedGoal(user, budget, encryptionKey, {
     name: 'Third goal',
+    type: 'long',
     requiredAmount: '750',
   });
 }

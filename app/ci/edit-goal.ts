@@ -21,7 +21,8 @@ export async function seedEditGoalTest() {
     requiredAmount: '500',
   });
   const goal3 = await seedGoal(user, budget, encryptionKey, {
-    name: 'Third goal',
+    name: 'First long goal',
+    type: 'long',
     requiredAmount: '750',
   });
   await seedSavings(user, budget, encryptionKey, { amount: '2000' }, [

@@ -7,8 +7,8 @@ export class BudgetAcceptForm {
     this.name = page.getByLabel('Budget name');
   }
 
-  submit() {
-    return this.page
+  async submit() {
+    await this.page
       .getByRole('button', { name: 'Accept the invitation' })
       .click();
   }

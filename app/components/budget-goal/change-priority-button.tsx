@@ -4,11 +4,8 @@ import { useOutletContext, useSubmit } from '@remix-run/react';
 
 import type { BudgetsLayoutContext } from '~/helpers/budgets';
 import type { ClientBudgetGoal } from '~/helpers/budget-goals';
-import { buildGoalsSorting } from '~/services/budget-goals';
-import {
-  buildGoalsUpdater,
-  encryptBudgetGoal,
-} from '~/services/budget-goals.client';
+import { buildGoalsSorting, buildGoalsUpdater } from '~/services/budget-goals';
+import { encryptBudgetGoal } from '~/services/budget-goals.client';
 import { unlockKey } from '~/services/encryption.client';
 import { Button } from '~/components/ui/button';
 import { useNavigationDelay } from '~/hooks/useNavigationDelay';

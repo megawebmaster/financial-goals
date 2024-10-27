@@ -29,7 +29,8 @@ export async function seedShareBudgetTest(params: string[]) {
     goal2,
     goal3,
   ]);
-  await seedUser(`share-budget-receiver-${params[0]}`);
+  const user2 = await seedUser(`share-budget-receiver-${params[0]}`);
+  await seedBudget(user2, { name: 'First budget' });
 }
 
 export async function cleanupShareBudgetTest(params: string[]) {
