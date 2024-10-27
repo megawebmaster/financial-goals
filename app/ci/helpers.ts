@@ -2,6 +2,7 @@ import type { LoaderFunctionArgs } from '@remix-run/node';
 import process from 'node:process';
 import invariant from 'tiny-invariant';
 import { subMonths } from 'date-fns';
+import { identity } from 'ramda';
 
 import type {
   BudgetGoal,
@@ -9,6 +10,7 @@ import type {
   BudgetUser,
   User,
 } from '@prisma/client';
+
 import { prisma } from '~/services/db.server';
 import { createUser, deleteUser } from '~/services/user.server';
 import {
@@ -22,8 +24,7 @@ import {
 import { createBudget } from '~/services/budgets.server';
 import { createBudgetGoal } from '~/services/budget-goals.server';
 import { createSavingsEntry } from '~/services/budget-savings-entries.server';
-import { getGoalsCurrentAmount } from '~/helpers/budget-goals';
-import { buildGoalsCurrentAmountFiller } from '~/services/budget-goals';
+import { buildGoalsUpdater } from '~/services/budget-goals.client';
 
 export function buildFixtureLoader(
   fixtureMap: Record<string, (params: string[]) => Promise<void>>,
@@ -130,21 +131,19 @@ export async function seedSavings(
     parseFloat(await decrypt(currentBudget.currentSavings, encryptionKey)) +
     parseFloat(amount);
 
-  const processGoals = buildGoalsCurrentAmountFiller(currentSavings);
-  const updatedGoals = processGoals(
-    await Promise.all(
-      goals.map(async (goal) => ({
-        ...goal,
-        requiredAmount: parseFloat(
-          await decrypt(goal.requiredAmount, encryptionKey),
-        ),
-        currentAmount: parseFloat(
-          await decrypt(goal.currentAmount, encryptionKey),
-        ),
-      })),
-    ),
+  const decryptedGoals = await Promise.all(
+    goals.map(async (goal) => ({
+      ...goal,
+      requiredAmount: parseFloat(
+        await decrypt(goal.requiredAmount, encryptionKey),
+      ),
+      currentAmount: parseFloat(
+        await decrypt(goal.currentAmount, encryptionKey),
+      ),
+    })),
   );
-  const freeSavings = currentSavings - getGoalsCurrentAmount(updatedGoals);
+  const processGoals = buildGoalsUpdater(decryptedGoals, currentSavings);
+  const { goals: updatedGoals, freeSavings } = processGoals(identity);
 
   await createSavingsEntry(
     user.id,
@@ -156,7 +155,7 @@ export async function seedSavings(
     {
       amount: await encrypt(amount, encryptionKey),
       createdAt: data.createdAt || subMonths(new Date(), 1),
-      updatedAt: data.updatedAt,
+      updatedAt: data.updatedAt || subMonths(new Date(), 1),
     },
     await Promise.all(
       updatedGoals.map(async (goal) => ({

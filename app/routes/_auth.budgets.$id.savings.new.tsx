@@ -2,16 +2,18 @@ import type { MetaFunction } from '@remix-run/node';
 import { useOutletContext, useSubmit } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
 import { redirectWithError, redirectWithSuccess } from 'remix-toast';
+import { identity } from 'ramda';
 import invariant from 'tiny-invariant';
 
 import { INDEX_ROUTE } from '~/routes';
 import type { BudgetsLayoutContext } from '~/helpers/budgets';
 import { authenticatedAction, authenticatedLoader } from '~/helpers/auth';
-import { getGoalsCurrentAmount } from '~/helpers/budget-goals';
 import { encrypt, unlockKey } from '~/services/encryption.client';
 import { createSavingsEntry } from '~/services/budget-savings-entries.server';
-import { encryptBudgetGoal } from '~/services/budget-goals.client';
-import { buildGoalsCurrentAmountFiller } from '~/services/budget-goals';
+import {
+  buildGoalsUpdater,
+  encryptBudgetGoal,
+} from '~/services/budget-goals.client';
 import type { BudgetSavingsFormValues } from '~/components/budget-savings-entry-form';
 import { BudgetSavingsEntryForm } from '~/components/budget-savings-entry-form';
 import { PageTitle } from '~/components/ui/page-title';
@@ -69,12 +71,20 @@ export const action = authenticatedAction(
       invariant(goals, 'Goals are required');
       invariant(typeof goals === 'string');
 
+      const budgetFields = JSON.parse(budgetData);
+      const entryFields = JSON.parse(entryData);
+      const updatedGoals = JSON.parse(goals);
+
       await createSavingsEntry(
         userId,
         budgetId,
-        JSON.parse(budgetData),
-        JSON.parse(entryData),
-        JSON.parse(goals),
+        budgetFields,
+        {
+          ...entryFields,
+          createdAt: new Date(entryFields.createdAt),
+          updatedAt: new Date(entryFields.updatedAt || entryFields.createdAt),
+        },
+        updatedGoals,
       );
       const t = await i18next.getFixedT(await i18next.getLocale(request));
 
@@ -102,12 +112,12 @@ export default function () {
 
   const handleSubmit = async (values: BudgetSavingsFormValues) => {
     const encryptionKey = await unlockKey(budget.key);
-
-    // TODO: Properly process goals using buildGoalsUpdater
     const currentSavings = budget.currentSavings + values.savingsAmount;
-    const processGoals = buildGoalsCurrentAmountFiller(currentSavings);
-    const updatedGoals = processGoals(goals);
-    const freeSavings = currentSavings - getGoalsCurrentAmount(updatedGoals);
+    const processGoals = buildGoalsUpdater(
+      goals,
+      budget.freeSavings + values.savingsAmount,
+    );
+    const { goals: updatedGoals, freeSavings } = processGoals(identity);
 
     submit(
       {

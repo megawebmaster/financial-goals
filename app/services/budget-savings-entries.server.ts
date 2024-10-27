@@ -17,18 +17,16 @@ export const createSavingsEntry = async (
   userId: number,
   budgetId: number,
   budgetData: Partial<Omit<Budget, 'id'>>,
-  entryData: Partial<Omit<BudgetSavingsEntry, 'id' | 'userId' | 'budgetId'>>,
+  entryData: Partial<Omit<BudgetSavingsEntry, 'id' | 'userId' | 'budgetId'>> &
+    Pick<BudgetSavingsEntry, 'amount'>,
   goals: Partial<Pick<BudgetGoal, 'id' | 'currentAmount'>>[],
 ): Promise<BudgetSavingsEntry> =>
   await prisma.$transaction(async (tx) => {
-    // TODO: Does this update ensure the budget exists?
+    await tx.budgetUser.findFirstOrThrow({ where: { budgetId, userId } });
     await tx.budget.update({
       data: budgetData,
       where: {
         id: budgetId,
-        users: {
-          some: { userId },
-        },
       },
     });
 
