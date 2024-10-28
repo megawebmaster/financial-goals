@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Loader2 } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
-import { useOutletContext } from '@remix-run/react';
+import { useLocation, useOutletContext } from '@remix-run/react';
 
 import type {
   AuthenticatedLayoutContext,
@@ -87,6 +87,8 @@ export const BudgetGoalForm = ({
   const { t } = useTranslation();
   const loading = useNavigationDelay();
   const { user } = useOutletContext<AuthenticatedLayoutContext>();
+  const location = useLocation();
+  const query = new URLSearchParams(location.search);
   const FORMAT_CURRENCY = {
     currency: budget.currency,
     locale: user.preferredLocale,
@@ -96,7 +98,7 @@ export const BudgetGoalForm = ({
     resolver: zodResolver(goalFormSchema),
     defaultValues: {
       goalName: goal?.name || '',
-      goalType: goal?.type || '',
+      goalType: goal?.type || query.get('type') || '',
       goalAmount: goal?.requiredAmount,
     },
   });
