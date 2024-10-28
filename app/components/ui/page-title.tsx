@@ -20,23 +20,25 @@ export function PageTitle({
   title,
 }: PageTitleProps) {
   return (
-    <div className={cn('flex gap-2', className)}>
-      {back && (
-        <Button
-          asChild
-          className="text-3xl"
-          size="icon"
-          variant="ghost"
-          onClick={() => window.history.back()}
-        >
-          <Link to={back}>
-            <ChevronLeftIcon />
-          </Link>
-        </Button>
-      )}
-      <h1 className={twJoin('text-3xl flex-1 font-semibold', !back && 'ms-4')}>
-        {title}
-      </h1>
+    <div className={cn('flex flex-col lg:flex-row gap-2', className)}>
+      <div className="flex grow mb-2 lg:mb-0">
+        {back && (
+          <Button
+            asChild
+            className="text-3xl"
+            size="icon"
+            variant="ghost"
+            onClick={() => window.history.back()}
+          >
+            <Link to={back}>
+              <ChevronLeftIcon />
+            </Link>
+          </Button>
+        )}
+        <h1 className={twJoin('text-3xl font-semibold', !back && 'lg:ms-4')}>
+          {title}
+        </h1>
+      </div>
       {children}
     </div>
   );
