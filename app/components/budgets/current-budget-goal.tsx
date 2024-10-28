@@ -7,12 +7,13 @@ import type {
   ClientBudget,
 } from '~/helpers/budgets';
 import type { ClientBudgetGoal } from '~/helpers/budget-goals';
-import { getGoalPercentage } from '~/helpers/budget-goals';
+import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
+import { CurrentGoalStatus } from '~/components/budgets/current-goal-status';
 
 type CurrentBudgetGoalProps = {
   budget: ClientBudget;
   children?: ReactNode;
-  goal: ClientBudgetGoal;
+  goal?: ClientBudgetGoal;
   type: string;
 };
 
@@ -29,33 +30,21 @@ export function CurrentBudgetGoal({
     locale: user.preferredLocale,
   };
 
-  // TODO: Make it pretty!
   return (
-    <>
-      <h2 className="text-xl">
-        {t(`component.current-goal.${type}.title`, { name: goal.name })}
-      </h2>
-      {/* TODO: Improve the current goal part - it is very important */}
-      <p className="flex gap-1">
-        <strong>{t('component.current-goal.required-amount')}:</strong>
-        {t('component.current-goal.required-amount-value', {
-          value: goal.requiredAmount,
-          formatParams: {
-            value: FORMAT_CURRENCY,
-          },
-        })}
-      </p>
-      <p className="flex gap-1">
-        <strong>{t('component.current-goal.current-amount')}:</strong>
-        {t('component.current-goal.current-amount-value', {
-          value: goal.currentAmount,
-          percent: getGoalPercentage(goal),
-          formatParams: {
-            value: FORMAT_CURRENCY,
-          },
-        })}
-      </p>
-      {children}
-    </>
+    <Card className="flex flex-col">
+      <CardHeader>
+        <CardTitle className="flex gap-2 text-xl">
+          {goal
+            ? t(`component.current-goal.${type}.title`, { name: goal.name })
+            : t(`component.current-goal.${type}.no-goal`)}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-4 grow justify-center">
+        {goal && (
+          <CurrentGoalStatus currencyFormat={FORMAT_CURRENCY} goal={goal} />
+        )}
+        {children}
+      </CardContent>
+    </Card>
   );
 }

@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Link } from '@remix-run/react';
 import { ChevronLeftIcon } from 'lucide-react';
+import { twJoin } from 'tailwind-merge';
 
 import { cn } from '~/lib/utils';
 import { Button } from '~/components/ui/button';
@@ -33,7 +34,9 @@ export function PageTitle({
           </Link>
         </Button>
       )}
-      <h1 className="text-3xl flex-1 font-semibold">{title}</h1>
+      <h1 className={twJoin('text-3xl flex-1 font-semibold', !back && 'ms-4')}>
+        {title}
+      </h1>
       {children}
     </div>
   );

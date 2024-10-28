@@ -9,7 +9,7 @@ export function DecryptingMessage() {
   return (
     <PageContent>
       <Card>
-        <CardContent className="pt-6">
+        <CardContent className="pt-6 text-center">
           {t('component.decrypting-message.text')}
         </CardContent>
       </Card>
