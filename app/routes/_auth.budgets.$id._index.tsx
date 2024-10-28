@@ -1,6 +1,12 @@
 import type { LoaderFunctionArgs, MetaFunction } from '@remix-run/node';
 import { Link, useOutletContext } from '@remix-run/react';
-import { DollarSignIcon, EditIcon, ShareIcon } from 'lucide-react';
+import {
+  DollarSignIcon,
+  EditIcon,
+  ListIcon,
+  PlusIcon,
+  ShareIcon,
+} from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { filter, propEq } from 'ramda';
 
@@ -10,6 +16,7 @@ import { getCurrentGoal } from '~/services/budget-goals.client';
 import { PageTitle } from '~/components/ui/page-title';
 import { PageContent } from '~/components/ui/page-content';
 import { Button } from '~/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
 import { BudgetStatus } from '~/components/budgets/budget-status';
 import { CurrentBudgetGoal } from '~/components/budgets/current-budget-goal';
 import { GoalEstimatedCompletion } from '~/components/budgets/goal-estimated-completion';
@@ -74,29 +81,63 @@ export default function () {
       </PageTitle>
       <PageContent>
         <BudgetStatus budget={budget} savings={savings} />
-        {currentQuickGoal && (
-          <CurrentBudgetGoal
-            budget={budget}
-            goal={currentQuickGoal}
-            type="quick"
-          >
-            <GoalEstimatedCompletion
-              currentGoal={currentQuickGoal}
-              goals={goals}
-              savings={savings}
-            />
-          </CurrentBudgetGoal>
-        )}
-        {currentLongGoal && (
-          <CurrentBudgetGoal budget={budget} goal={currentLongGoal} type="long">
-            <GoalEstimatedCompletion
-              baseSavingsAmount={shortGoalsAmount}
-              currentGoal={currentLongGoal}
-              goals={goals}
-              savings={savings}
-            />
-          </CurrentBudgetGoal>
-        )}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex gap-2 text-2xl">
+              <span className="flex-1">{t('budget.view.goals.title')}</span>
+              {(currentQuickGoal || currentLongGoal) && (
+                <Button asChild variant="outline">
+                  <Link to={`/budgets/${budget.budgetId}/goals`}>
+                    <ListIcon className="mr-2 size-4" />
+                    <span>{t('budget.view.goals.all-goals')}</span>
+                  </Link>
+                </Button>
+              )}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {currentQuickGoal && (
+              <CurrentBudgetGoal
+                budget={budget}
+                goal={currentQuickGoal}
+                type="quick"
+              >
+                <GoalEstimatedCompletion
+                  currentGoal={currentQuickGoal}
+                  goals={goals}
+                  savings={savings}
+                />
+              </CurrentBudgetGoal>
+            )}
+            {currentLongGoal && (
+              <CurrentBudgetGoal
+                budget={budget}
+                goal={currentLongGoal}
+                type="long"
+              >
+                <GoalEstimatedCompletion
+                  baseSavingsAmount={shortGoalsAmount}
+                  currentGoal={currentLongGoal}
+                  goals={goals}
+                  savings={savings}
+                />
+              </CurrentBudgetGoal>
+            )}
+            {!currentQuickGoal && !currentLongGoal && (
+              <div className="flex flex-col items-center gap-6">
+                <p className="text-gray-600 italic">
+                  {t('budget.view.goals.no-goals')}
+                </p>
+                <Button asChild variant="ghost">
+                  <Link to={`/budgets/${budget.budgetId}/goals/new`}>
+                    <PlusIcon className="mr-2 size-4" />
+                    <span>{t('budget.view.goals.create-goal')}</span>
+                  </Link>
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
         <GoalsSavingsChart budget={budget} goals={goals} savings={savings} />
       </PageContent>
     </>

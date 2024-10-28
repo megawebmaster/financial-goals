@@ -22,6 +22,7 @@ export async function seedRemoveGoalWithSavingsTest() {
   });
   const goal3 = await seedGoal(user, budget, encryptionKey, {
     name: 'Third goal',
+    type: 'long',
     requiredAmount: '750',
   });
   await seedSavings(user, budget, encryptionKey, { amount: '2000' }, [

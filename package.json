@@ -8,7 +8,7 @@
     "build": "vite build && vite build --ssr",
     "db:reset": "prisma migrate reset -f",
     "dev": "vite dev",
-    "ci:server": "CI=1 SESSION_SECRET=test PORT=5555 DATABASE_URL=file:./test.db run-s db:reset 'dev -- --host 127.0.0.1'",
+    "ci:server": "CI=1 SESSION_SECRET=test PORT=5555 DATABASE_URL=postgres://goals:example@127.0.0.1:5432/goals-tests run-s db:reset 'dev -- --host 127.0.0.1'",
     "emails": "email dev --dir app/emails",
     "seed": "tsx prisma/scripts/seed.ts",
     "start": "remix-serve build/server/index.js",

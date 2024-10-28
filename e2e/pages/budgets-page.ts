@@ -13,7 +13,7 @@ export class BudgetsPage {
   }
 
   async visitInvitations() {
-    await this.page.getByRole('button', { name: 'Budgets' }).click();
+    await this.page.getByRole('button', { name: 'First budget' }).click();
     await this.page.getByRole('menuitem', { name: 'Invitations' }).click();
     await expect(this.page.getByText('List of your invitations')).toBeVisible();
     await expect(this.page.getByText('Decrypting data…')).not.toBeAttached();

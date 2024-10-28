@@ -142,7 +142,9 @@ export const BudgetForm = ({
                       </FormControl>
                     </PopoverTrigger>
                     <PopoverContent className="p-0">
-                      <Command>
+                      <Command
+                        label={t('component.budget-form.currency.placeholder')}
+                      >
                         <CommandInput
                           placeholder={t(
                             'component.budget-form.currency.search.placeholder',

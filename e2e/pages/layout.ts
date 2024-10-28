@@ -10,4 +10,20 @@ export class Layout {
     await this.page.getByRole('menuitem', { name: 'Log out' }).click();
     await expect(this.page.getByText('Sign up')).toBeVisible();
   }
+
+  async goToDashboard() {
+    await this.page
+      .getByRole('link', { name: 'Dashboard', exact: true })
+      .click();
+    await expect(
+      this.page.getByRole('heading', { name: 'Current goals' }),
+    ).toBeVisible();
+  }
+
+  async goToGoals() {
+    await this.page.getByRole('link', { name: 'Goals', exact: true }).click();
+    await expect(
+      this.page.getByRole('heading', { name: 'All your goals' }),
+    ).toBeVisible();
+  }
 }

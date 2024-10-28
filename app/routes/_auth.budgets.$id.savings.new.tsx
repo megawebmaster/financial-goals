@@ -10,10 +10,8 @@ import type { BudgetsLayoutContext } from '~/helpers/budgets';
 import { authenticatedAction, authenticatedLoader } from '~/helpers/auth';
 import { encrypt, unlockKey } from '~/services/encryption.client';
 import { createSavingsEntry } from '~/services/budget-savings-entries.server';
-import {
-  buildGoalsUpdater,
-  encryptBudgetGoal,
-} from '~/services/budget-goals.client';
+import { encryptBudgetGoal } from '~/services/budget-goals.client';
+import { buildGoalsUpdater } from '~/services/budget-goals';
 import type { BudgetSavingsFormValues } from '~/components/budget-savings-entry-form';
 import { BudgetSavingsEntryForm } from '~/components/budget-savings-entry-form';
 import { PageTitle } from '~/components/ui/page-title';
