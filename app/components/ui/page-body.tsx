@@ -15,7 +15,7 @@ export function PageBody({ children, className }: PageBodyProps) {
         className,
       )}
     >
-      <div className="mx-auto w-full max-w-6xl flex flex-1 flex-col gap-4 relative">
+      <div className="mx-auto w-full max-w-6xl flex flex-1 flex-col gap-4">
         {children}
       </div>
     </main>
