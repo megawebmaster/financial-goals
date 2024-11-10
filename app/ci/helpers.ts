@@ -130,7 +130,6 @@ export async function seedSavings(
   const currentSavings =
     parseFloat(await decrypt(currentBudget.currentSavings, encryptionKey)) +
     parseFloat(amount);
-  console.log('seeding: current savings', currentSavings);
 
   const decryptedGoals = await Promise.all(
     goals.map(async (goal) => ({
