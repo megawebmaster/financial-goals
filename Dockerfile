@@ -1,5 +1,5 @@
 FROM node:20-alpine AS deps
-MAINTAINER Amadeusz Starzykiewicz <megawebmaster@gmail.com>
+LABEL authors="Amadeusz Starzykiewicz"
 
 WORKDIR /app
 
@@ -8,7 +8,7 @@ COPY package.json package-lock.json ./
 RUN npm ci
 
 FROM deps AS deps-prod
-MAINTAINER Amadeusz Starzykiewicz <megawebmaster@gmail.com>
+LABEL authors="Amadeusz Starzykiewicz"
 
 WORKDIR /app
 
@@ -16,7 +16,7 @@ WORKDIR /app
 RUN npm ci --omit=dev
 
 FROM node:20-alpine AS builder
-MAINTAINER Amadeusz Starzykiewicz <megawebmaster@gmail.com>
+LABEL authors="Amadeusz Starzykiewicz"
 
 WORKDIR /app
 
@@ -29,7 +29,7 @@ COPY . .
 RUN npm run build && npm cache clean --force
 
 FROM node:20-alpine AS runner
-MAINTAINER Amadeusz Starzykiewicz <megawebmaster@gmail.com>
+LABEL authors="Amadeusz Starzykiewicz"
 
 RUN addgroup --system --gid 1001 remix
 RUN adduser --system --uid 1001 remix
