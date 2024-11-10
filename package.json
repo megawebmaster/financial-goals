@@ -39,9 +39,9 @@
     "@radix-ui/react-slot": "^1.1.0",
     "@radix-ui/react-switch": "^1.1.1",
     "@react-email/components": "^0.0.25",
-    "@remix-run/node": "^2.12.1",
-    "@remix-run/react": "^2.12.1",
-    "@remix-run/serve": "^2.12.1",
+    "@remix-run/node": "2.13.1",
+    "@remix-run/react": "2.13.1",
+    "@remix-run/serve": "2.13.1",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "cmdk": "^1.0.0",
@@ -77,8 +77,8 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.48.0",
-    "@remix-run/dev": "^2.12.1",
-    "@remix-run/eslint-config": "^2.12.1",
+    "@remix-run/dev": "2.13.1",
+    "@remix-run/eslint-config": "2.13.1",
     "@types/node": "^20.16.11",
     "@types/nodemailer": "^6.4.16",
     "@types/ramda": "^0.29.12",
@@ -98,5 +98,10 @@
     "vite": "^5.4.8",
     "vite-plugin-svgr": "^4.2.0",
     "vite-tsconfig-paths": "^5.0.1"
+  },
+  "overrides": {
+    "@remix-run/server-runtime": {
+      "cookie": "^0.7.0"
+    }
   }
 }
