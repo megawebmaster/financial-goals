@@ -31,6 +31,9 @@ RUN npm run build && npm cache clean --force
 FROM node:20-alpine AS runner
 LABEL authors="Amadeusz Starzykiewicz"
 
+# Link SSL
+RUN sh -c '[ ! -e /lib/libssl.so.3 ] && ln -s /usr/lib/libssl.so.3 /lib/libssl.so.3 || echo "Link already exists"'
+
 RUN addgroup --system --gid 1001 remix
 RUN adduser --system --uid 1001 remix
 USER remix
