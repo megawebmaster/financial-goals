@@ -157,7 +157,7 @@ export function GoalsSavingsChart({
         {data.length === 0 && (
           <div className="flex items-center justify-center h-full">
             <p className="text-gray-600 italic text-sm">
-              No data for the chart
+              {t('component.goal-savings-chart.no-data')}
             </p>
           </div>
         )}

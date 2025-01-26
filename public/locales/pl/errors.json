@@ -3,6 +3,7 @@
   "signup.failed": "Nie udało się utworzyć Twojego konta.",
   "user.deletion-failed": "Nie udało się usunąć Twojego konta.",
   "user.not-found": "Użytkownik nie istnieje!",
+  "user.update-failed": "Nie udało się zaktualizować Twoich danych. Spróbuj ponownie.",
   "user.invalid-login": "E-mail i/lub hasło są nieprawidłowe.",
   "user.exists": "Użytkownik o takim adresie e-mail już istnieje!",
   "budget.not-found": "Nie znaleziono budżetu!",
@@ -17,5 +18,6 @@
   "goal.edit.updating-failed": "Nie udało się zaktualizować celu. Spróbuj ponownie.",
   "goal.deletion-failed": "Nie udało się usunąć celu. Spróbuj ponownie.",
   "goal.priority.change-failed": "Nie udało się przesunąć celu. Spróbuj ponownie.",
-  "savings.new.creation-failed": "Nie udało się zapisać nowych oszczędności. Spróbuj ponownie."
+  "savings.new.creation-failed": "Nie udało się zapisać nowych oszczędności. Spróbuj ponownie.",
+  "decryption.failure": "Odszyfrowywanie się nie udało. Zaloguj się ponownie."
 }
