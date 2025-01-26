@@ -1,15 +1,11 @@
-import { useEffect } from 'react';
 import {
   Outlet,
   useLoaderData,
-  useNavigate,
   useOutletContext,
   useParams,
 } from '@remix-run/react';
 import invariant from 'tiny-invariant';
 import { redirectWithError } from 'remix-toast';
-import { toast } from 'sonner';
-import { useTranslation } from 'react-i18next';
 import { Loader2 } from 'lucide-react';
 import { propEq } from 'ramda';
 
@@ -59,22 +55,13 @@ const useBudget = () => {
 
 export default function () {
   const { user } = useOutletContext<AuthenticatedLayoutContext>();
-  const { t } = useTranslation();
   const data = useLoaderData<typeof loader>();
-  const navigate = useNavigate();
   const budget = useBudget();
   const { goals, decryptingGoals, loadingGoals } = useGoals(budget, data.goals);
   const { savings, decryptingSavings, loadingSavings } = useSavings(
     budget,
     data.savings,
   );
-
-  useEffect(() => {
-    if (!budget) {
-      toast.warning(t('budget.not-found'));
-      navigate('/');
-    }
-  }, [budget, navigate, t]);
 
   if (!budget) {
     return null;

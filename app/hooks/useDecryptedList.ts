@@ -1,22 +1,31 @@
 import { useEffect, useRef, useState } from 'react';
 import { equals, type KeyValuePair, reduce, reduced, zip } from 'ramda';
 import { useSpinDelay } from 'spin-delay';
+import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from '@remix-run/react';
 
 const listsComparator = reduce(
   (_, [previous, current]: KeyValuePair<object, object>) => {
-    if (equals(previous, current)) {
-      return reduced(true);
+    if (!equals(previous, current)) {
+      return reduced(false);
     }
 
-    return false;
+    return true;
   },
-  false,
+  true,
 );
 
 const areListsEqual = <T extends object>(
-  previousList: T[],
-  currentList: T[],
+  previousList: T[] | undefined,
+  currentList: T[] | undefined,
 ) => {
+  if (previousList === undefined) {
+    return currentList === undefined;
+  }
+  if (currentList === undefined) {
+    return false;
+  }
   if (previousList.length !== currentList.length) {
     return false;
   }
@@ -34,7 +43,9 @@ export const useDecryptedList = <T extends object, R extends object>(
   items: T[],
   decryptFn: (items: T[]) => Promise<R[]>,
 ): DecryptedData<R> => {
-  const currentItems = useRef(items);
+  const { t } = useTranslation('errors');
+  const navigate = useNavigate();
+  const currentItems = useRef<T[]>(undefined);
   const [decrypting, setDecrypting] = useState(true);
   const [data, setData] = useState<R[]>();
 
@@ -44,22 +55,27 @@ export const useDecryptedList = <T extends object, R extends object>(
   });
 
   useEffect(() => {
-    if (decrypting || !areListsEqual(items, currentItems.current)) {
-      setDecrypting(true);
-      decryptFn(items)
-        .then((results) => {
+    const run = async () => {
+      if (!areListsEqual(currentItems.current, items)) {
+        setDecrypting(true);
+        try {
+          setData(await decryptFn(items));
+        } catch (e) {
+          navigate('/logout');
+          toast.error(t('decryption.failure'));
+        } finally {
           currentItems.current = items;
-          setData(results);
-        })
-        .finally(() => {
           setDecrypting(false);
-        });
-    }
-  }, [decrypting, items, decryptFn]);
+        }
+      }
+    };
+
+    run();
+  }, [items, decryptFn, navigate, t]);
 
   return {
     data,
     decrypting: isDecrypting,
-    loading: !data && isDecrypting,
+    loading: data === undefined || isDecrypting,
   };
 };

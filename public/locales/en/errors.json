@@ -18,5 +18,6 @@
   "goal.edit.updating-failed": "Updating goal failed. Please try again.",
   "goal.deletion-failed": "Couldn't delete goal. Please try again.",
   "goal.priority.change-failed": "Couldn't change goal priorities. Please try again.",
-  "savings.new.creation-failed": "Couldn't add savings. Please try again."
+  "savings.new.creation-failed": "Couldn't add savings. Please try again.",
+  "decryption.failure": "Decryption failed. Please log in again."
 }

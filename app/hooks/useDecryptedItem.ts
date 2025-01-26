@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useSpinDelay } from 'spin-delay';
+import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from '@remix-run/react';
 
 type DecryptedData<T> = {
   data?: T;
@@ -10,6 +13,8 @@ type DecryptedData<T> = {
 export const useDecryptedItem = <T extends object>(
   decryptFn: () => Promise<T>,
 ): DecryptedData<T> => {
+  const { t } = useTranslation('errors');
+  const navigate = useNavigate();
   const [decrypting, setDecrypting] = useState(true);
   const [data, setData] = useState<T>();
 
@@ -19,21 +24,24 @@ export const useDecryptedItem = <T extends object>(
   });
 
   useEffect(() => {
-    if (decrypting) {
+    const run = async () => {
       setDecrypting(true);
-      decryptFn()
-        .then((results) => {
-          setData(results);
-        })
-        .finally(() => {
-          setDecrypting(false);
-        });
-    }
-  }, [decrypting, decryptFn]);
+      try {
+        setData(await decryptFn());
+      } catch (e) {
+        navigate('/logout');
+        toast.error(t('decryption.failure'));
+      } finally {
+        setDecrypting(false);
+      }
+    };
+
+    run();
+  }, [decryptFn, navigate, t]);
 
   return {
     data,
     decrypting: isDecrypting,
-    loading: !data && isDecrypting,
+    loading: data === undefined || isDecrypting,
   };
 };

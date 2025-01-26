@@ -125,7 +125,7 @@ export const unlockKey = async (
   );
 };
 
-const getKeyAlgorith = (algo: string): Record<string, string> => {
+const getKeyAlgorithm = (algo: string): Record<string, string> => {
   switch (algo) {
     case 'RSA-OAEP':
       return {
@@ -159,7 +159,7 @@ export const lockKey = async (
   return JSON.stringify({
     key: encodeArrayBufferToUrlSafeBase64(wrappedKey),
     iv: encodeArrayBufferToUrlSafeBase64(iv),
-    algo: getKeyAlgorith(key.algorithm.name),
+    algo: getKeyAlgorithm(key.algorithm.name),
   });
 };
 
@@ -184,6 +184,6 @@ export const exportKey = async (key: CryptoKey): Promise<string> => {
 
   return JSON.stringify({
     key: exportedKey,
-    algo: getKeyAlgorith(key.algorithm.name),
+    algo: getKeyAlgorithm(key.algorithm.name),
   });
 };
