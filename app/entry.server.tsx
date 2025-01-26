@@ -1,5 +1,6 @@
 import { PassThrough } from 'node:stream';
 
+import type { EntryContext as RuntimeEntryContext } from '@remix-run/server-runtime';
 import type { EntryContext } from '@remix-run/node';
 import { createReadableStreamFromReadable } from '@remix-run/node';
 import { RemixServer } from '@remix-run/react';
@@ -9,6 +10,7 @@ import { I18nextProvider } from 'react-i18next';
 import { isbot } from 'isbot';
 
 import i18next, { initializeI18n } from '~/i18n.server';
+import { prisma } from '~/services/db.server';
 
 const ABORT_DELAY = 5_000;
 
@@ -20,8 +22,14 @@ export default async function handleRequest(
 ) {
   const instance = initializeI18n(
     await i18next.getLocale(request),
-    i18next.getRouteNamespaces(remixContext),
+    i18next.getRouteNamespaces(remixContext as RuntimeEntryContext),
   );
+
+  try {
+    await prisma.$executeRaw`SELECT * FROM pg_settings WHERE name = 'port';`;
+  } catch (error) {
+    // Do nothing - it's just a warmup query
+  }
 
   return isBotRequest(request.headers.get('user-agent'))
     ? handleBotRequest(
