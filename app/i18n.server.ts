@@ -3,7 +3,7 @@ import { createCookie } from '@remix-run/node';
 import { createInstance } from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import { RemixI18Next } from 'remix-i18next/server';
-import Backend from 'i18next-fs-backend';
+import Backend from 'i18next-fs-backend/cjs';
 
 import { config } from '~/config.server';
 import i18n from '~/i18n';

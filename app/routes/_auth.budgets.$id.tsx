@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import {
   Outlet,
   useLoaderData,
@@ -68,9 +69,14 @@ export default function () {
     data.savings,
   );
 
+  useEffect(() => {
+    if (!budget) {
+      toast.warning(t('budget.not-found'));
+      navigate('/');
+    }
+  }, [budget, navigate, t]);
+
   if (!budget) {
-    toast.warning(t('budget.not-found'));
-    navigate('/');
     return null;
   }
 

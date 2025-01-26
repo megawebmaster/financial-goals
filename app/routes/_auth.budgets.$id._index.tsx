@@ -108,7 +108,7 @@ export default function () {
                   savings={savings}
                 />
               ) : (
-                <Button asChild variant="ghost">
+                <Button asChild className="self-center" variant="outline">
                   <Link to={`/budgets/${budget.budgetId}/goals/new?type=long`}>
                     <PlusIcon className="mr-2 size-4" />
                     <span>{t('budget.view.goals.create-goal')}</span>

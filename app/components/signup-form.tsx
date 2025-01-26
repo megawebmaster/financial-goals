@@ -64,6 +64,7 @@ export function SignupForm() {
         <CardContent>
           <form
             className="grid gap-4"
+            method="post"
             onSubmit={form.handleSubmit(handleSubmit)}
           >
             <FormField
