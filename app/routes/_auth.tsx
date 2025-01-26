@@ -50,9 +50,11 @@ export default function () {
   const params = useParams();
   const budgetId =
     parseInt(params.id || '0', 10) || data.defaultBudget?.budgetId;
-  const { budgets, decryptingBudgets } = useBudgets(data.budgets);
+  const { budgets, decryptingBudgets, loadingBudgets } = useBudgets(
+    data.budgets,
+  );
 
-  if (!user || loadingUser) {
+  if (!user || loadingUser || loadingBudgets) {
     return <DecryptingMessage />;
   }
 
