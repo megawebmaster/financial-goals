@@ -101,8 +101,17 @@
     "vite-tsconfig-paths": "^5.0.1"
   },
   "overrides": {
+    "@remix-run/dev": {
+      "esbuild": "0.25.0"
+    },
     "@remix-run/server-runtime": {
       "cookie": "^0.7.0"
+    },
+    "react-email": {
+      "esbuild": "0.25.0"
+    },
+    "vite": {
+      "esbuild": "0.25.0"
     }
   }
 }
