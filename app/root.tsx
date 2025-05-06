@@ -26,7 +26,7 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => [
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const locale = await i18next.getLocale(request);
-  const t = await i18next.getFixedT(await i18next.getLocale(request));
+  const t = await i18next.getFixedT(locale);
   const { toast, headers } = await getToast(request);
 
   return json(

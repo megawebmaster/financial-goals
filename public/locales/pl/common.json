@@ -1,9 +1,13 @@
 {
   "app.name": "Financial Goals",
+  "app.404.description": "Niestety nie udało nam się znaleźć strony, której szukasz.",
   "login.title": "Zaloguj się | $t(app.name)",
   "register.title": "Załóż konto | $t(app.name)",
   "nav.dashboard": "Dashboard",
   "nav.goals": "Cele",
+  "404.title": "404 - nie znaleziono",
+  "404.content": "Strona, której poszukujesz nie istnieje. Spróbuj skorzystać z jednej ze stron poniżej:",
+  "404.items.login": "Zaloguj się do swojego konta",
   "budget.not-found": "Nie znaleziono budżetu!",
   "budget.edit.title": "Zaktualizuj budżet | $t(app.name)",
   "budget.edit.page.title": "Zaktualizuj budżet \"{{ name }}\"",
